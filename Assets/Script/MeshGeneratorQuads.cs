@@ -659,7 +659,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         GUIStyle style = new GUIStyle();
         style.fontSize = 12;
 
-        wingedEdgeMesh.DrawGizmos(m_DisplayMeshVertices, m_DisplayMeshEdges, m_DisplayMeshFaces);
+        wingedEdgeMesh.DrawGizmos(m_DisplayMeshVertices, m_DisplayMeshEdges, m_DisplayMeshFaces, transform);
 
         style.normal.textColor = Color.red;
         if (m_DisplayMeshInfo)
@@ -673,7 +673,7 @@ public class MeshGeneratorQuads : MonoBehaviour
        
 
         
-        style.normal.textColor = Color.magenta;
+        style.normal.textColor = Color.green;
         for (int i = 0; i < quads.Length / 4; i++)
         {
             int index1 = quads[4 * i];

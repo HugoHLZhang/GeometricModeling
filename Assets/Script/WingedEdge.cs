@@ -305,7 +305,7 @@ namespace WingedEdge
                 + string.Join("\n", strings);
             return str;
         }
-        public void DrawGizmos(bool drawVertices, bool drawEdges, bool drawFaces)
+        public void DrawGizmos(bool drawVertices, bool drawEdges, bool drawFaces, Transform transform)
         {
             //magic happens 
 
@@ -329,7 +329,7 @@ namespace WingedEdge
                 style.normal.textColor = Color.red;
                 for (int i = 0; i < vertices.Count; i++)
                 {
-                    Vector3 worldPos = vertices[i].position;
+                    Vector3 worldPos = transform.TransformPoint(vertices[i].position);
                     Handles.Label(worldPos, "V"+vertices[i].index, style);
                 }
             }
@@ -345,10 +345,10 @@ namespace WingedEdge
                     int index3 = m_quads[4 * i + 2];
                     int index4 = m_quads[4 * i + 3];
 
-                    Vector3 pt1 = vertices[index1].position;
-                    Vector3 pt2 = vertices[index2].position;
-                    Vector3 pt3 = vertices[index3].position;
-                    Vector3 pt4 = vertices[index4].position;
+                    Vector3 pt1 = transform.TransformPoint(vertices[index1].position);
+                    Vector3 pt2 = transform.TransformPoint(vertices[index2].position);
+                    Vector3 pt3 = transform.TransformPoint(vertices[index3].position);
+                    Vector3 pt4 = transform.TransformPoint(vertices[index4].position);
 
                     Handles.Label((pt1 + pt2 + pt3 + pt4) / 4.0f, "F" + faces[i].index, style);
 
@@ -364,8 +364,8 @@ namespace WingedEdge
                 style.normal.textColor = Color.blue;
                 foreach (var edge in edges)
                 {
-                    Vector3 start = edge.startVertex.position;
-                    Vector3 end = edge.endVertex.position;
+                    Vector3 start = transform.TransformPoint(edge.startVertex.position);
+                    Vector3 end = transform.TransformPoint(edge.endVertex.position);
                     Vector3 pos = Vector3.Lerp(start, end, 0.5f);
 
                     Handles.Label(pos, "e" + edge.index, style);
