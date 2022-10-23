@@ -108,33 +108,35 @@ public class MeshGeneratorQuads : MonoBehaviour
     void Start()
     {
         m_Mf = GetComponent<MeshFilter>();
+
         //m_Mf.mesh = CreateStrip(7, new Vector3(4, 1, 3));
         //m_Mf.mesh = CreateNormalizedGridXZ(7, 4);
 
+
+        //##############        TD1 Objet        ##############
         m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
-        Debug.Log("Create a mesh");
-        
-        
         //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
-        Debug.Log("Convert the mesh To CSV");
-        GUIUtility.systemCopyBuffer = ConvertToCSV("\t");
-        Debug.Log(ConvertToCSV("\t"));
+        Debug.Log($"#################      Create a {m_Mf.mesh.name}     #################");
+        ConvertToCSV();
 
+        //GUIUtility.systemCopyBuffer To Copy In Clipboard
 
-        Debug.Log("Create a WingedEdgeMesh with the mesh");
+        //##############        WingedEdge        ##############
+
+        /*
         m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
-        Debug.Log("WingedEdgeMesh Convert to CSV");
-        GUIUtility.systemCopyBuffer = m_WingedEdgeMesh.ConvertToCSVFormat();
-        Debug.Log(m_WingedEdgeMesh.ConvertToCSVFormat());
-        Debug.Log("Convert WingedEdgeMesh to FaceVertexMesh");
+        m_WingedEdgeMesh.ConvertToCSVFormat();
         Mesh tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
         m_Mf.mesh = tmp;
-        Debug.Log("Convert FaceVertexMesh to CSV");
-        GUIUtility.systemCopyBuffer = ConvertToCSV("\t");
-        Debug.Log(ConvertToCSV("\t"));
-        
+        ConvertToCSV("\t");
+        m_WingedEdgeMesh = new WingedEdgeMesh(tmp);
+        m_WingedEdgeMesh.ConvertToCSVFormat();
+        */
+
+        //##############        HalfEdge        ##############
+
         //Cylindre
         /* m_Mf.mesh = CreateNormalizedGridXZ(20, 40,
              (kX, kZ) =>
@@ -202,10 +204,11 @@ public class MeshGeneratorQuads : MonoBehaviour
 
 
     }
-    string ConvertToCSV(string separator)
+    string ConvertToCSV(string separator = "\t")
     {
         if (!(m_Mf && m_Mf.mesh)) return "";
-
+        Debug.Log("#################      FaceVertex ConvertTOCSVFormat     #################");
+        string str = "";
         Vector3[] vertices = m_Mf.mesh.vertices;
         int[] quads = m_Mf.mesh.GetIndices(0);
 
@@ -232,11 +235,12 @@ public class MeshGeneratorQuads : MonoBehaviour
                 + quads[4 * i + 3].ToString();
         }
 
-        return "Vertices" + separator + separator + separator + "Faces\n"
+        str = "Vertices" + separator + separator + separator + "Faces\n"
             + "Index" + separator + "Position" + separator + separator +
             "Index" + separator + "Indices des vertices\n"
             + string.Join("\n", strings);
-
+        Debug.Log(str);
+        return str;
     }
     /*
     string ConvertToCSV(string separator)
@@ -445,6 +449,7 @@ public class MeshGeneratorQuads : MonoBehaviour
     {
         Mesh mesh = new Mesh();
         mesh.name = "box";
+        
 
         Vector3[] vertices = new Vector3[8];
         int[] quads = new int[6 * 4];
@@ -649,8 +654,14 @@ public class MeshGeneratorQuads : MonoBehaviour
     {
         
         if (!(m_Mf && m_Mf.mesh)) return;
-        WingedEdgeMesh wingedEdgeMesh = m_WingedEdgeMesh;
         Mesh mesh = m_Mf.mesh;
+        if(m_WingedEdgeMesh != null)
+        {
+            WingedEdgeMesh wingedEdgeMesh = m_WingedEdgeMesh;
+            wingedEdgeMesh.DrawGizmos(m_DisplayMeshVertices, m_DisplayMeshEdges, m_DisplayMeshFaces, transform);
+        }
+        
+        
         Vector3[] vertices = mesh.vertices;
         int[] quads = mesh.GetIndices(0);
 
@@ -659,7 +670,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         GUIStyle style = new GUIStyle();
         style.fontSize = 12;
 
-        wingedEdgeMesh.DrawGizmos(m_DisplayMeshVertices, m_DisplayMeshEdges, m_DisplayMeshFaces, transform);
+        
 
         style.normal.textColor = Color.red;
         if (m_DisplayMeshInfo)

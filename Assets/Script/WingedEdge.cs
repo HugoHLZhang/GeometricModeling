@@ -53,7 +53,7 @@ namespace WingedEdge
         public WingedEdgeMesh(Mesh mesh)
         {// constructeur prenant un mesh Vertex-Face en paramètre 
          // magic happens 
-
+            Debug.Log("#################      Constructeur de WingedEdgeMesh     #################");
             vertices = new List<Vertex>();
             edges = new List<WingedEdge>();
             faces = new List<Face>();
@@ -63,8 +63,6 @@ namespace WingedEdge
 
             Dictionary<ulong, WingedEdge> dico = new Dictionary<ulong, WingedEdge>();
             WingedEdge e;
-
-            Debug.Log(mesh.name);
 
             //Add mesh.vertices to List Vertex vertices
             for (int i = 0; i < mesh.vertexCount; i++)
@@ -91,7 +89,7 @@ namespace WingedEdge
                     {
                         edges.Add(new WingedEdge(index, vertices[arr_index[j]], vertices[arr_index[(j + 1) % 4]], faces[i], null));
                         
-                        faces[i].edge = edges[index];
+                        if(faces[i].edge==null) faces[i].edge = edges[index];
                         
                         vertices[arr_index[j]].edge = edges[index];
                         vertices[arr_index[(j + 1) % 4]].edge = edges[index];
@@ -102,7 +100,7 @@ namespace WingedEdge
                     else
                     {
                         edges[e.index].leftFace = faces[i];
-                        faces[i].edge = edges[e.index];
+                        if (faces[i].edge == null) faces[i].edge = edges[e.index];
                     }
                 }
 
@@ -198,6 +196,7 @@ namespace WingedEdge
             Mesh faceVertexMesh = new Mesh();
             // magic happens 
 
+            Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
             List<Vertex> vertices = this.vertices;
             List<WingedEdge> edges = this.edges;
             List<Face> faces = this.faces;
@@ -254,7 +253,8 @@ namespace WingedEdge
         }
         public string ConvertToCSVFormat(string separator = "\t")
         {
-
+            if (this == null) return "";
+            Debug.Log("#################      WindgedEdgeMesh ConvertTOCSVFormat     #################");
             string str = "";
             List<Vertex> vertices = this.vertices;
             List<WingedEdge> edges = this.edges;
@@ -303,6 +303,7 @@ namespace WingedEdge
                 "Index" + separator + "Start Vertex" + separator + "End Vertex" + separator + "Left Face" + separator + "Right Face" + separator + "Start CCW Edge" + separator + "Start CW Edge" + separator + "End CW Edge" + separator + "End CCW Edge" + separator + separator +
                 "Index" + separator + "Edge\n"
                 + string.Join("\n", strings);
+            Debug.Log(str);
             return str;
         }
         public void DrawGizmos(bool drawVertices, bool drawEdges, bool drawFaces, Transform transform)
