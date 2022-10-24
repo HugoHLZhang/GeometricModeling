@@ -127,24 +127,30 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //##############        WingedEdge        ##############
 
-        /*
-        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
-
-        m_WingedEdgeMesh.ConvertToCSVFormat();
         
-        Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
-        Mesh tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
-        m_Mf.mesh = tmp;
-        ConvertToCSV("\t");
-        m_WingedEdgeMesh = new WingedEdgeMesh(tmp);
+        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
         m_WingedEdgeMesh.ConvertToCSVFormat();
-        */
+        List<Vector3> v1;
+        List<Vector3> v2;
+        List<Vector3> v3;
+
+        m_WingedEdgeMesh.CatmullClarkCreateNewPoints(out v1, out v2, out v3 );
+        /*
+    m_WingedEdgeMesh.ConvertToCSVFormat();
+
+    Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
+    Mesh tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
+    m_Mf.mesh = tmp;
+    ConvertToCSV("\t");
+    m_WingedEdgeMesh = new WingedEdgeMesh(tmp);
+    m_WingedEdgeMesh.ConvertToCSVFormat();
+    */
 
         //##############        HalfEdge        ##############
-
-        m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);
         /*
-         * 
+        m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);
+        
+         
         m_HalfEdgeMesh.ConvertToCSVFormat();
         Debug.Log("#################      HalfEdgeMesh ConvertToFaceVertexMesh     #################");
         Mesh tmp = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
