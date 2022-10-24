@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 using WingedEdge;
+using HalfEdge;
 
 public class MeshGeneratorQuads : MonoBehaviour
 {
     delegate Vector3 ComputePosDelegate(float kx, float kz);
     MeshFilter m_Mf;
     WingedEdgeMesh m_WingedEdgeMesh;
+    HalfEdgeMesh m_HalfEdgeMesh;
     [SerializeField] private float m_x;
     [SerializeField] private float m_y;
     [SerializeField] private float m_z;
@@ -127,7 +129,10 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         /*
         m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
+
         m_WingedEdgeMesh.ConvertToCSVFormat();
+        
+        Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
         Mesh tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
         m_Mf.mesh = tmp;
         ConvertToCSV("\t");
@@ -137,6 +142,15 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //##############        HalfEdge        ##############
 
+        m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);
+        /*
+         * 
+        m_HalfEdgeMesh.ConvertToCSVFormat();
+        Debug.Log("#################      HalfEdgeMesh ConvertToFaceVertexMesh     #################");
+        Mesh tmp = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
+        m_Mf.mesh = tmp;
+        ConvertToCSV();
+        */
         //Cylindre
         /* m_Mf.mesh = CreateNormalizedGridXZ(20, 40,
              (kX, kZ) =>
@@ -660,8 +674,13 @@ public class MeshGeneratorQuads : MonoBehaviour
             WingedEdgeMesh wingedEdgeMesh = m_WingedEdgeMesh;
             wingedEdgeMesh.DrawGizmos(m_DisplayMeshVertices, m_DisplayMeshEdges, m_DisplayMeshFaces, transform);
         }
-        
-        
+        if (m_HalfEdgeMesh != null)
+        {
+            HalfEdgeMesh halfEdgeMesh = m_HalfEdgeMesh;
+            halfEdgeMesh.DrawGizmos(m_DisplayMeshVertices, m_DisplayMeshEdges, m_DisplayMeshFaces, transform);
+        }
+
+
         Vector3[] vertices = mesh.vertices;
         int[] quads = mesh.GetIndices(0);
 

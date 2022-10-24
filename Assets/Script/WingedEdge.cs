@@ -196,7 +196,6 @@ namespace WingedEdge
             Mesh faceVertexMesh = new Mesh();
             // magic happens 
 
-            Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
             List<Vertex> vertices = this.vertices;
             List<WingedEdge> edges = this.edges;
             List<Face> faces = this.faces;
