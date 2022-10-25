@@ -43,8 +43,8 @@ namespace HalfEdge
         public List<Vertex> vertices;
         public List<HalfEdge> edges;
         public List<Face> faces;
-        public HalfEdgeMesh(Mesh mesh)
-        { // constructeur prenant un mesh Vertex-Face en paramètre //magic happens
+        public HalfEdgeMesh(Mesh mesh) // Constructeur prenant un mesh Vertex-Face en paramètre //magic happens
+        {
             vertices = new List<Vertex>();
             edges = new List<HalfEdge>();
             faces = new List<Face>();
@@ -57,7 +57,9 @@ namespace HalfEdge
                 vertices.Add(new Vertex(i, m_vertices[i]));
 
             int index = 0;
-            //Add faces and edges to List Face faces and WingedEdge edges
+
+            // Ajout des faces dans la liste Face faces
+
             for (int i = 0; i < m_quads.Length / 4; i++)
             {
                 faces.Add(new Face(i));
@@ -68,14 +70,18 @@ namespace HalfEdge
                     m_quads[4 * i + 2],
                     m_quads[4 * i + 3]
                 };
+
+                // Ajout des edges dans la liste Winged Edge edges
+
                 for (int j = 0; j < arr_index.Length; j++)
                 {
                     edges.Add(new HalfEdge(index, vertices[arr_index[j]], faces[i]));
                     if (faces[i].edge == null) faces[i].edge = edges[index];
-                    if(vertices[arr_index[j]].outgoingEdge == null) vertices[arr_index[j]].outgoingEdge = edges[index];
+                    if (vertices[arr_index[j]].outgoingEdge == null) vertices[arr_index[j]].outgoingEdge = edges[index];
                     index++;
                 }
             }
+
             index = 0;
             for (int i = 0; i < m_quads.Length / 4; i++)
             {
@@ -88,7 +94,7 @@ namespace HalfEdge
                 };
                 for (int j = 0; j < arr_index.Length; j++)
                 {
-                    edges[index].twinEdge = edges.Find(edge => edge.sourceVertex.index == arr_index[(j + 1) % 4] && edge.face != edges[index].face );
+                    edges[index].twinEdge = edges.Find(edge => edge.sourceVertex.index == arr_index[(j + 1) % 4] && edge.face != edges[index].face);
                     edges[index].nextEdge = edges.Find(edge => edge.sourceVertex.index == arr_index[(j + 1) % 4] && edge.face == edges[index].face);
                     edges[index].prevEdge = edges.Find(edge => edge.sourceVertex.index == arr_index[(j - 1 + 4) % 4] && edge.face == edges[index].face);
 
@@ -116,10 +122,12 @@ namespace HalfEdge
             //}
             //Debug.Log(p);
         }
-        public Mesh ConvertToFaceVertexMesh()
+
+        public Mesh ConvertToFaceVertexMesh() // Conversion vers un mesh FaceVertex
         {
+            // Attributs 
+
             Mesh faceVertexMesh = new Mesh();
-            // magic happens 
             
             List<Vertex> vertices = this.vertices;
             List<HalfEdge> edges = this.edges;
@@ -128,7 +136,7 @@ namespace HalfEdge
             Vector3[] m_vertices = new Vector3[vertices.Count];
             int[] m_quads = new int[faces.Count * 4];
 
-            //Vertices
+            //Conversion des vertices
 
             for (int i = 0; i < vertices.Count; i++)
             {
@@ -136,14 +144,15 @@ namespace HalfEdge
             }
 
             int index = 0;
-            //Quads
+
+            // Conversion des quads
+
             for (int i = 0; i < faces.Count; i++)
             {
                 m_quads[index] = edges[index++].sourceVertex.index;
                 m_quads[index] = edges[index++].sourceVertex.index;
                 m_quads[index] = edges[index++].sourceVertex.index;
                 m_quads[index] = edges[index++].sourceVertex.index;
-
             }
 
             faceVertexMesh.vertices = m_vertices;
@@ -151,17 +160,22 @@ namespace HalfEdge
 
             return faceVertexMesh;
         }
-        public string ConvertToCSVFormat(string separator = "\t")
+
+        public string ConvertToCSVFormat(string separator = "\t") // Conversion vers format CSV
         {
             if (this == null) return "";
             Debug.Log("#################      WindgedEdgeMesh ConvertTOCSVFormat     #################");
+
+            // Attributs
+
             string str = "";
+
             List<Vertex> vertices = this.vertices;
             List<HalfEdge> edges = this.edges;
             List<Face> faces = this.faces;
-
-
             List<string> strings = new List<string>();
+
+            // Récupération des vertices dans le fichier CSV
 
             for (int i = 0; i < vertices.Count; i++)
             {
@@ -177,6 +191,8 @@ namespace HalfEdge
             for (int i = vertices.Count; i < edges.Count; i++)
                 strings.Add(separator + separator + separator + separator);
 
+            // Récupération des edges dans le fichier CSV
+
             for (int i = 0; i < edges.Count; i++)
             {
                 strings[i] += edges[i].index + separator
@@ -187,12 +203,16 @@ namespace HalfEdge
                     + $"{( edges[i].twinEdge != null ? $"{edges[i].twinEdge.index}" : "NULL" )}" + separator + separator;
             }
 
+            // Récupération des faces dans le fichier CSV
+
             for (int i = 0; i < faces.Count; i++)
             {
                 strings[i] += faces[i].index + separator
                    + faces[i].edge.index + separator
                    + separator;
             }
+
+            // Mise en page du fichier CSV
 
             str = "Vertex" + separator + separator + separator + separator + "HalfEges" + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
                 + "Index" + separator + "Position" + separator + "outgoingEdge" + separator + separator +
@@ -202,9 +222,12 @@ namespace HalfEdge
             Debug.Log(str);
             return str;
         }
-        public void DrawGizmos(bool drawVertices, bool drawEdges, bool drawFaces, Transform transform)
+
+        public void DrawGizmos(bool drawVertices, bool drawEdges, bool drawFaces, Transform transform) // Dessins des Gizmos
         {
-            //magic happens 
+
+            // Attributs
+
             List<Vertex> vertices = this.vertices;
             List<HalfEdge> edges = this.edges;
             List<Face> faces = this.faces;
@@ -220,7 +243,7 @@ namespace HalfEdge
             GUIStyle style = new GUIStyle();
             style.fontSize = 12;
 
-            //vertices
+            // Affichage des vertices
 
             if (drawVertices)
             {
@@ -232,7 +255,8 @@ namespace HalfEdge
                 }
             }
 
-            //faces
+            // Affichage des faces
+
             if (drawFaces)
             {
                 style.normal.textColor = Color.magenta;
@@ -253,10 +277,8 @@ namespace HalfEdge
                 }
             }
 
+            // Affichage des edges
 
-
-
-            //edges
             if (drawEdges)
             {
                 style.normal.textColor = Color.blue;
@@ -267,8 +289,6 @@ namespace HalfEdge
                     Vector3 end = edge.nextEdge.sourceVertex.position;
                     Vector3 pos = Vector3.Lerp(Vector3.Lerp(start, end, 0.5f), center, 0.2f);
                     Handles.Label(transform.TransformPoint(pos), "e" + edge.index, style);
-
-
                 }
             }
         }
