@@ -97,22 +97,22 @@ namespace HalfEdge
             }
 
             //string p = "";
-            //foreach(var x in vertices)
+            //foreach (var x in vertices)
             //{
             //    p += $"V{x.index} : e{x.outgoingEdge.index} \n";
             //}
             //Debug.Log(p);
 
             //p = "";
-            //foreach(var x in edges)
+            //foreach (var x in faces)
             //{
-            //    p += $"e{x.index} : V{x.sourceVertex.index} | F{x.face.index} | Prev e{x.prevEdge.index} | Next e{x.nextEdge.index} | Twin e{x.twinEdge.index}\n";
+            //    p += $"F{x.index} : e{x.edge.index}\n";
             //}
             //Debug.Log(p);
             //p = "";
-            //foreach(var x in faces)
+            //foreach (var x in edges)
             //{
-            //    p += $"F{x.index} : e{x.edge.index}\n";
+            //    p += $"e{x.index} : V{x.sourceVertex.index} | F{x.face.index} " + $"| Prev e{(x.prevEdge!=null?$"{x.prevEdge.index}":"NULL")} | Next e{(x.nextEdge!=null?$"{x.nextEdge.index}":"NULL")} | Twin e{(x.twinEdge!=null? $"{x.twinEdge.index}": "NULL")} \n";
             //}
             //Debug.Log(p);
         }
@@ -166,11 +166,11 @@ namespace HalfEdge
             for (int i = 0; i < vertices.Count; i++)
             {
                 Vector3 pos = vertices[i].position;
-                strings.Add("V" + vertices[i].index + separator
+                strings.Add(vertices[i].index + separator
                     + pos.x.ToString("N03") + " "
                     + pos.y.ToString("N03") + " "
                     + pos.z.ToString("N03") + separator
-                    + "e" + vertices[i].outgoingEdge.index
+                    + vertices[i].outgoingEdge.index
                     + separator + separator);
             }
 
@@ -179,19 +179,19 @@ namespace HalfEdge
 
             for (int i = 0; i < edges.Count; i++)
             {
-                strings[i] += "e" + edges[i].index + separator
-                    + "V" + edges[i].sourceVertex.index + separator
-                    + "F" + edges[i].face.index + separator
-                    + "e" + edges[i].prevEdge.index + separator
-                    + "e" + edges[i].nextEdge.index + separator
-                    + "e" + edges[i].twinEdge.index + separator + separator;
+                strings[i] += edges[i].index + separator
+                    + edges[i].sourceVertex.index + separator
+                    + edges[i].face.index + separator
+                    + edges[i].prevEdge.index + separator
+                    + edges[i].nextEdge.index + separator
+                    + $"{( edges[i].twinEdge != null ? $"{edges[i].twinEdge.index}" : "NULL" )}" + separator + separator;
             }
 
             for (int i = 0; i < faces.Count; i++)
             {
-                strings[i] += "F" + faces[i].index + separator
-                   + "e" + faces[i].edge.index + separator
-                    + separator;
+                strings[i] += faces[i].index + separator
+                   + faces[i].edge.index + separator
+                   + separator;
             }
 
             str = "Vertex" + separator + separator + separator + separator + "HalfEges" + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
@@ -208,6 +208,8 @@ namespace HalfEdge
             List<Vertex> vertices = this.vertices;
             List<HalfEdge> edges = this.edges;
             List<Face> faces = this.faces;
+
+            List<Vector3> facePoints = new List<Vector3>();
 
             Mesh mesh = this.ConvertToFaceVertexMesh();
 
@@ -247,7 +249,7 @@ namespace HalfEdge
                     Vector3 pt4 = transform.TransformPoint(vertices[index4].position);
 
                     Handles.Label((pt1 + pt2 + pt3 + pt4) / 4.0f, "F" + faces[i].index, style);
-
+                    facePoints.Add((pt1 + pt2 + pt3 + pt4) / 4.0f);
                 }
             }
 
@@ -260,9 +262,12 @@ namespace HalfEdge
                 style.normal.textColor = Color.blue;
                 foreach (var edge in edges)
                 {
-                    Vector3 pos = transform.TransformPoint(edge.sourceVertex.position);
+                    Vector3 center = facePoints[edge.face.index];
+                    Vector3 start = edge.sourceVertex.position;
+                    Vector3 end = edge.nextEdge.sourceVertex.position;
+                    Vector3 pos = Vector3.Lerp(Vector3.Lerp(start, end, 0.5f), center, 0.2f);
+                    Handles.Label(transform.TransformPoint(pos), "e" + edge.index, style);
 
-                    Handles.Label(pos, "e" + edge.index, style);
 
                 }
             }

@@ -116,9 +116,9 @@ public class MeshGeneratorQuads : MonoBehaviour
 
 
         //##############        TD1 Objet        ##############
-        m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
+        m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
         //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
         Debug.Log($"#################      Create a {m_Mf.mesh.name}     #################");
         ConvertToCSV();
@@ -127,14 +127,14 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //##############        WingedEdge        ##############
 
-        
-        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
-        m_WingedEdgeMesh.ConvertToCSVFormat();
-        List<Vector3> v1;
-        List<Vector3> v2;
-        List<Vector3> v3;
 
-        m_WingedEdgeMesh.CatmullClarkCreateNewPoints(out v1, out v2, out v3 );
+        //m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
+        //m_WingedEdgeMesh.ConvertToCSVFormat();
+        //List<Vector3> v1;
+        //List<Vector3> v2;
+        //List<Vector3> v3;
+
+        //m_WingedEdgeMesh.CatmullClarkCreateNewPoints(out v1, out v2, out v3 );
         /*
     m_WingedEdgeMesh.ConvertToCSVFormat();
 
@@ -147,16 +147,16 @@ public class MeshGeneratorQuads : MonoBehaviour
     */
 
         //##############        HalfEdge        ##############
-        /*
+
         m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);
+
+
+        //m_HalfEdgeMesh.ConvertToCSVFormat();
+        //Debug.Log("#################      HalfEdgeMesh ConvertToFaceVertexMesh     #################");
+        //Mesh tmp = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
+        //m_Mf.mesh = tmp;
+        //ConvertToCSV();
         
-         
-        m_HalfEdgeMesh.ConvertToCSVFormat();
-        Debug.Log("#################      HalfEdgeMesh ConvertToFaceVertexMesh     #################");
-        Mesh tmp = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
-        m_Mf.mesh = tmp;
-        ConvertToCSV();
-        */
         //Cylindre
         /* m_Mf.mesh = CreateNormalizedGridXZ(20, 40,
              (kX, kZ) =>
@@ -172,7 +172,7 @@ public class MeshGeneratorQuads : MonoBehaviour
                  //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
              }
              );
-        */
+        
         /*
         // Sphère
         m_Mf.mesh = CreateNormalizedGridXZ(10, 5,
