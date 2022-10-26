@@ -233,6 +233,7 @@ namespace WingedEdge
             int[] m_quads = mesh.GetIndices(0);
 
             List<Vector3> mid_point = new List<Vector3>();
+
             //facePoints
             for (int i = 0; i < m_quads.Length/4; i++)
             {
@@ -369,18 +370,31 @@ namespace WingedEdge
             Mesh mesh = this.ConvertToFaceVertexMesh();
             int[] m_quads = mesh.GetIndices(0);
 
+            List<Vector3> facePoints;
+            List<Vector3> edgePoints;
+            List<Vector3> vertexPoints;
+
+            this.CatmullClarkCreateNewPoints(out facePoints, out edgePoints, out vertexPoints);
+
+
+
             Gizmos.color = Color.black;
             GUIStyle style = new GUIStyle();
+            GUIStyle style2 = new GUIStyle();
             style.fontSize = 12;
+            style2.fontSize = 12;
 
             //vertices
             if (drawVertices)
             {
                 style.normal.textColor = Color.red;
+                style2.normal.textColor = Color.black;
                 for (int i = 0; i < vertices.Count; i++)
                 {
                     Vector3 worldPos = transform.TransformPoint(vertices[i].position);
                     Handles.Label(worldPos, "V"+vertices[i].index, style);
+                    
+                    Handles.Label(transform.TransformPoint(vertexPoints[i]), "V'" + i, style2);
                 }
             }
 
@@ -401,7 +415,8 @@ namespace WingedEdge
                     Vector3 pt4 = transform.TransformPoint(vertices[index4].position);
 
                     Handles.Label((pt1 + pt2 + pt3 + pt4) / 4.0f, "F" + faces[i].index, style);
-
+                    //style.normal.textColor = Color.green;
+                    //Handles.Label(facePoints[i], "C" + i.ToString(), style);
                 }
             }
 
@@ -412,14 +427,16 @@ namespace WingedEdge
             if (drawEdges)
             {
                 style.normal.textColor = Color.blue;
-                foreach (var edge in edges)
+                style2.normal.textColor = Color.cyan;
+                for (int i=0; i < edges.Count; i++)
                 {
-                    Vector3 start = transform.TransformPoint(edge.startVertex.position);
-                    Vector3 end = transform.TransformPoint(edge.endVertex.position);
+                    Vector3 start = transform.TransformPoint(edges[i].startVertex.position);
+                    Vector3 end = transform.TransformPoint(edges[i].endVertex.position);
                     Vector3 pos = Vector3.Lerp(start, end, 0.5f);
 
-                    Handles.Label(pos, "e" + edge.index, style);
-
+                    Handles.Label(pos, "e" + edges[i].index, style);
+                    
+                    Handles.Label(transform.TransformPoint(edgePoints[i]), "E'" + i, style2);
                 }
             }
            
