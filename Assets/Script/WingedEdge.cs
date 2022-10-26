@@ -267,50 +267,43 @@ namespace WingedEdge
 
                 Vector3 Q = new Vector3();
                 Vector3 R = new Vector3();
-                List<WingedEdge> adjacents = edges.FindAll(edge => edge.startVertex == vertice || edge.endVertex == vertice);
+                List<WingedEdge> edge_adj = edges.FindAll(edge => edge.startVertex == vertice || edge.endVertex == vertice);
 
                 
 
-                if (adjacents.FindAll(edge => edge.rightFace != vertice.edge.rightFace).Count > 0)
+                if (edge_adj.FindAll(edge => edge.rightFace != vertice.edge.rightFace).Count > 0)
                 {
+                    p += "V" + vertice.index + " : ";
                     List<Face> face_adj = new List<Face>();
-                    foreach (var a in adjacents)
+                    foreach (var a in edge_adj)
                         if (a.startVertex == vertice)
                             face_adj.Add(a.rightFace);
                         else if (a.leftFace != null && a.endVertex == vertice)
                             face_adj.Add(a.leftFace);
-
-                    foreach (var f in face_adj)
+                    p += $"Q = ";
+                    foreach (var face in face_adj)
                     {
-                        p += "F" + f.index;
+                        Q += facePoints[face.index];
+                        p += face.index + " + ";
                     }
-                    Debug.Log(p);
-                    p = "";
-                    foreach (var f in adjacents)
-                    {
-                        p += "FACE ADJ : F" + f.rightFace.index + " - ";
-                    }
-                    p += "V" + vertice.index + " : ";
+                    p += $"/ {(float) face_adj.Count} | R = ";
                     //p += $"V{vertice.index} : R = ";
-                    foreach (var adjacent in adjacents)
+                    foreach (var edge in edge_adj)
                     {
-
-                        p += "F" + adjacent.rightFace.index + /*$"{(adjacent.startVertex == vertice ? adjacent.rightFace.index : adjacent.leftFace.index)}" +*/ ", e" + adjacent.index + " - ";
-                        Q += facePoints[adjacent.startVertex == vertice ? adjacent.rightFace.index : adjacent.leftFace!=null?adjacent.leftFace.index:adjacent.rightFace.index];
-                        R += mid_point[adjacent.index];
-                        p += $"R = { mid_point[adjacent.index] } - ";
-                        p += $"Q = {(adjacent.startVertex == vertice ? adjacent.rightFace.index : adjacent.leftFace!=null?adjacent.leftFace.index:adjacent.rightFace.index)} - ";
+                        R += mid_point[edge.index];
+                        p += $"{ edge.index } +  ";
                     }
-                    p += "\n";
+                    p += $"/ {(float) edge_adj.Count} \n";
                     index++;
-                    Q = Q / (float)adjacents.Count;
-                    R = R / (float)adjacents.Count;
+                    Q = Q / (float)face_adj.Count;
+                    R = R / (float)edge_adj.Count;
 
-                    vertexPoints.Add((1f / (float)adjacents.Count) * Q + (2f / (float)adjacents.Count) * R + (float)(adjacents.Count - 3) / (float)adjacents.Count * vertice.position);
+                    vertexPoints.Add((1f / (float)face_adj.Count) * Q + (2f / (float)face_adj.Count) * R + (float)(face_adj.Count - 3) / (float)face_adj.Count * vertice.position);
                 }
                 else
                 {
-                    vertexPoints.Add((mid_point[adjacents[0].index] + mid_point[adjacents[1].index] + vertice.position) / 3f);
+                    p += "V" + vertice.index + $" = {mid_point[edge_adj[0].index]} + {mid_point[edge_adj[1].index]} + {vertice.position} / 3f = {(mid_point[edge_adj[0].index] + mid_point[edge_adj[1].index] + vertice.position) / 3f}" +  "\n";
+                    vertexPoints.Add((mid_point[edge_adj[0].index] + mid_point[edge_adj[1].index] + vertice.position) / 3f);
                 }
 
                 //p +=  $" R = {R.x}, {R.y}, {R.z}, {adjacents.Count}\n";
