@@ -120,10 +120,10 @@ public class MeshGeneratorQuads : MonoBehaviour
 
 
         //##############        TD1 Objet        ##############
-        //m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
+        m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
-        m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
+        //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
         //##############        WingedEdge        ##############
 
@@ -167,28 +167,28 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         m_WingedEdgeMesh.CatmullClarkCreateNewPoints(out facePoints, out edgePoints, out vertexPoints);
 
-        //string p = "";
-        //int cnt = 0;
-        //foreach(var v in facePoints)
-        //{
-        //    p += $"facePoints{cnt++} : {v}\n";
-        //}
-        //Debug.Log(p);
-        //p = "";
-        //cnt = 0;
-        //foreach(var v in edgePoints)
-        //{
-        //    p += $"edgePoints{cnt++} : {v}\n";
-        //}
-        //Debug.Log(p);
+        string p = "";
+        int cnt = 0;
+        foreach (var v in facePoints)
+        {
+            p += $"facePoints{cnt++} : {v}\n";
+        }
+        Debug.Log(p);
+        p = "";
+        cnt = 0;
+        foreach (var v in edgePoints)
+        {
+            p += $"edgePoints{cnt++} : {v}\n";
+        }
+        Debug.Log(p);
 
-        //p = "";
-        //cnt = 0;
-        //foreach (var v in vertexPoints)
-        //{
-        //    p += $"vertexPoints{cnt++} : {v}\n";
-        //}
-        //Debug.Log(p);
+        p = "";
+        cnt = 0;
+        foreach (var v in vertexPoints)
+        {
+            p += $"vertexPoints{cnt++} : {v}\n";
+        }
+        Debug.Log(p);
 
 
 
