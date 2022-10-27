@@ -144,19 +144,19 @@ namespace WingedEdge
                         //cw
                         if (edge.startVertex == vertices[start] && edge.endVertex == vertices[end])//CW
                         {
-                            edge.startCWEdge = edges.Find(x => (x.startVertex == vertices[prev] && x.endVertex == vertices[start]) || (x.startVertex == vertices[start] && x.endVertex == vertices[prev]));
-                            edge.endCCWEdge = edges.Find(x => (x.startVertex == vertices[next] && x.endVertex == vertices[end]) || (x.startVertex == vertices[end] && x.endVertex == vertices[next]));
+                            edge.startCWEdge = edges.Find(e => (e.startVertex == vertices[prev] && e.endVertex == vertices[start]) || (e.startVertex == vertices[start] && e.endVertex == vertices[prev]));
+                            edge.endCCWEdge = edges.Find(e => (e.startVertex == vertices[next] && e.endVertex == vertices[end]) || (e.startVertex == vertices[end] && e.endVertex == vertices[next]));
                         }
                         //ccw
                         if (edge.endVertex == vertices[start] && edge.startVertex == vertices[end])//CCW
                         {
-                            edge.startCCWEdge = edges.Find(x => x.startVertex == vertices[end] && x.endVertex == vertices[next] || x.startVertex == vertices[next] && x.endVertex == vertices[end]);
-                            edge.endCWEdge = edges.Find(x => (x.startVertex.index == start && x.endVertex.index == quad_index[(j - 1 + 4) % 4]) || (x.startVertex.index == quad_index[(j - 1 + 4) % 4] && x.endVertex.index == start));
+                            edge.startCCWEdge = edges.Find(e => (e.startVertex == vertices[end] && e.endVertex == vertices[next]) || (e.startVertex == vertices[next] && e.endVertex == vertices[end]));
+                            edge.endCWEdge = edges.Find(e => (e.startVertex == vertices[start] && e.endVertex == vertices[prev]) || (e.startVertex == vertices[prev] && e.endVertex == vertices[start]));
                         }
 
                         //complete null value
-                        if (edge.leftFace == null && edge.endCWEdge == null) edge.endCWEdge = edges.Find(edge => edge.startVertex == edge.endVertex && edge.rightFace.index == (edge.rightFace.index - 1 + faces.Count)%faces.Count);
-                        if (edge.leftFace == null && edge.startCCWEdge== null) edge.startCCWEdge = edges.Find(edge => edge.endVertex == edge.startVertex && edge.rightFace.index == (edge.rightFace.index + 1) % faces.Count);
+                        if (edge.leftFace == null && edge.endCWEdge == null) edge.endCWEdge = edges.Find(e => e.startVertex == edge.endVertex && e.rightFace.index == (edge.rightFace.index - 1 + faces.Count)%faces.Count);
+                        if (edge.leftFace == null && edge.startCCWEdge== null) edge.startCCWEdge = edges.Find(e => e.endVertex == edge.startVertex && e.rightFace.index == (edge.rightFace.index + 1) % faces.Count);
                         
                         if (edge.leftFace == null && edge.endCWEdge == null) edge.endCWEdge = edge.endCCWEdge;
                         if (edge.leftFace == null && edge.startCCWEdge== null) edge.startCCWEdge = edge.startCWEdge;
