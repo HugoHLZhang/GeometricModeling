@@ -120,10 +120,10 @@ public class MeshGeneratorQuads : MonoBehaviour
 
 
         //##############        TD1 Objet        ##############
-        m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
-        //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
+        m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
         //##############        WingedEdge        ##############
 
@@ -167,6 +167,8 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         m_WingedEdgeMesh.CatmullClarkCreateNewPoints(out facePoints, out edgePoints, out vertexPoints);
 
+        m_WingedEdgeMesh.SplitEdge(m_WingedEdgeMesh.edges[0], edgePoints[0]);
+        m_WingedEdgeMesh.SplitFace(m_WingedEdgeMesh.faces[0], facePoints[0]); 
         string p = "";
         int cnt = 0;
         foreach (var v in facePoints)
