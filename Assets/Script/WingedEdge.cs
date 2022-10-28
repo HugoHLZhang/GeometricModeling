@@ -54,6 +54,9 @@ namespace WingedEdge
         public List<Vertex> vertices;
         public List<WingedEdge> edges;
         public List<Face> faces;
+        public List<Vector3> facePoints;
+        public List<Vector3> edgePoints;
+        public List<Vector3> vertexPoints;
         public WingedEdgeMesh(Mesh mesh)
         {
             int nbIndex;
@@ -89,13 +92,17 @@ namespace WingedEdge
 
             //Complete List Face and WingedEdge
             for (int i = 0; i < m_quads.Length/ nbIndex; i++) {
+
+                //Add face
                 Face face = new Face(faces.Count);
                 faces.Add(face);
+                
+                //quads vertices index
                 int[] quad_index = new int[nbIndex];
-
                 for(int k = 0; k < 4; k++)
                     quad_index[k] = m_quads[nbIndex * i + k];
 
+                
                 for(int j = 0; j < quad_index.Length; j++)
                 {
                     int start = quad_index[j];
@@ -109,8 +116,8 @@ namespace WingedEdge
                         
                         if(face.edge==null) face.edge = edge;
 
-                        vertices[start].edge = edge;
-                        vertices[end].edge = edge;
+                        if (vertices[start].edge == null) vertices[start].edge = edge;
+                        if (vertices[end].edge == null) vertices[end].edge = edge;
                         
                         dico.Add(key, edge);
                     }
@@ -125,6 +132,7 @@ namespace WingedEdge
             }
 
             //Complete WingedEdge (CW and CCW Edges)
+
             for (int i = 0; i < m_quads.Length / nbIndex; i++)
             {
                 int[] quad_index = new int[nbIndex];
@@ -144,7 +152,7 @@ namespace WingedEdge
                     ulong key = (ulong)Mathf.Min(start, end) + ((ulong)Mathf.Max(start, end) << 32);
                     if (dico.TryGetValue(key, out edge))
                     {
-                        
+
                         //cw
                         if (edge.startVertex == vertices[start] && edge.endVertex == vertices[end])//CW
                         {
@@ -159,11 +167,15 @@ namespace WingedEdge
                         }
 
                         //complete null value
-                        if (edge.leftFace == null && edge.endCWEdge == null) edge.endCWEdge = edges.Find(e => e.startVertex == edge.endVertex && e.rightFace.index == (edge.rightFace.index - 1 + faces.Count)%faces.Count);
-                        if (edge.leftFace == null && edge.startCCWEdge== null) edge.startCCWEdge = edges.Find(e => e.endVertex == edge.startVertex && e.rightFace.index == (edge.rightFace.index + 1) % faces.Count);
-                        
-                        if (edge.leftFace == null && edge.endCWEdge == null) edge.endCWEdge = edge.endCCWEdge;
-                        if (edge.leftFace == null && edge.startCCWEdge== null) edge.startCCWEdge = edge.startCWEdge;
+                        if (edge.leftFace == null && edge.endCWEdge == null) 
+                            edge.endCWEdge = edges.Find(e => e.startVertex == edge.endVertex && e.rightFace.index == (edge.rightFace.index - 1 + faces.Count) % faces.Count);
+                        if (edge.leftFace == null && edge.startCCWEdge == null) 
+                            edge.startCCWEdge = edges.Find(e => e.endVertex == edge.startVertex && e.rightFace.index == (edge.rightFace.index + 1) % faces.Count);
+
+                        if (edge.leftFace == null && edge.endCWEdge == null) 
+                            edge.endCWEdge = edge.endCCWEdge;
+                        if (edge.leftFace == null && edge.startCCWEdge == null) 
+                            edge.startCCWEdge = edge.startCWEdge;
 
 
                     }
@@ -191,46 +203,8 @@ namespace WingedEdge
             //Quads
             for (int i = 0; i < faces.Count; i++)
             {
-                //WingedEdge e = faces[i].edge;
-                //List<WingedEdge> edges_face = edges.FindAll(edge => edge.leftFace == faces[i] || edge.rightFace == faces[i]);
-
-                //for (int j = 0; j < edges_face.Count; j++)
-                //{
-                //    if (edges_face[j].rightFace.index == i)
-                //        m_quads[index++] = edges_face[j].startVertex.index;
-                //    else 
-                //        m_quads[index++] = edges_face[j].endVertex.index;
-                //}
-
 
                 WingedEdge e = faces[i].edge;
-
-                //if (e.rightFace.index == i)
-                //{
-                //    m_quads[index++] = e.startVertex.index;
-                //    m_quads[index++] = e.endVertex.index;
-                //    if (e.endCCWEdge.rightFace.index == i)
-                //        m_quads[index++] = e.endCCWEdge.endVertex.index;
-                //    if (e.endCCWEdge.leftFace != null && e.endCCWEdge.leftFace.index == i)
-                //        m_quads[index++] = e.endCCWEdge.startVertex.index;
-                //    if (e.startCWEdge.rightFace.index == i)
-                //        m_quads[index++] = e.startCWEdge.startVertex.index;
-                //    if (e.startCWEdge.leftFace != null && e.startCWEdge.leftFace.index == i)
-                //        m_quads[index++] = e.startCWEdge.endVertex.index;
-                //}
-                //if (e.leftFace != null && e.leftFace.index == i)
-                //{
-                //    m_quads[index++] = e.endVertex.index;
-                //    m_quads[index++] = e.startVertex.index;
-                //    if (e.startCCWEdge.rightFace.index == i)
-                //        m_quads[index++] = e.startCCWEdge.endVertex.index;
-                //    if (e.startCCWEdge.leftFace != null && e.startCCWEdge.leftFace.index == i)
-                //        m_quads[index++] = e.startCCWEdge.startVertex.index;
-                //    if (e.endCWEdge.rightFace.index == i)
-                //        m_quads[index++] = e.endCWEdge.startVertex.index;
-                //    if (e.endCWEdge.leftFace != null && e.endCWEdge.leftFace.index == i)
-                //        m_quads[index++] = e.endCWEdge.endVertex.index;
-                //}
 
                 if (e.rightFace.index == i)
                 {
@@ -276,8 +250,7 @@ namespace WingedEdge
 
             return faceVertexMesh;
         }
-
-        public void SubdivideCatmullClark()
+        /*public void SubdivideCatmullClark()
         {
             List<Vertex> vertices = this.vertices;
             List<WingedEdge> edges = this.edges;
@@ -288,22 +261,22 @@ namespace WingedEdge
             List<Vector3> vertexPoints;
 
             CatmullClarkCreateNewPoints(out facePoints, out edgePoints, out vertexPoints);
-            int i = 0;
-            foreach(var vertex in vertexPoints)
-            {
-                vertices[i++].position = vertex;
-            }
+            //int i = 0;
+            //foreach (var vertex in vertexPoints)
+            //{
+            //    vertices[i++].position = vertex;
+            //}
 
-            for (i = 0; i < edgePoints.Count; i++)
-            {
-                SplitEdge(edges[i], edgePoints[i]);
-            }
-            for (i = 0; i < facePoints.Count; i++)
-            {
-                Debug.Log(i);
-                //Debug.Log(facePoints[i]);
-                SplitFace(faces[i], facePoints[i]);
-            }
+            //for (i = 0; i < edgePoints.Count; i++)
+            //{
+            //    SplitEdge(edges[i], edgePoints[i]);
+            //}
+            //for (i = 0; i < facePoints.Count; i++)
+            //{
+            //    Debug.Log(i);
+            //    Debug.Log(facePoints[i]);
+            //    SplitFace(faces[i], facePoints[i]);
+            //}
             //Dictionary<ulong, WingedEdge> dico = new Dictionary<ulong, WingedEdge>();
             //WingedEdge edge;
             //string p = "";
@@ -396,32 +369,32 @@ namespace WingedEdge
             //    }
             //}
             //Debug.Log(p);
-            //p = "";
-            //int cnt = 0;
-            //foreach (var v in facePoints)
-            //{
-            //    p += $"facePoints{cnt++} : {v}\n";
-            //}
-            //Debug.Log(p);
-            //p = "";
-            //cnt = 0;
-            //foreach (var v in edgePoints)
-            //{
-            //    p += $"edgePoints{cnt++} : {v}\n";
-            //}
-            //Debug.Log(p);
+            string p = "";
+            int cnt = 0;
+            foreach (var v in facePoints)
+            {
+                p += $"facePoints{cnt++} : {v}\n";
+            }
+            Debug.Log(p);
+            p = "";
+            cnt = 0;
+            foreach (var v in edgePoints)
+            {
+                p += $"edgePoints{cnt++} : {v}\n";
+            }
+            Debug.Log(p);
 
-            //p = "";
-            //cnt = 0;
-            //foreach (var v in vertexPoints)
-            //{
-            //    p += $"vertexPoints{cnt++} : {v}\n";
-            //}
-            //Debug.Log(p);
+            p = "";
+            cnt = 0;
+            foreach (var v in vertexPoints)
+            {
+                p += $"vertexPoints{cnt++} : {v}\n";
+            }
+            Debug.Log(p);
 
         }
-
-        public void CatmullClarkCreateNewPoints(out List<Vector3> facePoints, out List<Vector3> edgePoints, out List<Vector3> vertexPoints)
+        */
+        /*public void CatmullClarkCreateNewPoints(out List<Vector3> facePoints, out List<Vector3> edgePoints, out List<Vector3> vertexPoints)
         {
             facePoints = new List<Vector3>();
             edgePoints = new List<Vector3>();
@@ -469,7 +442,7 @@ namespace WingedEdge
                 Vector3 R = new Vector3();
                 List<WingedEdge> edge_adj = edges.FindAll(edge => edge.startVertex == vertice || edge.endVertex == vertice);
 
-                if (edge_adj.FindAll(edge => edge.rightFace != null && edge.leftFace != null).Count >= 3)
+                if (edge_adj.FindAll(edge => edge.rightFace != null && edge.leftFace != null).Count >= 2)
                 {
                     List<Face> face_adj = new List<Face>();
                     foreach (var a in edge_adj)
@@ -496,18 +469,44 @@ namespace WingedEdge
                 }
             }
         }
+        */
+        //public void SplitEdge(WingedEdge edge, Vector3 splittingPoint)
+        //{
+        //    Vertex newVertex = new Vertex(vertices.Count, splittingPoint);
+        //    vertices.Add(newVertex);
+        //    WingedEdge newEdge = new WingedEdge(edges.Count, newVertex, edge.endVertex, edge.rightFace, edge.leftFace, edge, edge, edge.endCWEdge, edge.endCCWEdge);
+        //    edges.Add(newEdge);
+        //    edge.endCWEdge = newEdge;
+        //    edge.endCCWEdge = newEdge;
+        //    edge.endVertex = newVertex;
+        //    newVertex.edge = newEdge;
+        //}
+
+
+        public void SubdivideCatmullClark()
+        {
+
+        }
+
+        public void CatmullClarkCreateNewPoints(out List<Vector3> facePoints, out List<Vector3> edgePoints, out List<Vector3> vertexPoints)
+        {
+
+                        
+
+            facePoints = new List<Vector3>();
+            edgePoints = new List<Vector3>();
+            vertexPoints = new List<Vector3>();
+        }
         public void SplitEdge(WingedEdge edge, Vector3 splittingPoint)
         {
-            Vertex newVertex = new Vertex(vertices.Count, splittingPoint);
-            vertices.Add(newVertex);
-            WingedEdge newEdge = new WingedEdge(edges.Count, newVertex, edge.endVertex, edge.rightFace, edge.leftFace, edge, edge, edge.endCWEdge, edge.endCCWEdge);
-            edges.Add(newEdge);
-            edge.endCWEdge = newEdge;
-            edge.endCCWEdge = newEdge;
-            edge.endVertex = newVertex;
-            newVertex.edge = newEdge;
+
         }
         public void SplitFace(Face face, Vector3 splittingPoint)
+        {
+            //Pour chaque face, il faut créer 4 faces, 4 nouvelles edges et une vertices central
+        }
+
+        /*public void SplitFace(Face face, Vector3 splittingPoint)
         {
             //Dictionary<ulong, WingedEdge> dico = new Dictionary<ulong, WingedEdge>();
             //WingedEdge edge;
@@ -643,7 +642,7 @@ namespace WingedEdge
 
 
         }
-
+        */
         public string ConvertToCSVFormat(string separator = "\t")
         {
             if (this == null) return "";
@@ -666,12 +665,13 @@ namespace WingedEdge
                     + pos.x.ToString("N03") + " "
                     + pos.y.ToString("N03") + " "
                     + pos.z.ToString("N03") + separator 
+                    + vertice.edge.index + separator
                     + string.Join(" ", edges_adj)
                     + separator + separator);
             }
 
             for (int i = vertices.Count; i < edges.Count; i++)
-                strings.Add(separator + separator + separator + separator);
+                strings.Add(separator + separator + separator + separator + separator);
 
             //Edges
             for (int i = 0; i < edges.Count; i++)
@@ -695,20 +695,20 @@ namespace WingedEdge
             //Faces
             for (int i = 0; i < faces.Count; i++)
             {
-                //List<WingedEdge> edges_face = edges.FindAll(edge => edge.leftFace == faces[i] || edge.rightFace == faces[i]);
-                //int[] face_edges = new int[edges_face.Count];
-                //for (int j = 0; j < edges_face.Count; j++)
-                //    face_edges[j] = edges_face[j].index;
+                List<WingedEdge> edges_face = edges.FindAll(edge => edge.leftFace == faces[i] || edge.rightFace == faces[i]);
+                int[] face_edges = new int[edges_face.Count];
+                for (int j = 0; j < edges_face.Count; j++)
+                    face_edges[j] = edges_face[j].index;
                 strings[i] += faces[i].index + separator
-                    + faces[i].edge.index
-                    //+ string.Join(" ", face_edges)
+                    + faces[i].edge.index + separator
+                    + string.Join(" ", face_edges)
                     + separator + separator;
             }
 
-            string str = "Vertex" + separator + separator + separator + separator + "WingedEdges" + separator + separator + separator + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
-                + "Index" + separator + "Position" + separator + "Edge" + separator + separator +
+            string str = "Vertex" + separator + separator + separator + separator + separator + "WingedEdges" + separator + separator + separator + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
+                + "Index" + separator + "Position" + separator + "Edge" + separator + "Edges" + separator + separator +
                 "Index" + separator + "Start Vertex" + separator + "End Vertex" + separator + "Left Face" + separator + "Right Face" + separator + "Start CCW Edge" + separator + "Start CW Edge" + separator + "End CW Edge" + separator + "End CCW Edge" + separator + separator +
-                "Index" + separator + "Edge\n"
+                "Index" + separator + "Edge" + separator + "Edges\n"
                 + string.Join("\n", strings);
             Debug.Log(str);
             return str;

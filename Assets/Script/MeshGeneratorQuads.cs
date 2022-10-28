@@ -161,8 +161,10 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //################          CatmullClark        #######################
 
-        m_WingedEdgeMesh.SubdivideCatmullClark();
-        m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
+        //m_WingedEdgeMesh.SubdivideCatmullClark();
+        //WingedEdgeMesh newWEM = m_WingedEdgeMesh;
+        //newWEM.SubdivideCatmullClark();
+        //m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
         //tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
         //m_Mf.mesh = tmp;
         //m_WingedEdgeMesh = new WingedEdgeMesh(tmp);
