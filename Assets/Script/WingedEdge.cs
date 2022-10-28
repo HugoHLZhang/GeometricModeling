@@ -6,28 +6,32 @@ namespace WingedEdge
     public class WingedEdge
     {
         public int index;
-        public Vertex startVertex { set; get; }
-        public Vertex endVertex { set; get; }
-        public Face leftFace { set; get; }
-        public Face rightFace { set; get; }
-        public WingedEdge startCWEdge { set; get; }
-        public WingedEdge startCCWEdge { set; get; }
-        public WingedEdge endCWEdge { set; get; }
-        public WingedEdge endCCWEdge { set; get; }
-        public WingedEdge(int index, Vertex startVertex, Vertex endVertex, Face rightFace, Face leftFace)
+        public Vertex startVertex;
+        public Vertex endVertex;
+        public Face leftFace;
+        public Face rightFace;
+        public WingedEdge startCWEdge;
+        public WingedEdge startCCWEdge;
+        public WingedEdge endCWEdge;
+        public WingedEdge endCCWEdge;
+        public WingedEdge(int index, Vertex startVertex, Vertex endVertex, Face rightFace, Face leftFace, WingedEdge startCWEdge=null, WingedEdge startCCWEdge = null, WingedEdge endCWEdge = null, WingedEdge endCCWEdge = null)
         {
             this.index = index;
             this.startVertex = startVertex;
             this.endVertex = endVertex;
             this.rightFace = rightFace;
             this.leftFace = leftFace;
+            this.startCWEdge = startCWEdge;
+            this.startCCWEdge = startCCWEdge;
+            this.endCWEdge = endCWEdge;
+            this.endCCWEdge = endCCWEdge;
         }
     }
     public class Vertex
     {
         public int index;
-        public Vector3 position { set; get; }
-        public WingedEdge edge { set; get; }
+        public Vector3 position;
+        public WingedEdge edge;
         public Vertex(int index, Vector3 position)
         {
             this.index = index;
@@ -38,7 +42,7 @@ namespace WingedEdge
     public class Face
     {
         public int index;
-        public WingedEdge edge { set; get; }
+        public WingedEdge edge;
 
         public Face(int index)
         {
@@ -201,31 +205,68 @@ namespace WingedEdge
 
                 WingedEdge e = faces[i].edge;
 
+                //if (e.rightFace.index == i)
+                //{
+                //    m_quads[index++] = e.startVertex.index;
+                //    m_quads[index++] = e.endVertex.index;
+                //    if (e.endCCWEdge.rightFace.index == i)
+                //        m_quads[index++] = e.endCCWEdge.endVertex.index;
+                //    if (e.endCCWEdge.leftFace != null && e.endCCWEdge.leftFace.index == i)
+                //        m_quads[index++] = e.endCCWEdge.startVertex.index;
+                //    if (e.startCWEdge.rightFace.index == i)
+                //        m_quads[index++] = e.startCWEdge.startVertex.index;
+                //    if (e.startCWEdge.leftFace != null && e.startCWEdge.leftFace.index == i)
+                //        m_quads[index++] = e.startCWEdge.endVertex.index;
+                //}
+                //if (e.leftFace != null && e.leftFace.index == i)
+                //{
+                //    m_quads[index++] = e.endVertex.index;
+                //    m_quads[index++] = e.startVertex.index;
+                //    if (e.startCCWEdge.rightFace.index == i)
+                //        m_quads[index++] = e.startCCWEdge.endVertex.index;
+                //    if (e.startCCWEdge.leftFace != null && e.startCCWEdge.leftFace.index == i)
+                //        m_quads[index++] = e.startCCWEdge.startVertex.index;
+                //    if (e.endCWEdge.rightFace.index == i)
+                //        m_quads[index++] = e.endCWEdge.startVertex.index;
+                //    if (e.endCWEdge.leftFace != null && e.endCWEdge.leftFace.index == i)
+                //        m_quads[index++] = e.endCWEdge.endVertex.index;
+                //}
+
                 if (e.rightFace.index == i)
                 {
                     m_quads[index++] = e.startVertex.index;
                     m_quads[index++] = e.endVertex.index;
-                    if (e.endCCWEdge.rightFace.index == i)
-                        m_quads[index++] = e.endCCWEdge.endVertex.index;
-                    if (e.endCCWEdge.leftFace != null && e.endCCWEdge.leftFace.index == i)
-                        m_quads[index++] = e.endCCWEdge.startVertex.index;
-                    if (e.startCWEdge.rightFace.index == i)
-                        m_quads[index++] = e.startCWEdge.startVertex.index;
-                    if (e.startCWEdge.leftFace != null && e.startCWEdge.leftFace.index == i)
-                        m_quads[index++] = e.startCWEdge.endVertex.index;
+                    //next
+                    if (edges.Exists(edge => edge.startVertex.index == e.endVertex.index && edge.rightFace == faces[i]))
+                        m_quads[index++] = edges.Find(edge => edge.startVertex.index == e.endVertex.index && edge.rightFace == faces[i]).endVertex.index;
+                    
+                    if (edges.Exists(edge => edge.endVertex.index == e.endVertex.index && edge.leftFace == faces[i]))
+                        m_quads[index++] = edges.Find(edge => edge.endVertex.index == e.endVertex.index && edge.leftFace == faces[i]).startVertex.index;
+                    //last
+                    if (edges.Exists(edge => edge.endVertex.index == e.startVertex.index && edge.rightFace == faces[i]))
+                        m_quads[index++] = edges.Find(edge => edge.endVertex.index == e.startVertex.index && edge.rightFace == faces[i]).startVertex.index;
+
+                    if (edges.Exists(edge => edge.startVertex.index == e.startVertex.index && edge.leftFace == faces[i]))
+                        m_quads[index++] = edges.Find(edge => edge.startVertex.index == e.startVertex.index && edge.leftFace == faces[i]).endVertex.index;
+                    
                 }
                 if (e.leftFace != null && e.leftFace.index == i)
                 {
                     m_quads[index++] = e.endVertex.index;
                     m_quads[index++] = e.startVertex.index;
-                    if (e.startCCWEdge.rightFace.index == i)
-                        m_quads[index++] = e.startCCWEdge.endVertex.index;
-                    if (e.startCCWEdge.leftFace != null && e.startCCWEdge.leftFace.index == i)
-                        m_quads[index++] = e.startCCWEdge.startVertex.index;
-                    if (e.endCWEdge.rightFace.index == i)
-                        m_quads[index++] = e.endCWEdge.startVertex.index;
-                    if (e.endCWEdge.leftFace != null && e.endCWEdge.leftFace.index == i)
-                        m_quads[index++] = e.endCWEdge.endVertex.index;
+                    //next
+                    if (edges.Exists(edge => edge.startVertex.index == e.startVertex.index && edge.rightFace == faces[i]))
+                        m_quads[index++] = edges.Find(edge => edge.startVertex.index == e.startVertex.index && edge.rightFace == faces[i]).endVertex.index;
+
+                    if (edges.Exists(edge => edge.endVertex.index == e.startVertex.index && edge.leftFace == faces[i]))
+                        m_quads[index++] = edges.Find(edge => edge.endVertex.index == e.startVertex.index && edge.leftFace == faces[i]).startVertex.index;
+                    //last
+                    if (edges.Exists(edge => edge.endVertex.index == e.endVertex.index && edge.rightFace == faces[i]))
+                        m_quads[index++] = edges.Find(edge => edge.endVertex.index == e.endVertex.index && edge.rightFace == faces[i]).startVertex.index;
+
+                    if (edges.Exists(edge => edge.startVertex.index == e.endVertex.index && edge.leftFace == faces[i]))
+                        m_quads[index++] = edges.Find(edge => edge.startVertex.index == e.endVertex.index && edge.leftFace == faces[i]).endVertex.index;
+
                 }
 
             }
@@ -238,8 +279,148 @@ namespace WingedEdge
 
         public void SubdivideCatmullClark()
         {
+            List<Vertex> vertices = this.vertices;
+            List<WingedEdge> edges = this.edges;
+            List<Face> faces = this.faces;
+
+            List<Vector3> facePoints;
+            List<Vector3> edgePoints;
+            List<Vector3> vertexPoints;
+
+            CatmullClarkCreateNewPoints(out facePoints, out edgePoints, out vertexPoints);
+            int i = 0;
+            foreach(var vertex in vertexPoints)
+            {
+                vertices[i++].position = vertex;
+            }
+
+            for (i = 0; i < edgePoints.Count; i++)
+            {
+                SplitEdge(edges[i], edgePoints[i]);
+            }
+            for (i = 0; i < facePoints.Count; i++)
+            {
+                Debug.Log(i);
+                //Debug.Log(facePoints[i]);
+                SplitFace(faces[i], facePoints[i]);
+            }
+            //Dictionary<ulong, WingedEdge> dico = new Dictionary<ulong, WingedEdge>();
+            //WingedEdge edge;
+            //string p = "";
+            //foreach (var e in edges)
+            //{
+            //    e.startCWEdge = null;
+            //    e.startCCWEdge = null;
+            //    e.endCWEdge = null;
+            //    e.endCCWEdge = null;
+            //    int start = e.startVertex.index;
+            //    int end = e.endVertex.index;
+
+            //    ulong key = (ulong)Mathf.Min(start, end) + ((ulong)Mathf.Max(start, end) << 32);
+            //    dico.Add(key, e);
+            //}
+
+            //for (i = 0; i < faces.Count; i++)
+            //{
+            //    Face face = faces[i];
+            //    int[] quad_index = new int[4];
+            //    if (face == face.edge.rightFace)
+            //    {
+            //        quad_index[0] = face.edge.startVertex.index;//start
+            //        quad_index[1] = face.edge.endVertex.index;//end
+            //        //next
+            //        if (edges.Exists(edge => edge.startVertex.index == quad_index[1] && edge.rightFace == face))
+            //            quad_index[2] = edges.Find(edge => edge.startVertex.index == quad_index[1] && edge.rightFace == face).endVertex.index;
+            //        else if (edges.Exists(edge => edge.endVertex.index == quad_index[1] && edge.leftFace == face))
+            //            quad_index[2] = edges.Find(edge => edge.endVertex.index == quad_index[1] && edge.leftFace == face).startVertex.index;
+            //        //last
+            //        else if (edges.Exists(edge => edge.endVertex.index == quad_index[0] && edge.rightFace == face))
+            //            quad_index[3] = edges.Find(edge => edge.endVertex.index == quad_index[0] && edge.rightFace == face).startVertex.index;
+
+            //        else if (edges.Exists(edge => edge.startVertex.index == quad_index[0] && edge.leftFace == face))
+            //            quad_index[3] = edges.Find(edge => edge.startVertex.index == quad_index[0] && edge.leftFace == face).endVertex.index;
+            //    }
+            //    if (face.edge.leftFace != null && face == face.edge.leftFace)
+            //    {
+            //        quad_index[0] = face.edge.endVertex.index;//start
+            //        quad_index[1] = face.edge.startVertex.index;//end
+            //        //next
+            //        if (edges.Exists(edge => edge.startVertex.index == quad_index[1] && edge.rightFace == face))
+            //            quad_index[2] = edges.Find(edge => edge.startVertex.index == quad_index[1] && edge.rightFace == face).endVertex.index;
+            //        else if (edges.Exists(edge => edge.endVertex.index == quad_index[1] && edge.leftFace == face))
+            //            quad_index[2] = edges.Find(edge => edge.endVertex.index == quad_index[1] && edge.leftFace == face).startVertex.index;
+            //        //last
+            //        else if (edges.Exists(edge => edge.endVertex.index == quad_index[0] && edge.rightFace == face))
+            //            quad_index[3] = edges.Find(edge => edge.endVertex.index == quad_index[0] && edge.rightFace == face).startVertex.index;
+
+            //        else if (edges.Exists(edge => edge.startVertex.index == quad_index[0] && edge.leftFace == face))
+            //            quad_index[3] = edges.Find(edge => edge.startVertex.index == quad_index[0] && edge.leftFace == face).endVertex.index;
+            //    }
+
+            //    for (int j = 0; j < quad_index.Length; j++)
+            //    {
+
+            //        int prev = quad_index[(j - 1 + 4) % 4];
+            //        int start = quad_index[j];
+            //        int end = quad_index[(j + 1) % 4];
+            //        int next = quad_index[(j + 2) % 4];
+
+            //        p += "j = " + j + $" (quadLength:{quad_index.Length} : " + prev + " " + start + " " + end + " " + next + "\n";
+
+            //        ulong key = (ulong)Mathf.Min(start, end) + ((ulong)Mathf.Max(start, end) << 32);
+            //        if (dico.TryGetValue(key, out edge))
+            //        {
+
+            //            //cw
+            //            if (edge.startVertex == vertices[start] && edge.endVertex == vertices[end])//CW
+            //            {
+            //                edge.startCWEdge = edges.Find(e => (e.startVertex == vertices[prev] && e.endVertex == vertices[start]) || (e.startVertex == vertices[start] && e.endVertex == vertices[prev]));
+            //                edge.endCCWEdge = edges.Find(e => (e.startVertex == vertices[next] && e.endVertex == vertices[end]) || (e.startVertex == vertices[end] && e.endVertex == vertices[next]));
+            //            }
+            //            //ccw
+            //            if (edge.endVertex == vertices[start] && edge.startVertex == vertices[end])//CCW
+            //            {
+            //                edge.startCCWEdge = edges.Find(e => (e.startVertex == vertices[end] && e.endVertex == vertices[next]) || (e.startVertex == vertices[next] && e.endVertex == vertices[end]));
+            //                edge.endCWEdge = edges.Find(e => (e.startVertex == vertices[start] && e.endVertex == vertices[prev]) || (e.startVertex == vertices[prev] && e.endVertex == vertices[start]));
+            //            }
+
+            //            //complete null value
+            //            if (edge.leftFace == null && edge.endCWEdge == null) edge.endCWEdge = edges.Find(e => e.startVertex == edge.endVertex && e.rightFace.index == (edge.rightFace.index - 1 + faces.Count) % faces.Count);
+            //            if (edge.leftFace == null && edge.startCCWEdge == null) edge.startCCWEdge = edges.Find(e => e.endVertex == edge.startVertex && e.rightFace.index == (edge.rightFace.index + 1) % faces.Count);
+
+            //            if (edge.leftFace == null && edge.endCWEdge == null) edge.endCWEdge = edge.endCCWEdge;
+            //            if (edge.leftFace == null && edge.startCCWEdge == null) edge.startCCWEdge = edge.startCWEdge;
+
+
+            //        }
+            //    }
+            //}
+            //Debug.Log(p);
+            //p = "";
+            //int cnt = 0;
+            //foreach (var v in facePoints)
+            //{
+            //    p += $"facePoints{cnt++} : {v}\n";
+            //}
+            //Debug.Log(p);
+            //p = "";
+            //cnt = 0;
+            //foreach (var v in edgePoints)
+            //{
+            //    p += $"edgePoints{cnt++} : {v}\n";
+            //}
+            //Debug.Log(p);
+
+            //p = "";
+            //cnt = 0;
+            //foreach (var v in vertexPoints)
+            //{
+            //    p += $"vertexPoints{cnt++} : {v}\n";
+            //}
+            //Debug.Log(p);
 
         }
+
         public void CatmullClarkCreateNewPoints(out List<Vector3> facePoints, out List<Vector3> edgePoints, out List<Vector3> vertexPoints)
         {
             facePoints = new List<Vector3>();
@@ -319,19 +500,147 @@ namespace WingedEdge
         {
             Vertex newVertex = new Vertex(vertices.Count, splittingPoint);
             vertices.Add(newVertex);
-            WingedEdge newEdge = new WingedEdge(edges.Count, newVertex, edge.endVertex, edge.rightFace, edge.leftFace);
+            WingedEdge newEdge = new WingedEdge(edges.Count, newVertex, edge.endVertex, edge.rightFace, edge.leftFace, edge, edge, edge.endCWEdge, edge.endCCWEdge);
             edges.Add(newEdge);
+            edge.endCWEdge = newEdge;
+            edge.endCCWEdge = newEdge;
             edge.endVertex = newVertex;
-
+            newVertex.edge = newEdge;
         }
         public void SplitFace(Face face, Vector3 splittingPoint)
         {
-            List<WingedEdge> all_edge = edges.FindAll(edge => edge.rightFace == face || edge.leftFace == face);
-            Debug.Log(all_edge.Count);
-            //for(int i = 0; i < all_edge.Count; i++)
-            //{
+            //Dictionary<ulong, WingedEdge> dico = new Dictionary<ulong, WingedEdge>();
+            //WingedEdge edge;
 
-            //}
+
+            Vertex newVertex = new Vertex(vertices.Count, splittingPoint);
+            vertices.Add(newVertex);
+            List<WingedEdge> face_edges = edges.FindAll(edge => (edge.rightFace == face && edge.endCWEdge == edge.endCCWEdge) || (edge.leftFace == face && edge.startCCWEdge == edge.startCWEdge));
+
+            //List<WingedEdge> face_edges = edges.FindAll(edge => (edge.rightFace == face || edge.leftFace == face) && edge.startCWEdge != null && edge.endCWEdge != null);
+            bool recycle = false;
+
+            string p = "";
+            for (int i = 0; i < face_edges.Count; i++)
+            {
+                p += $"e{face_edges[i].index}";
+            }
+            Dictionary<ulong, WingedEdge> dico = new Dictionary<ulong, WingedEdge>();
+            WingedEdge edge;
+
+            foreach (var e in edges)
+            {
+                int start = e.startVertex.index;
+                int end = e.endVertex.index;
+
+                ulong key = (ulong)Mathf.Min(start, end) + ((ulong)Mathf.Max(start, end) << 32);
+                dico.Add(key, e);
+            }
+
+            p += "\n";
+            for (int k = 0; k < 4; k++)
+            {
+                int[] quad_index = new int[4];
+                quad_index[0] = newVertex.index;
+                Face newFace = null;
+                if (face_edges[k].rightFace == face)
+                {
+                    if (edges.Exists(edge => edge.startCWEdge == face_edges[k].startCWEdge && edge.startCCWEdge == face_edges[k].startCWEdge))
+                        quad_index[1] = edges.Find(edge => edge.startCWEdge == face_edges[k].startCWEdge && edge.startCCWEdge == face_edges[k].startCWEdge).startVertex.index;
+
+                    quad_index[2] = face_edges[k].startVertex.index;
+                    quad_index[3] = face_edges[k].endVertex.index;
+
+                }
+                else
+                {
+                    if (edges.Exists(edge => edge.startCCWEdge == face_edges[k].endCWEdge && edge.startCWEdge == face_edges[k].endCWEdge))
+                        quad_index[1] = edges.Find(edge => edge.startCCWEdge == face_edges[k].endCWEdge && edge.startCWEdge == face_edges[k].endCWEdge).startVertex.index;
+
+                    quad_index[2] = face_edges[k].endVertex.index;
+                    quad_index[3] = face_edges[k].startVertex.index;
+                }
+                if (!recycle)
+                {
+                    p += "RF";
+                    recycle = true;
+                }
+                else
+                {
+                    p += "NF";
+                    newFace = new Face(faces.Count);
+
+                    faces.Add(newFace);
+                }
+                for (int j = 0; j < quad_index.Length; j++)
+                {
+                    if (newFace == null)
+                    {
+
+                        p += $"V{quad_index[j]}V{quad_index[(j + 1) % 4]} - ";
+                        int start = quad_index[j];
+                        int end = quad_index[(j + 1) % 4];
+                        ulong key = (ulong)Mathf.Min(start, end) + ((ulong)Mathf.Max(start, end) << 32);
+                        if (!dico.TryGetValue(key, out edge))
+                        {
+                            p += "Vstart = " + vertices[start].index + "Vend = " + vertices[end].index;
+
+                            edge = new WingedEdge(edges.Count, vertices[start], vertices[end], face, null);
+                            edges.Add(edge);
+
+                            if (face.edge == null) face.edge = edge;
+
+                            if (vertices[start].edge == null) vertices[start].edge = edge;
+                            if (vertices[end].edge == null) vertices[end].edge = edge;
+
+                            dico.Add(key, edge);
+                        }
+                        else
+                        {
+                            if (edge.startVertex == vertices[end] && edge.endVertex == vertices[start]) edge.leftFace = face;
+                            if (face.edge == null) face.edge = edge;
+                        }
+
+
+                    }
+                    else if (newFace != null)
+                    {
+
+                        p += $"V{quad_index[j]}V{quad_index[(j + 1) % 4]} - ";
+
+                        int start = quad_index[j];
+                        int end = quad_index[(j + 1) % 4];
+                        ulong key = (ulong)Mathf.Min(start, end) + ((ulong)Mathf.Max(start, end) << 32);
+                        if (!dico.TryGetValue(key, out edge))
+                        {
+                            edge = new WingedEdge(edges.Count, vertices[start], vertices[end], newFace, null);
+                            edges.Add(edge);
+
+                            if (newFace.edge == null) newFace.edge = edge;
+
+                            if (vertices[start].edge == null) vertices[start].edge = edge;
+                            if (vertices[end].edge == null) vertices[end].edge = edge;
+
+                            dico.Add(key, edge);
+                        }
+                        else
+                        {
+                            if (edge.startVertex == vertices[start] && edge.endVertex == vertices[end]) edge.rightFace = newFace;
+                            if (edge.startVertex == vertices[end] && edge.endVertex == vertices[start]) edge.leftFace = newFace;
+                            if (newFace.edge == null) newFace.edge = edge;
+                        }
+                    }
+
+
+                }
+
+
+                p += "\n";
+            }
+                Debug.Log(p);
+            
+
+
 
         }
 
@@ -372,21 +681,28 @@ namespace WingedEdge
                     + edges[i].endVertex.index + separator
                     + $"{(edges[i].leftFace != null ? $"{edges[i].leftFace.index}" : "NULL")}" + separator
                     + $"{(edges[i].rightFace != null ? $"{edges[i].rightFace.index}" : "NULL")}" + separator
-                    + edges[i].startCCWEdge.index + separator
-                    + edges[i].startCWEdge.index + separator
-                    + edges[i].endCWEdge.index + separator
-                    + edges[i].endCCWEdge.index + separator
+                    + $"{(edges[i].startCCWEdge != null ? $"{edges[i].startCCWEdge.index}" : "NULL")}"
+                    + separator
+                    + $"{(edges[i].startCWEdge != null ? $"{edges[i].startCWEdge.index}" : "NULL")}"
+                    + separator
+                    + $"{(edges[i].endCWEdge != null ? $"{edges[i].endCWEdge.index}" : "NULL")}"
+                    + separator
+                    + $"{(edges[i].endCCWEdge != null ? $"{edges[i].endCCWEdge.index}" : "NULL")}"
+                    + separator
                     + separator;
             }
 
             //Faces
-            for(int i = 0; i < faces.Count; i++)
+            for (int i = 0; i < faces.Count; i++)
             {
-                List<WingedEdge> edges_face = edges.FindAll(edge => edge.leftFace == faces[i] || edge.rightFace == faces[i]);
-                int[] face_edges = new int[edges_face.Count];
-                for (int j = 0; j < edges_face.Count; j++)
-                    face_edges[j] = edges_face[j].index;
-                strings[i] += faces[i].index + separator + string.Join(" ", face_edges) +  separator + separator;
+                //List<WingedEdge> edges_face = edges.FindAll(edge => edge.leftFace == faces[i] || edge.rightFace == faces[i]);
+                //int[] face_edges = new int[edges_face.Count];
+                //for (int j = 0; j < edges_face.Count; j++)
+                //    face_edges[j] = edges_face[j].index;
+                strings[i] += faces[i].index + separator
+                    + faces[i].edge.index
+                    //+ string.Join(" ", face_edges)
+                    + separator + separator;
             }
 
             string str = "Vertex" + separator + separator + separator + separator + "WingedEdges" + separator + separator + separator + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
@@ -406,11 +722,6 @@ namespace WingedEdge
             Mesh mesh = this.ConvertToFaceVertexMesh();
             int[] m_quads = mesh.GetIndices(0);
 
-            List<Vector3> facePoints;
-            List<Vector3> edgePoints;
-            List<Vector3> vertexPoints;
-
-            this.CatmullClarkCreateNewPoints(out facePoints, out edgePoints, out vertexPoints);
 
 
 
@@ -428,13 +739,13 @@ namespace WingedEdge
                 for (int i = 0; i < vertices.Count; i++)
                 {
                     Vector3 worldPos = transform.TransformPoint(vertices[i].position);
-                    //Handles.Label(worldPos, "V"+vertices[i].index, style);
-                    
-                    Handles.Label(transform.TransformPoint(vertexPoints[i]), "V'" + i, style2);
+                    Handles.Label(worldPos, "V" + vertices[i].index, style);
+
+
                 }
             }
 
-            //faces
+            ////faces
             if (drawFaces)
             {
                 style.normal.textColor = Color.magenta;
@@ -450,9 +761,9 @@ namespace WingedEdge
                     Vector3 pt3 = transform.TransformPoint(vertices[index3].position);
                     Vector3 pt4 = transform.TransformPoint(vertices[index4].position);
 
-                    //Handles.Label((pt1 + pt2 + pt3 + pt4) / 4.0f, "F" + faces[i].index, style);
-                    style.normal.textColor = Color.green;
-                    Handles.Label(facePoints[i], "C" + i.ToString(), style);
+
+                    Handles.Label((pt1 + pt2 + pt3 + pt4) / 4.0f, "F" + faces[i].index, style);
+                    //style.normal.textColor = Color.green;
                 }
             }
 
@@ -460,22 +771,29 @@ namespace WingedEdge
 
 
             //edges
-            if (drawEdges)
-            {
-                style.normal.textColor = Color.blue;
-                style2.normal.textColor = Color.cyan;
-                for (int i=0; i < edges.Count; i++)
-                {
-                    Vector3 start = transform.TransformPoint(edges[i].startVertex.position);
-                    Vector3 end = transform.TransformPoint(edges[i].endVertex.position);
-                    Vector3 pos = Vector3.Lerp(start, end, 0.5f);
 
-                    //Handles.Label(pos, "e" + edges[i].index, style);
-                    
-                    Handles.Label(transform.TransformPoint(edgePoints[i]), "E'" + i, style2);
-                }
+            style.normal.textColor = Color.blue;
+            style2.normal.textColor = Color.cyan;
+            for (int i=0; i < edges.Count; i++)
+            {
+                Vector3 start = transform.TransformPoint(edges[i].startVertex.position);
+                Vector3 end = transform.TransformPoint(edges[i].endVertex.position);
+                Vector3 pos = Vector3.Lerp(start, end, 0.5f);
+
+
+                Gizmos.DrawLine(start, end);
+
+                if (drawEdges)
+                    Handles.Label(pos, "e" + edges[i].index, style);
+
+
             }
-           
+            //for(int j = 0; j < edgePoints.Count; j++)
+            //{
+            //    Handles.Label(transform.TransformPoint(edgePoints[j]), "E'" + j, style2);
+            //}
+
+
         }
     }
 }

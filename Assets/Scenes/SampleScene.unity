@@ -695,7 +695,7 @@ MonoBehaviour:
   m_y: 5
   m_z: 5
   m_nSectors: 20
-  m_DisplayMeshInfo: 0
+  m_DisplayMeshInfo: 1
   m_DisplayMeshEdges: 1
   m_DisplayMeshVertices: 1
   m_DisplayMeshFaces: 1

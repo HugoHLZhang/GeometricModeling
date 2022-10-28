@@ -120,10 +120,10 @@ public class MeshGeneratorQuads : MonoBehaviour
 
 
         //##############        TD1 Objet        ##############
-        //m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
+        m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
-        m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
+        //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
         //##############        WingedEdge        ##############
 
@@ -152,7 +152,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         //ConvertToCSV();
 
 
-        
+
         Debug.Log($"#################      Create a {m_Mf.mesh.name}     #################");
         ConvertToCSV();
 
@@ -161,39 +161,23 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //################          CatmullClark        #######################
 
-        List<Vector3> facePoints;
-        List<Vector3> edgePoints;
-        List<Vector3> vertexPoints;
+        m_WingedEdgeMesh.SubdivideCatmullClark();
+        m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
+        //tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
+        //m_Mf.mesh = tmp;
+        //m_WingedEdgeMesh = new WingedEdgeMesh(tmp);
+        //m_WingedEdgeMesh.ConvertToCSVFormat();
+        //m_WingedEdgeMesh.SubdivideCatmullClark();
 
-        m_WingedEdgeMesh.CatmullClarkCreateNewPoints(out facePoints, out edgePoints, out vertexPoints);
+        //ConvertToCSV();
+        //tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
+        //m_Mf.mesh = tmp;
+        //ConvertToCSV();
+        //WingedEdgeMesh newWinged = new WingedEdgeMesh(tmp);
 
-        m_WingedEdgeMesh.SplitEdge(m_WingedEdgeMesh.edges[0], edgePoints[0]);
-        m_WingedEdgeMesh.SplitFace(m_WingedEdgeMesh.faces[0], facePoints[0]); 
-        string p = "";
-        int cnt = 0;
-        foreach (var v in facePoints)
-        {
-            p += $"facePoints{cnt++} : {v}\n";
-        }
-        Debug.Log(p);
-        p = "";
-        cnt = 0;
-        foreach (var v in edgePoints)
-        {
-            p += $"edgePoints{cnt++} : {v}\n";
-        }
-        Debug.Log(p);
-
-        p = "";
-        cnt = 0;
-        foreach (var v in vertexPoints)
-        {
-            p += $"vertexPoints{cnt++} : {v}\n";
-        }
-        Debug.Log(p);
-
-
-
+        //newWinged.SubdivideCatmullClark();
+        //tmp = newWinged.ConvertToFaceVertexMesh();
+        //m_Mf.mesh = tmp;
 
 
     }
@@ -266,7 +250,7 @@ public class MeshGeneratorQuads : MonoBehaviour
 
 
         mesh.vertices = vertices;
-        mesh.SetIndices(quads, MeshTopology.Quads,0);
+        mesh.SetIndices(quads, MeshTopology.Quads, 0);
 
         return mesh;
     }
@@ -351,7 +335,7 @@ public class MeshGeneratorQuads : MonoBehaviour
     {
         Mesh mesh = new Mesh();
         mesh.name = "box";
-        
+
 
         Vector3[] vertices = new Vector3[8];
         int[] quads = new int[6 * 4];
@@ -383,17 +367,17 @@ public class MeshGeneratorQuads : MonoBehaviour
         quads[9] = 6;
         quads[10] = 7;
         quads[11] = 3;
-              
+
         quads[12] = 3;
         quads[13] = 7;
         quads[14] = 8;
         quads[15] = 4;
-              
+
         quads[16] = 4;
         quads[17] = 8;
         quads[18] = 5;
         quads[19] = 1;
-              
+
         quads[20] = 5;
         quads[21] = 8;
         quads[22] = 7;
@@ -408,7 +392,7 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         return mesh;
     }
-    
+
     Mesh CreateChips(Vector3 halfSize)
     {
         Mesh mesh = new Mesh();
@@ -460,7 +444,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         Mesh mesh = new Mesh();
         mesh.name = "regularPolygon";
 
-        Vector3[] vertices = new Vector3[nSectors*2 + 1];
+        Vector3[] vertices = new Vector3[nSectors * 2 + 1];
         int[] quads = new int[nSectors * 4];
 
         //Vertices
@@ -471,15 +455,15 @@ public class MeshGeneratorQuads : MonoBehaviour
         for (int i = 0; i < nSectors; i++)
         {
             float rad = step * i;
-            float rad2 = step * (i+1);
+            float rad2 = step * (i + 1);
             float x = Mathf.Cos(rad) * halfSize.x;
             float z = Mathf.Sin(rad) * halfSize.z;
             float x2 = Mathf.Cos(rad2) * halfSize.x;
             float z2 = Mathf.Sin(rad2) * halfSize.z;
             vertices[index++] = new Vector3(x, 0, z);
-            vertices[index++] = Vector3.Lerp(new Vector3(x, 0, z), new Vector3(x2, 0, z2),0.5f);
+            vertices[index++] = Vector3.Lerp(new Vector3(x, 0, z), new Vector3(x2, 0, z2), 0.5f);
         }
-        vertices[nSectors*2] = Vector3.zero;
+        vertices[nSectors * 2] = Vector3.zero;
 
         for (int i = 0; i < nSectors * 2 + 1; i++)
         {
@@ -488,9 +472,9 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         index = 0;
         //Quads
-        for (int i = 0; i < nSectors*2; i+=2)
+        for (int i = 0; i < nSectors * 2; i += 2)
         {
-            quads[index++] = nSectors*2;
+            quads[index++] = nSectors * 2;
             quads[index++] = (i + 1) % (nSectors * 2);
             quads[index++] = i % (nSectors * 2);
             quads[index++] = (nSectors * 2 + i - 1) % (nSectors * 2);
@@ -527,14 +511,14 @@ public class MeshGeneratorQuads : MonoBehaviour
             vertices[index++] = new Vector3(x, 0, z);
             vertices[index++] = Vector3.Lerp(new Vector3(x, 0, z), new Vector3(x2, 0, z2), 0.5f);
         }
-        vertices[nSectors * 2 +1] = Vector3.zero;
+        vertices[nSectors * 2 + 1] = Vector3.zero;
 
         index = 0;
         //Quads
-        for (int i = 0; i < nSectors * 2 ; i += 2)
+        for (int i = 0; i < nSectors * 2; i += 2)
         {
             quads[index++] = nSectors * 2 + 1;
-            quads[index++] = (i + 2) % (nSectors * 2 + 1 );
+            quads[index++] = (i + 2) % (nSectors * 2 + 1);
             quads[index++] = (i + 1) % (nSectors * 2 + 1);
             quads[index++] = i % (nSectors * 2 + 1);
         }
@@ -546,12 +530,12 @@ public class MeshGeneratorQuads : MonoBehaviour
 
     private void OnDrawGizmos()
     {
-        
+
         if (!(m_Mf && m_Mf.mesh)) return;
         Mesh mesh = m_Mf.mesh;
 
         //WingedEdgeDrawGizmos
-        if(m_WingedEdgeMesh != null)
+        if (m_WingedEdgeMesh != null)
         {
             WingedEdgeMesh wingedEdgeMesh = m_WingedEdgeMesh;
             wingedEdgeMesh.DrawGizmos(m_DisplayMeshVertices, m_DisplayMeshEdges, m_DisplayMeshFaces, transform);
@@ -578,27 +562,24 @@ public class MeshGeneratorQuads : MonoBehaviour
                 Vector3 worldPos = transform.TransformPoint(vertices[i]);
                 Handles.Label(worldPos, i.ToString(), style);
             }
-        }
-       
-        style.normal.textColor = Color.green;
-        for (int i = 0; i < quads.Length / 4; i++)
-        {
-            int index1 = quads[4 * i];
-            int index2 = quads[4 * i + 1];
-            int index3 = quads[4 * i + 2];
-            int index4 = quads[4 * i + 3];
-
-            Vector3 pt1 = transform.TransformPoint(vertices[index1]);
-            Vector3 pt2 = transform.TransformPoint(vertices[index2]);
-            Vector3 pt3 = transform.TransformPoint(vertices[index3]);
-            Vector3 pt4 = transform.TransformPoint(vertices[index4]);
-
-            Gizmos.DrawLine(pt1, pt2);
-            Gizmos.DrawLine(pt2, pt3);
-            Gizmos.DrawLine(pt3, pt4);
-            Gizmos.DrawLine(pt4, pt1);
-            if (m_DisplayMeshInfo)
+            style.normal.textColor = Color.green;
+            for (int i = 0; i < quads.Length / 4; i++)
             {
+                int index1 = quads[4 * i];
+                int index2 = quads[4 * i + 1];
+                int index3 = quads[4 * i + 2];
+                int index4 = quads[4 * i + 3];
+
+                Vector3 pt1 = transform.TransformPoint(vertices[index1]);
+                Vector3 pt2 = transform.TransformPoint(vertices[index2]);
+                Vector3 pt3 = transform.TransformPoint(vertices[index3]);
+                Vector3 pt4 = transform.TransformPoint(vertices[index4]);
+
+                Gizmos.DrawLine(pt1, pt2);
+                Gizmos.DrawLine(pt2, pt3);
+                Gizmos.DrawLine(pt3, pt4);
+                Gizmos.DrawLine(pt4, pt1);
+
                 string str = string.Format("{0}:{1},{2},{3},{4}", i, index1, index2, index3, index4);
                 Handles.Label((pt1 + pt2 + pt3 + pt4) / 4.0f, str, style);
             }
