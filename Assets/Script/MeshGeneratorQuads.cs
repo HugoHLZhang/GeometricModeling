@@ -128,15 +128,16 @@ public class MeshGeneratorQuads : MonoBehaviour
         //##############        WingedEdge        ##############
 
 
+        ConvertToCSV();
         m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);//constructeur
+        m_WingedEdgeMesh.SubdivideCatmullClark();
         m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
 
         Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
         Mesh tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
         m_Mf.mesh = tmp;
-        ConvertToCSV();
-        m_WingedEdgeMesh = new WingedEdgeMesh(tmp);
-        m_WingedEdgeMesh.ConvertToCSVFormat();
+        //m_WingedEdgeMesh = new WingedEdgeMesh(tmp);
+        //m_WingedEdgeMesh.ConvertToCSVFormat();
 
 
 
@@ -161,7 +162,6 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //################          CatmullClark        #######################
 
-        //m_WingedEdgeMesh.SubdivideCatmullClark();
         //WingedEdgeMesh newWEM = m_WingedEdgeMesh;
         //newWEM.SubdivideCatmullClark();
         //m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
