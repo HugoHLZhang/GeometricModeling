@@ -120,59 +120,36 @@ namespace WingedEdge
 
             }
 
+
+
             //Complete WingedEdge (CW and CCW Edges)
-
-            for (int i = 0; i < m_quads.Length / nbIndex; i++)
+            for (int i = 0; i < faces.Count; i++)
             {
-                int[] quad_index = new int[nbIndex];
+                List<WingedEdge> face_edges = edges.FindAll(edge => edge.rightFace == faces[i] || edge.leftFace == faces[i]);
 
-                for (int k = 0; k < 4; k++)
-                    quad_index[k] = m_quads[nbIndex * i + k];
-
-                for (int j = 0; j < quad_index.Length; j++)
+                for (int j = 0; j < face_edges.Count; j++)
                 {
-                    int prev = quad_index[(j - 1 + nbIndex) % nbIndex];
-                    int start = quad_index[j];
-                    int end = quad_index[(j + 1) % nbIndex];
-                    int next = quad_index[(j + 2) % nbIndex];
-
-
-
-                    ulong key = (ulong)Mathf.Min(start, end) + ((ulong)Mathf.Max(start, end) << 32);
-                    if (dicoEdges.TryGetValue(key, out edge))
+                    if (face_edges[j].rightFace == faces[i])
                     {
-
-                        //cw
-                        if (edge.startVertex == vertices[start] && edge.endVertex == vertices[end])//CW
-                        {
-                            edge.startCWEdge = edges.Find(e => (e.startVertex == vertices[prev] && e.endVertex == vertices[start]) || (e.startVertex == vertices[start] && e.endVertex == vertices[prev]));
-                            edge.endCCWEdge = edges.Find(e => (e.startVertex == vertices[next] && e.endVertex == vertices[end]) || (e.startVertex == vertices[end] && e.endVertex == vertices[next]));
-                        }
-                        //ccw
-                        if (edge.endVertex == vertices[start] && edge.startVertex == vertices[end])//CCW
-                        {
-                            edge.startCCWEdge = edges.Find(e => (e.startVertex == vertices[end] && e.endVertex == vertices[next]) || (e.startVertex == vertices[next] && e.endVertex == vertices[end]));
-                            edge.endCWEdge = edges.Find(e => (e.startVertex == vertices[start] && e.endVertex == vertices[prev]) || (e.startVertex == vertices[prev] && e.endVertex == vertices[start]));
-                        }
-
-                        //complete null value
-                        if (edge.leftFace == null && edge.endCWEdge == null) 
-                            edge.endCWEdge = edges.Find(e => e.startVertex == edge.endVertex && e.rightFace.index == (edge.rightFace.index - 1 + faces.Count) % faces.Count);
-                        if (edge.leftFace == null && edge.startCCWEdge == null) 
-                            edge.startCCWEdge = edges.Find(e => e.endVertex == edge.startVertex && e.rightFace.index == (edge.rightFace.index + 1) % faces.Count);
-
-                        if (edge.leftFace == null && edge.endCWEdge == null) 
-                            edge.endCWEdge = edge.endCCWEdge;
-                        if (edge.leftFace == null && edge.startCCWEdge == null) 
-                            edge.startCCWEdge = edge.startCWEdge;
-
-
+                        edges[face_edges[j].index].startCWEdge = edges.Find(e => (e.endVertex == face_edges[j].startVertex && e.rightFace == faces[i]) || (e.startVertex == face_edges[j].startVertex && e.leftFace == faces[i]));
+                        edges[face_edges[j].index].endCCWEdge = edges.Find(e => (e.startVertex == face_edges[j].endVertex && e.rightFace == faces[i]) || (e.endVertex == face_edges[j].endVertex && e.leftFace == faces[i]));
                     }
+                    if (face_edges[j].leftFace == null)
+                    {
+                        edges[face_edges[j].index].startCCWEdge = edges.Find(e => e.endVertex == face_edges[j].startVertex && e.leftFace == null);
+                        edges[face_edges[j].index].endCWEdge = edges.Find(e => e.startVertex == face_edges[j].endVertex && e.leftFace == null);
+                    }
+                    if (face_edges[j].leftFace == faces[i])
+                    {
+                        edges[face_edges[j].index].startCCWEdge = edges.Find(e => (e.startVertex == face_edges[j].startVertex && e.rightFace == faces[i]) || (e.endVertex == face_edges[j].startVertex && e.leftFace == faces[i]));
+                        edges[face_edges[j].index].endCWEdge = edges.Find(e => (e.endVertex == face_edges[j].endVertex && e.rightFace == faces[i]) || (e.startVertex == face_edges[j].endVertex && e.leftFace == faces[i]));
+                    }
+
                 }
             }
         }
 
-        
+
         public Mesh ConvertToFaceVertexMesh()
         {
             Mesh faceVertexMesh = new Mesh();
@@ -709,9 +686,9 @@ namespace WingedEdge
             List<Vertex> vertices = this.vertices;
             List<WingedEdge> edges = this.edges;
             List<Face> faces = this.faces;
-            List<Vector3> facePoints = this.facePoints;
-            List<Vector3> edgePoints = this.edgePoints;
-            List<Vector3> vertexPoints = this.vertexPoints;
+            //List<Vector3> facePoints = this.facePoints;
+            //List<Vector3> edgePoints = this.edgePoints;
+            //List<Vector3> vertexPoints = this.vertexPoints;
 
             List<string> strings = new List<string>();
 
@@ -734,9 +711,10 @@ namespace WingedEdge
                     + vertice.edge.index + separator
                     + string.Join(" ", edges_adj) + separator
                     + string.Join(" ", face_adj) + separator
-                    + vertexPoints != null ? vertexPoints[vertice.index].x.ToString("N03"):"NULL" + " "
-                    + vertexPoints != null ? vertexPoints[vertice.index].y.ToString("N03") : "NULL" + " "
-                    + vertexPoints != null ? vertexPoints[vertice.index].z.ToString("N03") : "NULL" + separator + separator);
+                    //+ vertexPoints != null ? vertexPoints[vertice.index].x.ToString("N03"):"NULL" + " "
+                    //+ vertexPoints != null ? vertexPoints[vertice.index].y.ToString("N03") : "NULL" + " "
+                    //+ vertexPoints != null ? vertexPoints[vertice.index].z.ToString("N03") : "NULL" 
+                    + separator + separator);
             }
 
             for (int i = vertices.Count; i < edges.Count; i++)
@@ -745,18 +723,20 @@ namespace WingedEdge
             //Edges
             for (int i = 0; i < edges.Count; i++)
             {
+                Debug.Log("hello");
                 strings[i] += edges[i].index + separator
                     + edges[i].startVertex.index + separator
                     + edges[i].endVertex.index + separator
-                    + edges[i].leftFace != null ? edges[i].leftFace.index.ToString(): "NULL" + separator
-                    + edges[i].rightFace != null ? edges[i].rightFace.index.ToString() : "NULL" + separator
-                    + edges[i].startCCWEdge != null ? edges[i].startCCWEdge.index.ToString() : "NULL" + separator
-                    + edges[i].startCWEdge != null ? edges[i].startCWEdge.index.ToString() : "NULL" + separator
-                    + edges[i].endCWEdge != null ? edges[i].endCWEdge.index.ToString() : "NULL" + separator
-                    + edges[i].endCCWEdge != null ? edges[i].endCCWEdge.index.ToString() : "NULL" + separator
-                    + edgePoints != null ? edgePoints[i].x.ToString("N03"): "NULL" + " "
-                    + edgePoints != null ? edgePoints[i].y.ToString("N03"): "NULL" + " "
-                    + edgePoints != null ? edgePoints[i].z.ToString("N03") : "NULL" + separator + separator;
+                    + $"{(edges[i].leftFace != null ? edges[i].leftFace.index.ToString() : "NULL")}" + separator
+                    + $"{(edges[i].rightFace != null ? edges[i].rightFace.index.ToString() : "NULL")}" + separator
+                    + $"{(edges[i].startCCWEdge != null ? edges[i].startCCWEdge.index.ToString() : "NULL")}" + separator
+                    + $"{(edges[i].startCWEdge != null ? edges[i].startCWEdge.index.ToString() : "NULL")}" + separator
+                    + $"{(edges[i].endCWEdge != null ? edges[i].endCWEdge.index.ToString() : "NULL")}" + separator
+                    + $"{(edges[i].endCCWEdge != null ? edges[i].endCCWEdge.index.ToString() : "NULL")}" + separator
+                    //+ edgePoints != null ? edgePoints[i].x.ToString("N03"): "NULL" + " "
+                    //+ edgePoints != null ? edgePoints[i].y.ToString("N03"): "NULL" + " "
+                    //+ edgePoints != null ? edgePoints[i].z.ToString("N03") : "NULL" 
+                    + separator + separator;
             }
             //Faces
             for (int i = 0; i < faces.Count; i++)
@@ -767,12 +747,13 @@ namespace WingedEdge
                 int nEdges = 4;
                 List<int> edge_index = new List<int>();
                 List<int> vertice_index = new List<int>();
-                for(int j = 0; j < nEdges; j++){
+                for (int j = 0; j < nEdges; j++)
+                {
                     edge_index.Add(edge.index);
                     edge = (faces[i] == edge.rightFace) ? edge.endCCWEdge : edge.startCCWEdge;
                 }
                 foreach (var a in edge_index)
-                    vertice_index.Add((edges[a].rightFace == faces[i])? edges[a].startVertex.index: edges[a].endVertex.index);
+                    vertice_index.Add((edges[a].rightFace == faces[i]) ? edges[a].startVertex.index : edges[a].endVertex.index);
 
                 int[] face_edges = new int[edge_index.Count];
                 for (int j = 0; j < edge_index.Count; j++)
@@ -783,9 +764,10 @@ namespace WingedEdge
                     + faces[i].edge.index + separator
                     + string.Join(" ", face_edges) + separator
                     + string.Join(" ", vertice_index) + separator
-                    + facePoints != null ? facePoints[i].x.ToString("N03") : "NULL" + " "
-                    + facePoints != null ? facePoints[i].y.ToString("N03") : "NULL" + " "
-                    + facePoints != null ? facePoints[i].z.ToString("N03") : "NULL" + separator + separator;
+                    //+ facePoints != null ? facePoints[i].x.ToString("N03") : "NULL" + " "
+                    //+ facePoints != null ? facePoints[i].y.ToString("N03") : "NULL" + " "
+                    //+ facePoints != null ? facePoints[i].z.ToString("N03") : "NULL" 
+                    + separator + separator;
             }
 
             string str = "Vertex" + separator + separator + separator + separator + separator + separator + separator + "WingedEdges" + separator + separator + separator + separator + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
