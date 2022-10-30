@@ -267,6 +267,101 @@ namespace WingedEdge
             edgePoints = null;
         }
 
+        public void SubdivideCatmullClark2()
+        {
+            List<Vertex> vertices = this.vertices;
+            List<WingedEdge> edges = this.edges;
+            List<Face> faces = this.faces;
+
+            CatmullClarkCreateNewPoints(out facePoints, out edgePoints, out vertexPoints);
+
+            for (int i = 0; i < vertexPoints.Count; i++)
+                vertices[i].position = vertexPoints[i];
+
+            for (int i = 0; i < edgePoints.Count; i++)
+                SplitEdge(edges[i], edgePoints[i]);
+            foreach (var face in faces)
+            {
+                //get all edges of the current face
+                List<WingedEdge> face_edges = edges.FindAll(edge => edge.rightFace == face || edge.leftFace == face);
+
+                foreach (var edge in face_edges)
+                {
+                    if (edge.rightFace == face)
+                    {
+                        edge.startCWEdge = edges.Find(e => (e.endVertex == edge.startVertex && e.rightFace == face) || (e.startVertex == edge.startVertex && e.leftFace == face));
+                        edge.endCCWEdge = edges.Find(e => (e.startVertex == edge.endVertex && e.rightFace == face) || (e.endVertex == edge.endVertex && e.leftFace == face));
+                    }
+                    if (edge.leftFace == face)
+                    {
+                        edge.startCCWEdge = edges.Find(e => (e.startVertex == edge.startVertex && e.rightFace == face) || (e.endVertex == edge.startVertex && e.leftFace == face));
+                        edge.endCWEdge = edges.Find(e => (e.endVertex == edge.endVertex && e.rightFace == face) || (e.startVertex == edge.endVertex && e.leftFace == face));
+                    }
+                    if (edge.leftFace == null)
+                    {
+                        edge.startCCWEdge = edges.Find(e => e.endVertex == edge.startVertex && e.leftFace == null);
+                        edge.endCWEdge = edges.Find(e => e.startVertex == edge.endVertex && e.leftFace == null);
+                    }
+
+                }
+            }
+
+
+
+            for (int i = 0; i < facePoints.Count; i++)
+            {
+                SplitFace2(faces[i], facePoints[i]);
+            }
+            foreach (var face in faces)
+            {
+                //get all edges of the current face
+                List<WingedEdge> face_edges = edges.FindAll(edge => edge.rightFace == face || edge.leftFace == face);
+
+                foreach (var edge in face_edges)
+                {
+                    if (edge.rightFace == face)
+                    {
+                        edge.startCWEdge = edges.Find(e => (e.endVertex == edge.startVertex && e.rightFace == face) || (e.startVertex == edge.startVertex && e.leftFace == face));
+                        edge.endCCWEdge = edges.Find(e => (e.startVertex == edge.endVertex && e.rightFace == face) || (e.endVertex == edge.endVertex && e.leftFace == face));
+                    }
+                    if (edge.leftFace == face)
+                    {
+                        edge.startCCWEdge = edges.Find(e => (e.startVertex == edge.startVertex && e.rightFace == face) || (e.endVertex == edge.startVertex && e.leftFace == face));
+                        edge.endCWEdge = edges.Find(e => (e.endVertex == edge.endVertex && e.rightFace == face) || (e.startVertex == edge.endVertex && e.leftFace == face));
+                    }
+                    if (edge.leftFace == null)
+                    {
+                        edge.startCCWEdge = edges.Find(e => e.endVertex == edge.startVertex && e.leftFace == null);
+                        edge.endCWEdge = edges.Find(e => e.startVertex == edge.endVertex && e.leftFace == null);
+                    }
+
+                }
+            }
+
+            string p = "";
+            foreach (var edge in edges)
+            {
+                p += $"{edge.index} \t {edge.startVertex.index} \t {edge.endVertex.index} \t {(edge.leftFace != null ? edge.leftFace.index.ToString() : "NULL")} \t {(edge.rightFace != null ? edge.rightFace.index.ToString() : "NULL")} \t {(edge.startCCWEdge!=null?edge.startCCWEdge.index.ToString():"NULL")} \t {(edge.startCWEdge !=null ? edge.startCWEdge.index.ToString() : "NULL")}  \t {(edge.endCWEdge != null ? edge.endCWEdge.index.ToString() : "NULL")} \t {(edge.endCCWEdge !=null  ? edge.endCCWEdge.index.ToString() : "NULL")} \n";
+            }
+            Debug.Log(p);
+            p = "";
+            foreach (var vertice in vertices)
+            {
+                p += $"{vertice.index} \t {vertice.position.x} {vertice.position.y} {vertice.position.z} \t {(vertice.edge != null ? vertice.edge.index.ToString() : "NULL")}\n";
+            }
+            Debug.Log(p);
+
+            p = "";
+            foreach (var face in faces)
+            {
+                p += $"{face.index} \t {(face.edge != null ? face.edge.index.ToString() : "NULL")}\n";
+            }
+            Debug.Log(p);
+
+            facePoints = null;
+            vertexPoints = null;
+            edgePoints = null;
+        }
 
         public void CatmullClarkCreateNewPoints(out List<Vector3> facePoints, out List<Vector3> edgePoints, out List<Vector3> vertexPoints)
         {
@@ -542,6 +637,178 @@ namespace WingedEdge
             //Debug.Log(str);
         }
 
+        public void SplitFace2(Face face, Vector3 splittingPoint)
+        {
+            //Pour chaque face, il faut créer 4 faces, 4 nouvelles edges et une vertices central
+            Vertex newVertex = new Vertex(vertices.Count, splittingPoint);
+            vertices.Add(newVertex);
+            bool isRecycled = false;
+
+            dicoEdges = new Dictionary<ulong, WingedEdge>();
+            WingedEdge wingedEdge;
+
+            List<WingedEdge> face_edges = edges.FindAll(edge => edge.rightFace == face || edge.leftFace == face);
+            List<WingedEdge> cw_edges = new List<WingedEdge>();
+            WingedEdge faceEdge = face.edge;
+            //Edge CW
+            for (int i = 0; i < face_edges.Count; i++)
+            {
+                cw_edges.Add(faceEdge);
+                faceEdge = face == faceEdge.rightFace ? faceEdge.endCCWEdge : faceEdge.startCCWEdge;
+                //faceEdge = face == faceEdge.rightFace ? face == faceEdge.endCCWEdge.rightFace ? faceEdge.endCCWEdge.endCCWEdge : faceEdge.endCCWEdge.startCCWEdge : face == faceEdge.startCCWEdge.rightFace ? faceEdge.startCCWEdge.endCCWEdge : faceEdge.startCCWEdge.startCCWEdge;
+            }
+
+            string p = $"F{face.index} : ";
+            for (int i = 0; i < cw_edges.Count; i++)
+            {
+                p += $"e{cw_edges[i].index} ";
+            }
+            p += "\n";
+            string str = "";
+
+
+            foreach (var e in edges)
+            {
+                int start = e.startVertex.index;
+                int end = e.endVertex.index;
+
+                ulong key = (ulong)Mathf.Min(start, end) + ((ulong)Mathf.Max(start, end) << 32);
+                dicoEdges.Add(key, e);
+            }
+
+            //foreach (var edge in cw_edges)
+            //{
+            //    int[] quad_index = new int[4];
+            //    quad_index[0] = newVertex.index;
+            //    Face newFace = null;
+            //    if (isRecycled)
+            //    {
+            //        newFace = new Face(faces.Count);
+            //        faces.Add(newFace);
+            //    }
+            //    if (edge.rightFace == face)
+            //    {
+            //        p += " RIGHT FACE : ";
+            //        if (edge.endCCWEdge == edge.endCWEdge)
+            //        {
+            //            quad_index[1] = edge.startCWEdge.endVertex == edge.startVertex ? edge.startCWEdge.startVertex.index : edge.startCWEdge.endVertex.index;
+            //            quad_index[2] = edge.startVertex.index;
+            //            quad_index[3] = edge.endVertex.index;
+
+            //            p += $"trouver edge du start : V{quad_index[1]}";
+            //        }
+            //        else
+            //        {
+            //            quad_index[1] = edge.startVertex.index;
+            //            quad_index[2] = edge.endVertex.index;
+            //            quad_index[3] = edge.endCCWEdge.startVertex == edge.endVertex ? edge.endCCWEdge.endVertex.index : edge.endCCWEdge.startVertex.index;
+
+            //            p += $"trouver edge du end  : V{quad_index[3]}";
+            //        }
+            //    }
+            //    else
+            //    {
+            //        p += " LEFT FACE : ";
+            //        if (edge.endCWEdge == edge.endCCWEdge)
+            //        {
+            //            quad_index[1] = edge.endVertex.index;
+            //            quad_index[2] = edge.startVertex.index;
+            //            quad_index[3] = edge.startCCWEdge.endVertex == edge.startVertex ? edge.startCCWEdge.startVertex.index : edge.startCCWEdge.endVertex.index;
+
+            //            p += $"trouver edge du start : V{quad_index[3]}";
+
+            //        }
+            //        else
+            //        {
+            //            quad_index[1] = edge.endCWEdge.startVertex == edge.endVertex ? edge.endCWEdge.endVertex.index : edge.endCWEdge.startVertex.index;
+            //            quad_index[2] = edge.endVertex.index;
+            //            quad_index[3] = edge.startVertex.index;
+            //            p += $"trouver edge du start : V{quad_index[1]}";
+            //        }
+            //    }
+            //    p += "\n";
+            //    //for (int i = 0; i < quad_index.Length; i++)
+            //    //{
+            //    //    p += $"V{quad_index[i]} ";
+            //    //}
+            //    //p += "\n";
+
+
+            //    for (int i = 0; i < quad_index.Length; i++)
+            //    {
+            //        wingedEdge = null;
+            //        //recyle 
+            //        str += $"e{i} : ";
+            //        if (!isRecycled)
+            //        {
+            //            p += $"V{quad_index[i]}V{quad_index[(i + 1) % 4]}  ->  ";
+            //            int start = quad_index[i];
+            //            int end = quad_index[(i + 1) % 4];
+            //            ulong key = (ulong)Mathf.Min(start, end) + ((ulong)Mathf.Max(start, end) << 32);
+
+
+            //            if (!dicoEdges.TryGetValue(key, out wingedEdge))
+            //            {
+            //                str += $" - createNewEdge V{start} V{end} - ";
+            //                wingedEdge = new WingedEdge(edges.Count, vertices[start], vertices[end], face, null);
+            //                //edges.Add(wingedEdge);
+
+            //                //if (face.edge == null) face.edge = wingedEdge;
+
+            //                //if (vertices[start].edge == null) vertices[start].edge = wingedEdge;
+            //                //if (vertices[end].edge == null) vertices[end].edge = wingedEdge;
+
+            //                dicoEdges.Add(key, wingedEdge);
+            //            }
+            //            else
+            //            {
+            //                //if (wingedEdge.startVertex == vertices[end] && wingedEdge.endVertex == vertices[start]) wingedEdge.leftFace = face;
+            //                //if (face.edge == null) face.edge = wingedEdge;
+            //                str += $" - Edge already exist V{start} V{end} - ";
+            //            }
+
+
+            //        }
+            //        else
+            //        //new
+            //        {
+            //            p += $"V{quad_index[i]}V{quad_index[(i + 1) % 4]} -> ";
+
+            //            int start = quad_index[i];
+            //            int end = quad_index[(i + 1) % 4];
+            //            ulong key = (ulong)Mathf.Min(start, end) + ((ulong)Mathf.Max(start, end) << 32);
+            //            if (!dicoEdges.TryGetValue(key, out wingedEdge))
+            //            {
+            //                str += $" - createNewEdge V{start} V{end} - ";
+            //                //wingedEdge = new WingedEdge(edges.Count, vertices[start], vertices[end], newFace, null);
+            //                //edges.Add(wingedEdge);
+
+            //                //if (newFace.edge == null) newFace.edge = wingedEdge;
+
+            //                //if (vertices[start].edge == null) vertices[start].edge = wingedEdge;
+            //                //if (vertices[end].edge == null) vertices[end].edge = wingedEdge;
+
+            //                dicoEdges.Add(key, wingedEdge);
+            //            }
+            //            else
+            //            {
+            //                str += $" - Edge already exist V{start} V{end} - ";
+            //                //if (wingedEdge.startVertex == vertices[start] && wingedEdge.endVertex == vertices[end]) wingedEdge.rightFace = newFace;
+            //                //if (wingedEdge.startVertex == vertices[end] && wingedEdge.endVertex == vertices[start]) wingedEdge.leftFace = newFace;
+            //                //if (newFace.edge == null) newFace.edge = wingedEdge;
+            //            }
+            //        }
+
+            //    }
+            //    p += "\n";
+            //    str += "\n";
+            //    isRecycled = true;
+
+            //}
+            Debug.Log(p);
+            Debug.Log(str);
+        }
+
         public string ConvertToCSVFormat(string separator = "\t")
         {
             if (this == null) return "";
@@ -557,25 +824,7 @@ namespace WingedEdge
             List<Vector3> vertexPoints = this.vertexPoints;
 
             List<string> strings = new List<string>();
-            string p = "";
-            foreach (var edge in edges)
-            {
-                p += $"{edge.index} \t {edge.startVertex.index} \t {edge.endVertex.index} \t {(edge.leftFace != null ? edge.leftFace.index.ToString() : "NULL")} \t {(edge.rightFace != null ? edge.rightFace.index.ToString() : "NULL")} \t {(edge.startCCWEdge!=null?edge.startCCWEdge.index.ToString():"NULL")} \t {(edge.startCWEdge !=null ? edge.startCWEdge.index.ToString() : "NULL")}  \t {(edge.endCWEdge != null ? edge.endCWEdge.index.ToString() : "NULL")} \t {(edge.endCCWEdge !=null  ? edge.endCCWEdge.index.ToString() : "NULL")} \n";
-            }
-            Debug.Log(p);
-            p = "";
-            foreach (var vertice in vertices)
-            {
-                p += $"{vertice.index} \t {vertice.position.x} {vertice.position.y} {vertice.position.z} \t {(vertice.edge != null ? vertice.edge.index.ToString() : "NULL")}\n";
-            }
-            Debug.Log(p);
-
-            p = "";
-            foreach (var face in faces)
-            {
-                p += $"{face.index} \t {(face.edge != null ? face.edge.index.ToString() : "NULL")}\n";
-            }
-            Debug.Log(p);
+            
             //Vertices
             foreach (var vertice in vertices)
             {
