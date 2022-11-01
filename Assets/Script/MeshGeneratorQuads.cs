@@ -126,90 +126,47 @@ public class MeshGeneratorQuads : MonoBehaviour
         //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
         //##############        WingedEdge        ##############
-
-
         ConvertToCSV();
-        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);//constructeur
-        m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
-        m_WingedEdgeMesh.SubdivideCatmullClark();
-        m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
+        
+        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);           m_WingedEdgeMesh.ConvertToCSVFormat();
 
-        Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
-        Mesh tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
-        m_Mf.mesh = tmp;
-        m_WingedEdgeMesh = new WingedEdgeMesh(tmp);
-        m_WingedEdgeMesh.ConvertToCSVFormat();
-
-
+        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
 
         //##############        HalfEdge        ##############
 
-        //m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);
+        //m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);             m_HalfEdgeMesh.ConvertToCSVFormat();
 
+        //m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
 
-        //m_HalfEdgeMesh.ConvertToCSVFormat();
-        //Debug.Log("#################      HalfEdgeMesh ConvertToFaceVertexMesh     #################");
-        //Mesh tmp = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
-        //m_Mf.mesh = tmp;
-        //ConvertToCSV();
-
-
-
-        ConvertToCSV();
-        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);//constructeur
-        m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
-        m_WingedEdgeMesh.SubdivideCatmullClark();
-        m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
-
-        Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
-        tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
-        m_Mf.mesh = tmp;
-        m_WingedEdgeMesh = new WingedEdgeMesh(tmp);
-        m_WingedEdgeMesh.ConvertToCSVFormat();
-
-
-
-        ConvertToCSV();
-        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);//constructeur
-        m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
-        m_WingedEdgeMesh.SubdivideCatmullClark();
-        m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
-
-        Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
-        tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
-        m_Mf.mesh = tmp;
-        m_WingedEdgeMesh = new WingedEdgeMesh(tmp);
-        m_WingedEdgeMesh.ConvertToCSVFormat();
         //GUIUtility.systemCopyBuffer To Copy In Clipboard
 
+        //################          TD 2 CatmullClark        #######################
 
-        //################          CatmullClark        #######################
+        //Subdivide 1
+        m_WingedEdgeMesh.SubdivideCatmullClark();                   m_WingedEdgeMesh.ConvertToCSVFormat();
 
-        //WingedEdgeMesh newWEM = m_WingedEdgeMesh;
-        //newWEM.SubdivideCatmullClark();
-        //m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
-        //tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
-        //m_Mf.mesh = tmp;
-        //m_WingedEdgeMesh = new WingedEdgeMesh(tmp);
-        //m_WingedEdgeMesh.ConvertToCSVFormat();
-        //m_WingedEdgeMesh.SubdivideCatmullClark();
+        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
 
-        //ConvertToCSV();
-        //tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
-        //m_Mf.mesh = tmp;
-        //ConvertToCSV();
-        //WingedEdgeMesh newWinged = new WingedEdgeMesh(tmp);
+        //Subdivide 2
+        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);           m_WingedEdgeMesh.ConvertToCSVFormat();
 
-        //newWinged.SubdivideCatmullClark();
-        //tmp = newWinged.ConvertToFaceVertexMesh();
-        //m_Mf.mesh = tmp;
+        m_WingedEdgeMesh.SubdivideCatmullClark();                   m_WingedEdgeMesh.ConvertToCSVFormat();
+
+        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
+
+        //Subdivide 3
+        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);           m_WingedEdgeMesh.ConvertToCSVFormat();
+
+        m_WingedEdgeMesh.SubdivideCatmullClark();                   m_WingedEdgeMesh.ConvertToCSVFormat();
+
+        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
 
 
     }
     string ConvertToCSV(string separator = "\t")
     {
         if (!(m_Mf && m_Mf.mesh)) return "";
-        Debug.Log("#################      FaceVertex ConvertTOCSVFormat     #################");
+        Debug.Log("#################                FaceVertex ConvertTOCSVFormat                   #################");
         string str = "";
         Vector3[] vertices = m_Mf.mesh.vertices;
         int[] quads = m_Mf.mesh.GetIndices(0);
@@ -217,30 +174,15 @@ public class MeshGeneratorQuads : MonoBehaviour
         List<string> strings = new List<string>();
 
         for (int i = 0; i < vertices.Length; i++)
-        {
-            Vector3 pos = vertices[i];
-            strings.Add(i.ToString() + separator
-                + pos.x.ToString("N03") + " "
-                + pos.y.ToString("N03") + " "
-                + pos.z.ToString("N03") + separator + separator);
-        }
+            strings.Add(i.ToString() + separator + vertices[i].x.ToString("N03") + " " + vertices[i].y.ToString("N03") + " " + vertices[i].z.ToString("N03") + separator + separator);
 
         for (int i = vertices.Length; i < quads.Length / 4; i++)
             strings.Add(separator + separator + separator);
 
         for (int i = 0; i < quads.Length / 4; i++)
-        {
-            strings[i] += i.ToString() + separator
-                + quads[4 * i + 0].ToString() + ","
-                + quads[4 * i + 1].ToString() + ","
-                + quads[4 * i + 2].ToString() + ","
-                + quads[4 * i + 3].ToString();
-        }
+            strings[i] += i.ToString() + separator + quads[4 * i + 0].ToString() + "," + quads[4 * i + 1].ToString() + "," + quads[4 * i + 2].ToString() + "," + quads[4 * i + 3].ToString();
 
-        str = "Vertices" + separator + separator + separator + "Faces\n"
-            + "Index" + separator + "Position" + separator + separator +
-            "Index" + separator + "Indices des vertices\n"
-            + string.Join("\n", strings);
+        str = "Vertices" + separator + separator + separator + "Faces\n" + "Index" + separator + "Position" + separator + separator + "Index" + separator + "Indices des vertices\n" + string.Join("\n", strings);
         Debug.Log(str);
         return str;
     }
@@ -571,43 +513,47 @@ public class MeshGeneratorQuads : MonoBehaviour
             HalfEdgeMesh halfEdgeMesh = m_HalfEdgeMesh;
             halfEdgeMesh.DrawGizmos(m_DisplayMeshVertices, m_DisplayMeshEdges, m_DisplayMeshFaces, transform);
         }
+        
+        Vector3[] vertices = mesh.vertices;
+        int[] quads = mesh.GetIndices(0);
+
+        Gizmos.color = Color.black;
+        GUIStyle style = new GUIStyle();
+        style.fontSize = 12;
+
         if (m_DisplayMeshInfo)
         {
-            Vector3[] vertices = mesh.vertices;
-            int[] quads = mesh.GetIndices(0);
-
-            Gizmos.color = Color.black;
-            GUIStyle style = new GUIStyle();
-            style.fontSize = 12;
-
             style.normal.textColor = Color.red;
-
             for (int i = 0; i < vertices.Length; i++)
             {
                 Vector3 worldPos = transform.TransformPoint(vertices[i]);
                 Handles.Label(worldPos, i.ToString(), style);
             }
-            style.normal.textColor = Color.green;
-            for (int i = 0; i < quads.Length / 4; i++)
+        }
+        for (int i = 0; i < quads.Length / 4; i++)
+        {
+            int index1 = quads[4 * i];
+            int index2 = quads[4 * i + 1];
+            int index3 = quads[4 * i + 2];
+            int index4 = quads[4 * i + 3];
+
+            Vector3 pt1 = transform.TransformPoint(vertices[index1]);
+            Vector3 pt2 = transform.TransformPoint(vertices[index2]);
+            Vector3 pt3 = transform.TransformPoint(vertices[index3]);
+            Vector3 pt4 = transform.TransformPoint(vertices[index4]);
+
+            Gizmos.DrawLine(pt1, pt2);
+            Gizmos.DrawLine(pt2, pt3);
+            Gizmos.DrawLine(pt3, pt4);
+            Gizmos.DrawLine(pt4, pt1);
+
+            if (m_DisplayMeshInfo)
             {
-                int index1 = quads[4 * i];
-                int index2 = quads[4 * i + 1];
-                int index3 = quads[4 * i + 2];
-                int index4 = quads[4 * i + 3];
-
-                Vector3 pt1 = transform.TransformPoint(vertices[index1]);
-                Vector3 pt2 = transform.TransformPoint(vertices[index2]);
-                Vector3 pt3 = transform.TransformPoint(vertices[index3]);
-                Vector3 pt4 = transform.TransformPoint(vertices[index4]);
-
-                Gizmos.DrawLine(pt1, pt2);
-                Gizmos.DrawLine(pt2, pt3);
-                Gizmos.DrawLine(pt3, pt4);
-                Gizmos.DrawLine(pt4, pt1);
-
+                style.normal.textColor = Color.green;
                 string str = string.Format("{0}:{1},{2},{3},{4}", i, index1, index2, index3, index4);
                 Handles.Label((pt1 + pt2 + pt3 + pt4) / 4.0f, str, style);
             }
+        
         }
     }
 
