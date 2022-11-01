@@ -696,9 +696,9 @@ MonoBehaviour:
   m_z: 5
   m_nSectors: 20
   m_DisplayMeshInfo: 0
-  m_DisplayMeshEdges: 1
-  m_DisplayMeshVertices: 1
-  m_DisplayMeshFaces: 1
+  m_DisplayMeshEdges: 0
+  m_DisplayMeshVertices: 0
+  m_DisplayMeshFaces: 0
   m_Profil:
     serializedVersion: 2
     m_Curve:
