@@ -121,7 +121,7 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //##############        TD1 Objet        ##############
         m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
-        m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
         //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
@@ -158,9 +158,9 @@ public class MeshGeneratorQuads : MonoBehaviour
         Debug.Log($"#################      Create a {m_Mf.mesh.name}     #################");
         ConvertToCSV();
 
-        m_WingedEdgeMesh.SubdivideCatmullClark2();
-        m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
-        //Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
+        //m_WingedEdgeMesh.SubdivideCatmullClark2();
+        //m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
+        ////Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
         //tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
         //m_Mf.mesh = tmp;
 
