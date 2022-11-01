@@ -155,21 +155,31 @@ public class MeshGeneratorQuads : MonoBehaviour
 
 
 
-        Debug.Log($"#################      Create a {m_Mf.mesh.name}     #################");
         ConvertToCSV();
+        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);//constructeur
+        m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
+        m_WingedEdgeMesh.SubdivideCatmullClark();
+        m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
 
-        //m_WingedEdgeMesh.SubdivideCatmullClark2();
-        //m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
-        ////Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
-        //tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
-        //m_Mf.mesh = tmp;
+        Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
+        tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
+        m_Mf.mesh = tmp;
+        m_WingedEdgeMesh = new WingedEdgeMesh(tmp);
+        m_WingedEdgeMesh.ConvertToCSVFormat();
 
-        //m_WingedEdgeMesh.SubdivideCatmullClark();
-        //m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
-        //Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
-        //tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
-        //m_Mf.mesh = tmp;
 
+
+        ConvertToCSV();
+        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);//constructeur
+        m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
+        m_WingedEdgeMesh.SubdivideCatmullClark();
+        m_WingedEdgeMesh.ConvertToCSVFormat();//convertToCSV
+
+        Debug.Log("#################      WindgedEdgeMesh ConvertToFaceVertexMesh     #################");
+        tmp = m_WingedEdgeMesh.ConvertToFaceVertexMesh();//convertoToFaceVertex
+        m_Mf.mesh = tmp;
+        m_WingedEdgeMesh = new WingedEdgeMesh(tmp);
+        m_WingedEdgeMesh.ConvertToCSVFormat();
         //GUIUtility.systemCopyBuffer To Copy In Clipboard
 
 
