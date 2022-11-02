@@ -160,8 +160,8 @@ namespace WingedEdge
                         
                         if(face.edge==null) face.edge = wingedEdge;
 
-                        if (vertices[start].edge == null) vertices[start].edge = wingedEdge;
-                        if (vertices[end].edge == null) vertices[end].edge = wingedEdge;
+                        vertices[start].edge = wingedEdge;
+                        vertices[end].edge = wingedEdge;
 
                         dicoEdges.Add(key, wingedEdge);
                     }
@@ -238,17 +238,17 @@ namespace WingedEdge
 
             CatmullClarkCreateNewPoints(out facePoints, out edgePoints, out vertexPoints);
 
-            for (int i = 0; i < vertexPoints.Count; i++)
-                vertices[i].position = vertexPoints[i];
-
             for (int i = 0; i < edgePoints.Count; i++)
                 SplitEdge(edges[i], edgePoints[i]);
-
+           
+            List<WingedEdge> eef = vertices[0].GetAdjacentEdges();
+            Debug.Log(eef.Count);
             for (int i = 0; i < facePoints.Count; i++)
                 SplitFace(faces[i], facePoints[i]);
 
-            List<WingedEdge> eef = vertices[2].GetAdjacentEdges();
-            Debug.Log(eef.Count);
+            for (int i = 0; i < vertexPoints.Count; i++)
+                vertices[i].position = vertexPoints[i];
+           
         }
         public void CatmullClarkCreateNewPoints(out List<Vector3> facePoints, out List<Vector3> edgePoints, out List<Vector3> vertexPoints)
         {
@@ -321,17 +321,24 @@ namespace WingedEdge
             WingedEdge newEdge = new WingedEdge(edges.Count, newVertex, edge.endVertex, edge.rightFace, edge.leftFace, edge, edge, edge.endCWEdge, edge.endCCWEdge);
             edges.Add(newEdge);
 
+
             //update cw and ccw edge
             if (edge.endCWEdge.startCCWEdge == edge) edge.endCWEdge.startCCWEdge = newEdge;
             if (edge.endCCWEdge.startCWEdge == edge) edge.endCCWEdge.startCWEdge = newEdge;
             if (edge.endCWEdge.endCCWEdge == edge) edge.endCWEdge.endCCWEdge = newEdge;
             if (edge.endCCWEdge.endCWEdge == edge) edge.endCCWEdge.endCWEdge = newEdge;
 
+            edge.endVertex = newVertex;
+            edge.endVertex.edge = newEdge;
+            
             edge.endCCWEdge = newEdge;
             edge.endCWEdge = newEdge;
-            edge.endVertex = newVertex;
 
             newVertex.edge = newEdge;
+            newEdge.endVertex.edge = newEdge;
+
+
+
         }
         public void SplitFace(Face face, Vector3 splittingPoint)
         {
@@ -377,7 +384,7 @@ namespace WingedEdge
                 //Update for every split Face
 
                 //Update Vertex's and Face's edge
-                if (newVertex.edge == null) newVertex.edge = newEdge;
+                newVertex.edge = newEdge;
                 if (currentFace.edge == null) currentFace.edge = newEdge;
 
 

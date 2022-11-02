@@ -129,7 +129,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         ConvertToCSV();
         
         m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);           m_WingedEdgeMesh.ConvertToCSVFormat();
-
+        
         m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
 
         //##############        HalfEdge        ##############
@@ -142,25 +142,11 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //################          TD 2 CatmullClark        #######################
 
-        //Subdivide 1
-        m_WingedEdgeMesh.SubdivideCatmullClark();                   m_WingedEdgeMesh.ConvertToCSVFormat();
-
+        m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
+        m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
+        //m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
+        //m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
         m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
-
-        //Subdivide 2
-        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);           m_WingedEdgeMesh.ConvertToCSVFormat();
-
-        m_WingedEdgeMesh.SubdivideCatmullClark();                   m_WingedEdgeMesh.ConvertToCSVFormat();
-
-        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
-
-        //Subdivide 3
-        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);           m_WingedEdgeMesh.ConvertToCSVFormat();
-
-        m_WingedEdgeMesh.SubdivideCatmullClark();                   m_WingedEdgeMesh.ConvertToCSVFormat();
-
-        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
-
 
     }
     string ConvertToCSV(string separator = "\t")
