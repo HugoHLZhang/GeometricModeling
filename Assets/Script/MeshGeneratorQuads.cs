@@ -125,12 +125,26 @@ public class MeshGeneratorQuads : MonoBehaviour
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
         //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
+        //##############        Torus              ######################
+        m_Mf.mesh = CreateNormalizedGridXZ(20 * 6, 10,
+          (kX, kZ) => {
+              float theta = 6 * 2 * Mathf.PI * kX;
+              float r = 1;
+              float R = 3;
+              Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
+              float alpha = Mathf.PI * 2 * kZ;
+              Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up + Vector3.up * kX * 2 * r * 6;
+              return OOmega + OmegaP;
+          }
+        );
+
+
         ConvertToCSV();
         //##############        WingedEdge        ##############
-        
-        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);           m_WingedEdgeMesh.ConvertToCSVFormat();
-        
-        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
+
+        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh); m_WingedEdgeMesh.ConvertToCSVFormat();
+
+        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
 
         //##############        HalfEdge        ##############
 
@@ -144,8 +158,8 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
         m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
-        m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
-        m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
+        //m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
+        //m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
         m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
 
     }

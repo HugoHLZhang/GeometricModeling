@@ -164,15 +164,12 @@ namespace HalfEdge
         public string ConvertToCSVFormat(string separator = "\t") // Conversion vers format CSV
         {
             if (this == null) return "";
-            Debug.Log("#################      WindgedEdgeMesh ConvertTOCSVFormat     #################");
+            Debug.Log("#################      HalfEdgeMesh ConvertTOCSVFormat     #################");
 
             // Attributs
 
             string str = "";
 
-            List<Vertex> vertices = this.vertices;
-            List<HalfEdge> edges = this.edges;
-            List<Face> faces = this.faces;
             List<string> strings = new List<string>();
 
             // Récupération des vertices dans le fichier CSV
