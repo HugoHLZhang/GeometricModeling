@@ -554,7 +554,7 @@ namespace WingedEdge
                     Vector3 C = new Vector3();
                     for (int i = 0; i < faceVertex.Count; i++)
                     {
-                        Gizmos.DrawLine(faceVertex[i].position, faceVertex[(i + 1) % faceVertex.Count].position);
+                        Gizmos.DrawLine(transform.TransformPoint(faceVertex[i].position), transform.TransformPoint(faceVertex[(i + 1) % faceVertex.Count].position));
                         C += faceVertex[i].position;
                     }
 
