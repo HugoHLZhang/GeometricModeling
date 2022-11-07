@@ -56,10 +56,31 @@ namespace WingedEdge
         public List<Face> GetAdjacentFaces()
         {
             List<WingedEdge> adjacentEdges = GetAdjacentEdges();
+            List<WingedEdge> borderEdges = GetBorderEdges();
             List<Face> adjacentFaces = new List<Face>();
+            if(borderEdges.Count == 0)
+            {
+                foreach (var edge in adjacentEdges)
+                    adjacentFaces.Add(this == edge.startVertex ? edge.rightFace : edge.leftFace);
+            }
+            else
+            {
+                switch (adjacentEdges.Count)
+                {
+                    case 2:
+                        adjacentFaces.Add(borderEdges[0].rightFace);
+                        break;
+                    case 3:
+                        foreach (var edge in borderEdges)
+                            adjacentFaces.Add(edge.rightFace);
+                        break;
+                    default:
+                        foreach (var edge in adjacentEdges)
+                            if(!adjacentFaces.Contains(edge.rightFace)) adjacentFaces.Add(edge.rightFace);
+                        break;
 
-            foreach (var edge in adjacentEdges)
-                if(edge.leftFace != null) adjacentFaces.Add(this == edge.startVertex ? edge.rightFace : edge.leftFace);
+                }
+            }
 
             return adjacentFaces;
         }
@@ -455,15 +476,23 @@ namespace WingedEdge
             {
                 List<WingedEdge> adjacentEdges = vertice.GetAdjacentEdges();
                 List<Face> adjacentFaces = vertice.GetAdjacentFaces();
+                List<WingedEdge> borderEdges = vertice.GetBorderEdges();
 
                 List<int> edgesIndex = new List<int>();
                 List<int> facesIndex = new List<int>();
+                List<int> borderEdgesIndex = new List<int>();
 
                 foreach (var edge in adjacentEdges)
                     edgesIndex.Add(edge.index);
 
                 foreach (var face in adjacentFaces)
+                {
+                    Debug.Log(face.index);
                     if(face != null) facesIndex.Add(face.index);
+                }
+
+                foreach (var edge in borderEdges)
+                    borderEdgesIndex.Add(edge.index);
 
 
                 strings.Add(vertice.index + separator
@@ -472,12 +501,13 @@ namespace WingedEdge
                     + vertice.position.z.ToString("N03") + separator 
                     + vertice.edge.index + separator
                     + string.Join(" ", edgesIndex) + separator
-                    + string.Join(" ", facesIndex) 
+                    + string.Join(" ", facesIndex) + separator
+                    + string.Join(" ", borderEdgesIndex)
                     + separator + separator);
             }
 
             for (int i = vertices.Count; i < edges.Count; i++)
-                strings.Add(separator + separator + separator + separator + separator + separator);
+                strings.Add(separator + separator + separator + separator + separator + separator + separator);
 
             //Edges
             for (int i = 0; i < edges.Count; i++)
@@ -513,8 +543,8 @@ namespace WingedEdge
                     + string.Join(" ", vertexIndex) + separator + separator;
             }
 
-            string str = "Vertex" + separator + separator + separator + separator + separator + separator + "WingedEdges" + separator + separator + separator + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
-                + "Index" + separator + "Position" + separator + "Edge" + separator + "Edges Adj" + separator + "Face Adj" + separator + separator +
+            string str = "Vertex" + separator + separator + separator + separator + separator + separator + separator + "WingedEdges" + separator + separator + separator + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
+                + "Index" + separator + "Position" + separator + "Edge" + separator + "Edges Adj" + separator + "Face Adj" + separator + "Border Edges" + separator + separator +
                 "Index" + separator + "Start Vertex" + separator + "End Vertex" + separator + "Left Face" + separator + "Right Face" + separator + "Start CCW Edge" + separator + "Start CW Edge" + separator + "End CW Edge" + separator + "End CCW Edge" + separator + separator +
                 "Index" + separator + "Edge" + separator + "CW Edges" + separator + "CW Vertices\n"
                 + string.Join("\n", strings);
