@@ -21,120 +21,100 @@ public class MeshGeneratorQuads : MonoBehaviour
     [SerializeField] bool m_DisplayMeshVertices = true;
     [SerializeField] bool m_DisplayMeshFaces = true;
 
-    [SerializeField] AnimationCurve m_Profil;
+    [SerializeField] AnimationCurve m_Profile;
 
-    //Cours
-    /*
-    private void Start()
-    {
-        m_Mf = GetComponent<MeshFilter>();
-        //m_Mf.mesh = CreateStrip(7, new Vector3(4, 1, 3));
-        //m_Mf.mesh = CreateNormalizedGridXZ(7, 4);
-
-
-        //m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
-        m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
-
-        WingedEdgeMesh m = new WingedEdgeMesh(m_Mf.mesh);
-        //Cylindre
-        m_Mf.mesh = CreateNormalizedGridXZ(20, 40,
-            (kX, kZ) =>
-            {
-                float rho, theta, y;
-
-                // coordinates mapping de (kX,kZ) -> (rho,theta,y)
-                theta = kX * 2 * Mathf.PI;
-                y = kZ * 6;
-                //rho = 3 + .25f * Mathf.Sin(kZ*2*Mathf.PI*4) ;
-                rho = m_Profile.Evaluate(kZ) * 2;
-                return new Vector3(rho * Mathf.Cos(theta), y, rho * Mathf.Sin(theta));
-                //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
-            }
-        );
-    
-    
-        // Sphère
-        m_Mf.mesh = CreateNormalizedGridXZ(10, 5,
-            (kX, kZ) =>
-            {
-                float rho, theta, phi;
-
-                // coordinates mapping de (kX,kZ) -> (rho,theta,phi)
-                theta = kX * 2 * Mathf.PI;
-                phi = kZ * Mathf.PI;
-                rho = 2 + .55f * Mathf.Cos(kX * 2 * Mathf.PI * 8)
-                                * Mathf.Sin(kZ * 2 * Mathf.PI * 6);
-                //rho = 3 + .25f * Mathf.Sin(kZ*2*Mathf.PI*4) ;
-                //rho = m_Profile.Evaluate(kZ) * 2;
-
-                return new Vector3(rho * Mathf.Cos(theta) * Mathf.Sin(phi),
-                    rho * Mathf.Cos(phi),
-                    rho * Mathf.Sin(theta) * Mathf.Sin(phi));
-                //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
-            }
-        );
-    
-        Torus(Donut) Inner
-        m_mf.mesh = createnormalizedgridxz(20 * 6, 10,
-          (kx, kz) => {
-            float theta = 6 * 2 * mathf.pi * kx;
-            float r = 1;
-            float r = 3;
-            vector3 oomega = new vector3(r * mathf.cos(theta), 0, r * mathf.sin(theta));
-            float alpha = mathf.pi * 2 * (1 - kz);
-            vector3 omegap = r * mathf.cos(alpha) * oomega.normalized + r * mathf.sin(alpha) * vector3.up + vector3.up * kx * 2 * r * 6;
-            return oomega + omegap;
-            }
-        );
-
-        Torus(Donut) Outer
-        m_Mf.mesh = CreateNormalizedGridXZ(20*6, 10,
-          (kX, kZ) => {
-            float theta = 6 * 2 * Mathf.PI * kX;
-            float r = 1;
-            float R = 3;
-            Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
-            float alpha = Mathf.PI * 2 * kZ;
-            Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up + Vector3.up * kX * 2 * r * 6;
-            return OOmega + OmegaP;
-            }
-        );
-
-
-        GUIUtility.systemCopyBuffer = ConvertToCSV("\t");
-        Debug.Log(ConvertToCSV("\t"));
-    }
-
-    */
-
-
-    //Projet
     void Start()
     {
         m_Mf = GetComponent<MeshFilter>();
 
         //m_Mf.mesh = CreateStrip(7, new Vector3(4, 1, 3));
+        //m_Mf.mesh = CreateGridXZ(3, 4, new Vector3(4, 0, 4));
         //m_Mf.mesh = CreateNormalizedGridXZ(7, 4);
 
 
+        //##############        Cylindre             ######################
+
+        //m_Mf.mesh = CreateNormalizedGridXZ(20, 40,
+        //    (kX, kZ) =>
+        //    {
+        //        float rho, theta, y;
+
+        //        // coordinates mapping de (kX,kZ) -> (rho,theta,y)
+        //        theta = kX * 2 * Mathf.PI;
+        //        y = kZ * 6;
+        //        //rho = 3 + .25f * Mathf.Sin(kZ*2*Mathf.PI*4) ;
+        //        rho = m_Profile.Evaluate(kZ) * 2;
+        //        return new Vector3(rho * Mathf.Cos(theta), y, rho * Mathf.Sin(theta));
+        //        //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
+        //    }
+        //);
+
+        //##############        Sphere             ######################
+
+        //m_Mf.mesh = CreateNormalizedGridXZ(10, 5,
+        //    (kX, kZ) =>
+        //    {
+        //        float rho, theta, phi;
+
+        //        // coordinates mapping de (kX,kZ) -> (rho,theta,phi)
+        //        theta = kX * 2 * Mathf.PI;
+        //        phi = kZ * Mathf.PI;
+        //        //rho = 2 + .55f * Mathf.Cos(kX * 2 * Mathf.PI * 8)
+        //        //                * Mathf.Sin(kZ * 2 * Mathf.PI * 6);
+        //        //rho = 3 + .25f * Mathf.Sin(kZ * 2 * Mathf.PI * 4);
+        //        rho = m_Profile.Evaluate(kZ) * 2;
+
+        //        return new Vector3(rho * Mathf.Cos(theta) * Mathf.Sin(phi),
+        //            rho * Mathf.Cos(phi),
+        //            rho * Mathf.Sin(theta) * Mathf.Sin(phi));
+        //        //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
+        //    }
+        //);
+
+        //##############        Torus Inner             ######################
+
+        //m_Mf.mesh = CreateNormalizedGridXZ(20 * 6, 10,
+        //  (kx, kz) => {
+        //      float theta = 6 * 2 * Mathf.PI * kx;
+        //      float r = 1;
+        //      float R = 3;
+        //      Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
+        //      float alpha = Mathf.PI * 2 * (1 - kz);
+        //      Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up + Vector3.up * kx * 2 * r * 6;
+        //      return OOmega + OmegaP;
+        //  }
+        //);
+
+        //##############        Torus Outer             ######################
+        //m_Mf.mesh = CreateNormalizedGridXZ(20 * 6, 10,
+        //  (kX, kZ) => {
+        //      float theta = 6 * 2 * Mathf.PI * kX;
+        //      float r = 1;
+        //      float R = 3;
+        //      Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
+        //      float alpha = Mathf.PI * 2 * kZ;
+        //      Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up + Vector3.up * kX * 2 * r * 6;
+        //      return OOmega + OmegaP;
+        //  }
+        //);
+
         //##############        TD1 Objet        ##############
         m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
+        m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
         m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
-        //##############        WingedEdge        ##############
+
         ConvertToCSV();
-        
-        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);           m_WingedEdgeMesh.ConvertToCSVFormat();
-        
-        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
+        //##############        WingedEdge        ##############
+
+        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh); m_WingedEdgeMesh.ConvertToCSVFormat();
+
+        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
 
         //##############        HalfEdge        ##############
 
-        //m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);             m_HalfEdgeMesh.ConvertToCSVFormat();
+        //m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh); m_HalfEdgeMesh.ConvertToCSVFormat();
 
         //m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
 
@@ -142,11 +122,11 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //################          TD 2 CatmullClark        #######################
 
-        m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
         //m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
         //m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
         //m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
-        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
+        //m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
+        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh(); ConvertToCSV();
 
     }
     string ConvertToCSV(string separator = "\t")

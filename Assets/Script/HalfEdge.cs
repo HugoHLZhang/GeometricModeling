@@ -8,21 +8,22 @@ namespace HalfEdge
         public int index;
         public Vertex sourceVertex;
         public Face face;
-        public HalfEdge prevEdge { set; get; }
-        public HalfEdge nextEdge { set; get; }
-        public HalfEdge twinEdge { set; get; }
-        public HalfEdge(int index, Vertex sourceVertex, Face face)
+        public HalfEdge prevEdge;
+        public HalfEdge nextEdge;
+        public HalfEdge twinEdge;
+        public HalfEdge(int index, Vertex sourceVertex, Face face, HalfEdge twinEdge = null)
         {
             this.index = index;
             this.sourceVertex = sourceVertex;
             this.face = face;
+            this.twinEdge = twinEdge;
         }
     }
     public class Vertex
     {
         public int index;
         public Vector3 position;
-        public HalfEdge outgoingEdge { set; get; }
+        public HalfEdge outgoingEdge;
         public Vertex(int index, Vector3 position)
         {
             this.index = index;
@@ -32,10 +33,34 @@ namespace HalfEdge
     public class Face
     {
         public int index;
-        public HalfEdge edge { set; get; }
+        public HalfEdge edge;
         public Face(int index)
         {
             this.index = index;
+        }
+
+        public List<HalfEdge> GetFaceEdges()
+        {
+            List<HalfEdge> faceEdges = new List<HalfEdge>();
+            HalfEdge halfEdge = edge;
+
+            //Edge CW
+            while (!faceEdges.Contains(halfEdge))
+            {
+                faceEdges.Add(halfEdge);
+                halfEdge = halfEdge.nextEdge;
+            }
+            return faceEdges;
+        }
+        public List<Vertex> GetFaceVertex()
+        {
+            List<HalfEdge> faceEdges = GetFaceEdges();
+            List<Vertex> faceVertices = new List<Vertex>();
+            //Vertice CW
+            foreach (var edge in faceEdges)
+                faceVertices.Add(edge.sourceVertex);
+
+            return faceVertices;
         }
     }
     public class HalfEdgeMesh
@@ -45,6 +70,8 @@ namespace HalfEdge
         public List<Face> faces;
         public HalfEdgeMesh(Mesh mesh) // Constructeur prenant un mesh Vertex-Face en paramètre //magic happens
         {
+            int nEdges = 4;
+
             vertices = new List<Vertex>();
             edges = new List<HalfEdge>();
             faces = new List<Face>();
@@ -58,49 +85,65 @@ namespace HalfEdge
 
             int index = 0;
 
+            Dictionary<ulong, HalfEdge> dicoEdges = new Dictionary<ulong, HalfEdge>();
+            HalfEdge halfEdge;
+
             // Ajout des faces dans la liste Face faces
 
             for (int i = 0; i < m_quads.Length / 4; i++)
             {
-                faces.Add(new Face(i));
-                int[] arr_index = new int[]
-                {
-                    m_quads[4 * i],
-                    m_quads[4 * i + 1],
-                    m_quads[4 * i + 2],
-                    m_quads[4 * i + 3]
-                };
+                Face face = new Face(faces.Count);
+                faces.Add(face);
+                //quad's vertices index
+                int[] quad_index = new int[nEdges];
+                for (int j = 0; j < 4; j++)
+                    quad_index[j] = m_quads[nEdges * i + j];
 
                 // Ajout des edges dans la liste Winged Edge edges
-
-                for (int j = 0; j < arr_index.Length; j++)
+                HalfEdge prevEdge = null;
+                for (int j = 0; j < quad_index.Length; j++)
                 {
-                    edges.Add(new HalfEdge(index, vertices[arr_index[j]], faces[i]));
-                    if (faces[i].edge == null) faces[i].edge = edges[index];
-                    if (vertices[arr_index[j]].outgoingEdge == null) vertices[arr_index[j]].outgoingEdge = edges[index];
-                    index++;
+                    int start = quad_index[j];
+                    int end = quad_index[(j + 1) % nEdges];
+
+                    ulong key = (ulong)Mathf.Min(start, end) + ((ulong)Mathf.Max(start, end) << 32);
+                    HalfEdge newEdge = null;
+                    //Create newEdge if not in dico
+                    if (dicoEdges.TryGetValue(key, out halfEdge))
+                    {
+                        newEdge = new HalfEdge(edges.Count, vertices[start], face, halfEdge);
+                        edges.Add(newEdge);
+                        halfEdge.twinEdge = newEdge;
+
+
+                    }
+                    else //Update the edge found in dico
+                    {
+                        
+                        newEdge = new HalfEdge(edges.Count, vertices[start], face);
+                        edges.Add(newEdge);
+
+                        dicoEdges.Add(key, newEdge);
+                        
+                    }
+                    if (face.edge == null) face.edge = newEdge;
+                    if (vertices[start].outgoingEdge == null) vertices[start].outgoingEdge = newEdge;
+                    if (prevEdge != null)
+                    {
+                        newEdge.prevEdge = prevEdge;
+                        prevEdge.nextEdge = newEdge;
+                    }
+                    if (j == 3)
+                    {
+                        newEdge.nextEdge = edges[edges.Count - 4];
+                        edges[edges.Count - 4].prevEdge = newEdge;
+                    }
+                    
+                    prevEdge = newEdge;
+
                 }
             }
 
-            index = 0;
-            for (int i = 0; i < m_quads.Length / 4; i++)
-            {
-                int[] arr_index = new int[]
-                {
-                    m_quads[4 * i],
-                    m_quads[4 * i + 1],
-                    m_quads[4 * i + 2],
-                    m_quads[4 * i + 3]
-                };
-                for (int j = 0; j < arr_index.Length; j++)
-                {
-                    edges[index].twinEdge = edges.Find(edge => edge.sourceVertex.index == arr_index[(j + 1) % 4] && edge.face != edges[index].face);
-                    edges[index].nextEdge = edges.Find(edge => edge.sourceVertex.index == arr_index[(j + 1) % 4] && edge.face == edges[index].face);
-                    edges[index].prevEdge = edges.Find(edge => edge.sourceVertex.index == arr_index[(j - 1 + 4) % 4] && edge.face == edges[index].face);
-
-                    index++;
-                }
-            }
 
             //string p = "";
             //foreach (var x in vertices)
@@ -164,15 +207,12 @@ namespace HalfEdge
         public string ConvertToCSVFormat(string separator = "\t") // Conversion vers format CSV
         {
             if (this == null) return "";
-            Debug.Log("#################      WindgedEdgeMesh ConvertTOCSVFormat     #################");
+            Debug.Log("#################      HalfEdgeMesh ConvertTOCSVFormat     #################");
 
             // Attributs
 
             string str = "";
 
-            List<Vertex> vertices = this.vertices;
-            List<HalfEdge> edges = this.edges;
-            List<Face> faces = this.faces;
             List<string> strings = new List<string>();
 
             // Récupération des vertices dans le fichier CSV
@@ -207,9 +247,23 @@ namespace HalfEdge
 
             for (int i = 0; i < faces.Count; i++)
             {
+                List<HalfEdge> faceEdges = faces[i].GetFaceEdges();
+                List<Vertex> faceVertex = faces[i].GetFaceVertex();
+
+                List<int> edgesIndex = new List<int>();
+                List<int> vertexIndex = new List<int>();
+                //Edge CW
+                foreach (var edge in faceEdges)
+                    edgesIndex.Add(edge.index);
+                //Vertice CW
+                foreach (var vertice in faceVertex)
+                    vertexIndex.Add(vertice.index);
+
+
                 strings[i] += faces[i].index + separator
-                   + faces[i].edge.index + separator
-                   + separator;
+                    + faces[i].edge.index + separator
+                    + string.Join(" ", edgesIndex) + separator
+                    + string.Join(" ", vertexIndex) + separator + separator;
             }
 
             // Mise en page du fichier CSV
@@ -217,7 +271,7 @@ namespace HalfEdge
             str = "Vertex" + separator + separator + separator + separator + "HalfEges" + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
                 + "Index" + separator + "Position" + separator + "outgoingEdge" + separator + separator +
                 "Index" + separator + "sourceVertex" + separator + "Face" + separator + "prevEdge" + separator + "nextEdge" + separator + "twinEdge" + separator + separator +
-                "Index" + separator + "Edge\n"
+                "Index" + separator + "Edge" + separator + "CW Edges" + separator + "CW Vertices\n"
                 + string.Join("\n", strings);
             Debug.Log(str);
             return str;
