@@ -86,7 +86,7 @@ namespace HalfEdge
             int index = 0;
 
             Dictionary<ulong, HalfEdge> dicoEdges = new Dictionary<ulong, HalfEdge>();
-           
+            HalfEdge halfEdge;
 
             // Ajout des faces dans la liste Face faces
 
@@ -100,59 +100,50 @@ namespace HalfEdge
                     quad_index[j] = m_quads[nEdges * i + j];
 
                 // Ajout des edges dans la liste Winged Edge edges
-
+                HalfEdge prevEdge = null;
                 for (int j = 0; j < quad_index.Length; j++)
                 {
                     int start = quad_index[j];
                     int end = quad_index[(j + 1) % nEdges];
 
                     ulong key = (ulong)Mathf.Min(start, end) + ((ulong)Mathf.Max(start, end) << 32);
-                    HalfEdge halfEdge = null;
+                    HalfEdge newEdge = null;
                     //Create newEdge if not in dico
                     if (dicoEdges.TryGetValue(key, out halfEdge))
-
                     {
-                        HalfEdge twinEdge = new HalfEdge(edges.Count, vertices[start], face, halfEdge);
-                        edges.Add(twinEdge);
-                        halfEdge.twinEdge = twinEdge;
-                        Debug.Log(halfEdge.twinEdge);
+                        newEdge = new HalfEdge(edges.Count, vertices[start], face, halfEdge);
+                        edges.Add(newEdge);
+                        halfEdge.twinEdge = newEdge;
 
-                        if (vertices[start].outgoingEdge == null) vertices[start].outgoingEdge = twinEdge;
 
-                        if (halfEdge.face == null) halfEdge.face = face;
-                        if (face.edge == null) face.edge = twinEdge;
                     }
                     else //Update the edge found in dico
                     {
                         
-                        HalfEdge newEdge = new HalfEdge(edges.Count, vertices[start], face);
+                        newEdge = new HalfEdge(edges.Count, vertices[start], face);
                         edges.Add(newEdge);
-
-                        if (face.edge == null) face.edge = newEdge;
-                        if (vertices[start].outgoingEdge == null) vertices[start].outgoingEdge = newEdge;
 
                         dicoEdges.Add(key, newEdge);
                         
                     }
+                    if (face.edge == null) face.edge = newEdge;
+                    if (vertices[start].outgoingEdge == null) vertices[start].outgoingEdge = newEdge;
+                    if (prevEdge != null)
+                    {
+                        newEdge.prevEdge = prevEdge;
+                        prevEdge.nextEdge = newEdge;
+                    }
+                    if (j == 3)
+                    {
+                        newEdge.nextEdge = edges[edges.Count - 4];
+                        edges[edges.Count - 4].prevEdge = newEdge;
+                    }
+                    
+                    prevEdge = newEdge;
+
                 }
             }
 
-            index = 0;
-            for (int i = 0; i < m_quads.Length / 4; i++)
-            {
-                //quad's vertices index
-                int[] quad_index = new int[nEdges];
-                for (int j = 0; j < 4; j++)
-                    quad_index[j] = m_quads[nEdges * i + j];
-
-                for (int j = 0; j < quad_index.Length; j++)
-                {
-                    edges[index].nextEdge = edges.Find(edge => edge.sourceVertex.index == quad_index[(j + 1) % 4] && edge.face == edges[index].face);
-                    edges[index].prevEdge = edges.Find(edge => edge.sourceVertex.index == quad_index[(j - 1 + 4) % 4] && edge.face == edges[index].face);
-
-                    index++;
-                }
-            }
 
             //string p = "";
             //foreach (var x in vertices)
