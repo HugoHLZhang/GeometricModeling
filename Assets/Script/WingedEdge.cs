@@ -242,8 +242,44 @@ namespace WingedEdge
                         edge.startCWEdge = prev;
                         edge.endCCWEdge = next;
 
-                        edge.startCCWEdge = prev;
-                        edge.endCWEdge = next;
+
+                        if(edge.startVertex == prev.startVertex)
+                        {
+
+                            edge.startCCWEdge = prev.startCCWEdge;
+                            if(edge.startVertex == prev.startCCWEdge.endVertex)
+                            {
+                                prev.startCCWEdge.endCWEdge = edge;
+                            }
+                            else
+                            {
+                                prev.startCCWEdge.startCWEdge = edge;
+                            }
+                            
+                        }
+
+                        if(edge.startVertex == prev.endVertex)
+                        {
+                            edge.startCCWEdge = prev;
+                        }
+
+                        if(edge.endVertex == next.startVertex)
+                        {
+                            edge.endCWEdge = next;
+                        }
+
+                        if(edge.endVertex == next.endVertex)
+                        {
+                            edge.endCWEdge = next.endCWEdge;
+                            if(edge.endVertex == next.endCWEdge.startVertex)
+                            {
+                                next.endCWEdge.startCCWEdge = edge;
+                            }
+                            else
+                            {
+                                next.endCWEdge.endCCWEdge = edge;
+                            }
+                        }
 
                         //edge.startCCWEdge = prev;
                         //edge.endCWEdge = next;
@@ -253,9 +289,33 @@ namespace WingedEdge
                     {
                         //repasse sur la edge                         
 
+                        if(edge.endVertex == prev.startVertex)
+                        {
+                            edge.endCWEdge = prev;
+                        }
+                        if(edge.startVertex == next.endVertex)
+                        {
+                            edge.startCCWEdge = next;
+                        }
 
-                        edge.startCCWEdge = next;
-                        edge.endCWEdge = prev;
+                        if(edge.startVertex == next.startVertex)
+                        {
+                            edge.startCCWEdge = next;
+
+                            next.startCCWEdge = edge.startCWEdge;
+                        }
+
+                        if(edge.endVertex == prev.endVertex)
+                        {
+                            edge.endCWEdge = prev;
+
+                            prev.endCWEdge = edge.endCCWEdge;
+                            
+                        }
+
+                        //BIG UPDATE WHEN 
+
+
                         //if(prev.endCWEdge == prev.endCCWEdge && prev.leftFace == null)
                         //{
                         //    if (prev.endVertex == edge.endVertex)
