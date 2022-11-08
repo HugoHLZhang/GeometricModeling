@@ -15,8 +15,11 @@ public class MeshGeneratorQuads : MonoBehaviour
     [SerializeField] private float m_y;
     [SerializeField] private float m_z;
     [SerializeField] private int m_nSectors;
+    [SerializeField] private int m_nSegmentsX;
+    [SerializeField] private int m_nSegmentsY;
 
-    [SerializeField] bool m_DisplayMeshInfo = true;
+    [SerializeField] bool m_DisplayMeshWires = true;
+    [SerializeField] bool m_DisplayMeshInfos = true;
     [SerializeField] bool m_DisplayMeshEdges = true;
     [SerializeField] bool m_DisplayMeshVertices = true;
     [SerializeField] bool m_DisplayMeshFaces = true;
@@ -27,9 +30,9 @@ public class MeshGeneratorQuads : MonoBehaviour
     {
         m_Mf = GetComponent<MeshFilter>();
 
-        //m_Mf.mesh = CreateStrip(7, new Vector3(4, 1, 3));
-        //m_Mf.mesh = CreateGridXZ(3, 4, new Vector3(4, 0, 4));
-        //m_Mf.mesh = CreateNormalizedGridXZ(7, 4);
+        //m_Mf.mesh = CreateStrip(m_nSegmentsX, new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateGridXZ(m_nSegmentsX, m_nSegmentsY, new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateNormalizedGridXZ(m_nSegmentsX, m_nSegmentsY);
 
 
         //##############        Cylindre             ######################
@@ -86,48 +89,53 @@ public class MeshGeneratorQuads : MonoBehaviour
         //);
 
         //##############        Torus Outer             ######################
-        //m_Mf.mesh = CreateNormalizedGridXZ(20 * 6, 10,
-        //  (kX, kZ) => {
-        //      float theta = 6 * 2 * Mathf.PI * kX;
-        //      float r = 1;
-        //      float R = 3;
-        //      Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
-        //      float alpha = Mathf.PI * 2 * kZ;
-        //      Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up + Vector3.up * kX * 2 * r * 6;
-        //      return OOmega + OmegaP;
-        //  }
-        //);
+        m_Mf.mesh = CreateNormalizedGridXZ(40, 4,
+          (kX, kZ) =>
+          {
+              float theta = 4 * 2 * Mathf.PI * kX;
+              float r = 1;
+              float R = 2;
+              Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
+              float alpha = Mathf.PI * 2 * kZ + 2;
+              Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up + Vector3.up * kX * 2 * r * 4;
+              return OOmega + OmegaP;
+          }
+        );
 
         //##############        TD1 Objet        ##############
-        m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
-        m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
-        m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
+        //m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
         //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
-
-        ConvertToCSV();
         //##############        WingedEdge        ##############
 
-        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh); m_WingedEdgeMesh.ConvertToCSVFormat();
-
-        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
+        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
+        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh(); 
 
         //##############        HalfEdge        ##############
 
-        //m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh); m_HalfEdgeMesh.ConvertToCSVFormat();
-
-        //m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();     ConvertToCSV();
-
-        //GUIUtility.systemCopyBuffer To Copy In Clipboard
+        //m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);
+        //m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
 
         //################          TD 2 CatmullClark        #######################
 
-        //m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
-        //m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
-        //m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
-        ////m_WingedEdgeMesh.SubdivideCatmullClark(); m_WingedEdgeMesh.ConvertToCSVFormat();
-        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh(); ConvertToCSV();
 
+        m_WingedEdgeMesh.SubdivideCatmullClark();
+        m_WingedEdgeMesh.SubdivideCatmullClark();
+        m_WingedEdgeMesh.SubdivideCatmullClark();
+        //m_WingedEdgeMesh.SubdivideCatmullClark();
+
+        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
+
+        //################          ConvertToCSVFormat        #######################
+
+        //FaceVertexMEsh
+        //GUIUtility.systemCopyBuffer = ConvertToCSV();
+        //HalfEdgeMesh
+        //GUIUtility.systemCopyBuffer = m_HalfEdgeMesh.ConvertToCSVFormat();
+        //WingedEdgeMesh
+        //GUIUtility.systemCopyBuffer = m_WingedEdgeMesh.ConvertToCSVFormat();
     }
     string ConvertToCSV(string separator = "\t")
     {
@@ -398,11 +406,6 @@ public class MeshGeneratorQuads : MonoBehaviour
         }
         vertices[nSectors * 2] = Vector3.zero;
 
-        for (int i = 0; i < nSectors * 2 + 1; i++)
-        {
-            Debug.Log(i + " : " + vertices[i] + "\n");
-        }
-
         index = 0;
         //Quads
         for (int i = 0; i < nSectors * 2; i += 2)
@@ -412,10 +415,7 @@ public class MeshGeneratorQuads : MonoBehaviour
             quads[index++] = i % (nSectors * 2);
             quads[index++] = (nSectors * 2 + i - 1) % (nSectors * 2);
         }
-        for (int i = 0; i < nSectors * 4; i++)
-        {
-            Debug.Log(i + " : " + quads[i] + "\n");
-        }
+
         mesh.vertices = vertices;
         mesh.SetIndices(quads, MeshTopology.Quads, 0);
         return mesh;
@@ -479,7 +479,9 @@ public class MeshGeneratorQuads : MonoBehaviour
             HalfEdgeMesh halfEdgeMesh = m_HalfEdgeMesh;
             halfEdgeMesh.DrawGizmos(m_DisplayMeshVertices, m_DisplayMeshEdges, m_DisplayMeshFaces, transform);
         }
-        
+
+       
+
         Vector3[] vertices = mesh.vertices;
         int[] quads = mesh.GetIndices(0);
 
@@ -487,7 +489,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         GUIStyle style = new GUIStyle();
         style.fontSize = 12;
 
-        if (m_DisplayMeshInfo)
+        if (m_DisplayMeshInfos)
         {
             style.normal.textColor = Color.red;
             for (int i = 0; i < vertices.Length; i++)
@@ -508,12 +510,15 @@ public class MeshGeneratorQuads : MonoBehaviour
             Vector3 pt3 = transform.TransformPoint(vertices[index3]);
             Vector3 pt4 = transform.TransformPoint(vertices[index4]);
 
+        if (m_DisplayMeshWires)
+        {
             Gizmos.DrawLine(pt1, pt2);
             Gizmos.DrawLine(pt2, pt3);
             Gizmos.DrawLine(pt3, pt4);
             Gizmos.DrawLine(pt4, pt1);
 
-            if (m_DisplayMeshInfo)
+        }
+            if (m_DisplayMeshInfos)
             {
                 style.normal.textColor = Color.green;
                 string str = string.Format("{0}:{1},{2},{3},{4}", i, index1, index2, index3, index4);
