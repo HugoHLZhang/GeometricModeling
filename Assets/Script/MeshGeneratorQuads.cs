@@ -141,9 +141,9 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //##############        TD1 Objet        ##############
         m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
-        //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
+        m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
+        m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
+        m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
         //##############        WingedEdge        ##############
 
@@ -158,9 +158,9 @@ public class MeshGeneratorQuads : MonoBehaviour
         //################          TD 2 CatmullClark        #######################
 
 
-        //m_WingedEdgeMesh.SubdivideCatmullClark();
-        //m_WingedEdgeMesh.SubdivideCatmullClark();
-        //m_WingedEdgeMesh.SubdivideCatmullClark();
+        m_WingedEdgeMesh.SubdivideCatmullClark();
+        m_WingedEdgeMesh.SubdivideCatmullClark();
+        m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
 
         m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
