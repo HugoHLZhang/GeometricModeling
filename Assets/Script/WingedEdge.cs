@@ -27,6 +27,7 @@ namespace WingedEdge
             this.endCCWEdge = endCCWEdge;
         }
 
+
     }
     public class Vertex
     {
@@ -233,33 +234,6 @@ namespace WingedEdge
                 edge.endCWEdge = borderEdges.Find(e => e.startVertex == edge.endVertex);
             }
 
-
-            //Complete WingedEdge (CW and CCW Edges)
-            //foreach (var face in faces)
-            //{
-            //    //get all edges of the current face
-            //    List<WingedEdge> face_edges = edges.FindAll(edge => edge.rightFace == face || edge.leftFace == face);
-
-            //    foreach (var edge in face_edges)
-            //    {
-            //        if (edge.rightFace == face)
-            //        {
-            //            edge.startCWEdge = edges.Find(e => (e.endVertex == edge.startVertex && e.rightFace == face) || (e.startVertex == edge.startVertex && e.leftFace == face));
-            //            edge.endCCWEdge = edges.Find(e => (e.startVertex == edge.endVertex && e.rightFace == face) || (e.endVertex == edge.endVertex && e.leftFace == face));
-            //        }
-            //        if (edge.leftFace == face)
-            //        {
-            //            edge.startCCWEdge = edges.Find(e => (e.startVertex == edge.startVertex && e.rightFace == face) || (e.endVertex == edge.startVertex && e.leftFace == face));
-            //            edge.endCWEdge = edges.Find(e => (e.endVertex == edge.endVertex && e.rightFace == face) || (e.startVertex == edge.endVertex && e.leftFace == face));
-            //        }
-            //        if (edge.leftFace == null)
-            //        {
-            //            edge.startCCWEdge = edges.Find(e => e.endVertex == edge.startVertex && e.leftFace == null);
-            //            edge.endCWEdge = edges.Find(e => e.startVertex == edge.endVertex && e.leftFace == null);
-            //        }
-
-            //    }
-            //}
 
         }
         public Mesh ConvertToFaceVertexMesh()

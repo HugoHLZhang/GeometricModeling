@@ -761,9 +761,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db4151bc9a0874d4b9c720dfcde75286, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_x: 5
-  m_y: 5
-  m_z: 5
+  m_x: 1000
+  m_y: 1000
+  m_z: 1000
   m_nSectors: 10
   m_nSegmentsX: 0
   m_nSegmentsY: 0
@@ -947,6 +947,10 @@ PrefabInstance:
     - target: {fileID: 7980105900505294573, guid: 608169e901f43594ba69ddfb57797ed7, type: 3}
       propertyPath: m_Name
       value: BoxSubdivide1Outer_Gfx
+      objectReference: {fileID: 0}
+    - target: {fileID: 7980105900505294573, guid: 608169e901f43594ba69ddfb57797ed7, type: 3}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8037389440558211726, guid: 608169e901f43594ba69ddfb57797ed7, type: 3}
       propertyPath: m_Mesh
