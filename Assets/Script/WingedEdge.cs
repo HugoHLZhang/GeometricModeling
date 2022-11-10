@@ -30,10 +30,10 @@ namespace WingedEdge
             this.endCWEdge = endCWEdge;
             this.endCCWEdge = endCCWEdge;
         }
-        public WingedEdge BorderEndCW()
+        public WingedEdge FindBorderEndCW()
         {
             //Find Last endCCW with no leftFace
-            if (this.endCCWEdge == null) return null;
+            if (this.leftFace != null) return null;
             WingedEdge endCCW = this.endCCWEdge;
             
             while(endCCW.leftFace != null)
@@ -41,10 +41,10 @@ namespace WingedEdge
             
             return endCCW;
         }
-        public WingedEdge BorderStartCCW()
+        public WingedEdge FindBorderStartCCW()
         {
             //Find Last startCW with no leftFace
-            if (this.startCWEdge == null) return null;
+            if (this.leftFace != null) return null;
             WingedEdge startCW = this.startCWEdge;
 
             while(startCW.leftFace != null)
@@ -202,10 +202,10 @@ namespace WingedEdge
                         wingedEdge.leftFace = face;
 
                     //update vertex edge
-                    if (vertices[start].edge == null) vertices[start].edge = wingedEdge;
-                    if (vertices[end].edge == null) vertices[end].edge = wingedEdge;
+                    if (vertices[start].edge == null)   vertices[start].edge = wingedEdge;
+                    if (vertices[end].edge == null)     vertices[end].edge = wingedEdge;
                     //update face edge
-                    if (face.edge == null) face.edge = wingedEdge;
+                    if (face.edge == null)              face.edge = wingedEdge;
 
                     faceEdges.Add(wingedEdge);
                     
@@ -213,19 +213,15 @@ namespace WingedEdge
                 //Update CCW and CW Edge
                 for (int j = 0; j < faceEdges.Count; j++)
                 {
-                    WingedEdge edge = faceEdges[j];
-                    WingedEdge next = faceEdges[(j + 1) % faceEdges.Count];
-                    WingedEdge prev = faceEdges[(j - 1 + faceEdges.Count) % faceEdges.Count];
-
-                    if (edge.rightFace == face)
+                    if (faceEdges[j].rightFace == face)
                     {
-                        edge.startCWEdge = prev;
-                        edge.endCCWEdge = next;
+                        faceEdges[j].startCWEdge    = faceEdges[(j - 1 + faceEdges.Count) % faceEdges.Count];
+                        faceEdges[j].endCCWEdge     = faceEdges[(j + 1) % faceEdges.Count];
                     }
-                    if (edge.leftFace == face)
-                    {                   
-                        edge.endCWEdge = prev;
-                        edge.startCCWEdge = next;
+                    if (faceEdges[j].leftFace == face)
+                    {
+                        faceEdges[j].endCWEdge      = faceEdges[(j - 1 + faceEdges.Count) % faceEdges.Count];
+                        faceEdges[j].startCCWEdge   = faceEdges[(j + 1) % faceEdges.Count];
                     }
                 }
 
@@ -235,8 +231,8 @@ namespace WingedEdge
             {
                 if(edges[i].leftFace == null)
                 {
-                    edges[i].startCCWEdge = edges[i].BorderStartCCW();
-                    edges[i].endCWEdge = edges[i].BorderEndCW();
+                    edges[i].startCCWEdge = edges[i].FindBorderStartCCW();
+                    edges[i].endCWEdge = edges[i].FindBorderEndCW();
                 }
             }
 
