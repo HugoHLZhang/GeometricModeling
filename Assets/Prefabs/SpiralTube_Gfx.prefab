@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 8636967990248904306}
   - component: {fileID: 7179026538486084843}
   - component: {fileID: 5853476190676525766}
+  - component: {fileID: 2429029371853549406}
   m_Layer: 0
   m_Name: SpiralTube_Gfx
   m_TagString: Untagged
@@ -90,7 +91,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9136583030683458714}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: ce1701a2bec45ad41af312d926be7fac, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 4
@@ -104,10 +105,26 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 9136583030683458714}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: ce1701a2bec45ad41af312d926be7fac, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 4
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 4300000, guid: adfacc5d96da21041a261fc93a21b6d4, type: 2}
+--- !u!54 &2429029371853549406
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9136583030683458714}
+  serializedVersion: 2
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0

@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2653407980112622383}
   - component: {fileID: 2653407980112622382}
   - component: {fileID: 2653407980112622290}
+  - component: {fileID: 7653521793370545640}
   m_Layer: 0
   m_Name: BoxSubdivide3Outer_Gfx
   m_TagString: Untagged
@@ -90,7 +91,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2653407980112622377}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: ce1701a2bec45ad41af312d926be7fac, type: 2}
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 4
@@ -113,3 +114,15 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &7653521793370545640
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2653407980112622377}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c627ab34218a8c04aba542e4ecf04f84, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
