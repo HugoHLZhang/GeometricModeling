@@ -114,18 +114,18 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //##############        Helix Inner             ######################
 
-        m_Mf.mesh = CreateNormalizedGridXZ(40, 4,
-          (kx, kz) =>
-          {
-              float theta = 4 * 2 * Mathf.PI * kx;
-              float r = 1;
-              float R = 2;
-              Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
-              float alpha = Mathf.PI * 2 * (1 - kz) + 2;
-              Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up + Vector3.up * kx * 2 * r * 4;
-              return OOmega + OmegaP;
-          }
-        );
+        //m_Mf.mesh = CreateNormalizedGridXZ(40, 4,
+        //  (kx, kz) =>
+        //  {
+        //      float theta = 4 * 2 * Mathf.PI * kx;
+        //      float r = 1;
+        //      float R = 2;
+        //      Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
+        //      float alpha = Mathf.PI * 2 * (1 - kz) + 2;
+        //      Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up + Vector3.up * kx * 2 * r * 4;
+        //      return OOmega + OmegaP;
+        //  }
+        //);
 
         //##############        Helix Outer             ######################
         //m_Mf.mesh = CreateNormalizedGridXZ(40, 4,
@@ -209,7 +209,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         //##############        TD1 Objet        ##############
         //m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
+        m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
         //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
         //##############        WingedEdge        ##############
