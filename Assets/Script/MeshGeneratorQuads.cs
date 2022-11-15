@@ -34,27 +34,27 @@ public class MeshGeneratorQuads : MonoBehaviour
     {
         m_Mf = GetComponent<MeshFilter>();
 
-        //m_Mf.mesh = CreateStrip(m_nSegmentsX, new Vector3(m_x, m_y, m_z));
+        m_Mf.mesh = CreateStrip(m_nSegmentsX, new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateGridXZ(m_nSegmentsX, m_nSegmentsY, new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateNormalizedGridXZ(m_nSegmentsX, m_nSegmentsY);
 
 
         //##############        Cylindre             ######################
 
-        //m_Mf.mesh = CreateNormalizedGridXZ(20, 40,
-        //   (kX, kZ) =>
-        //   {
-        //       float rho, theta, y;
-        //       // coordinates mapping de (kX,kZ) -> (rho,theta,y)
-        //       theta = kX * 2 * Mathf.PI;
-        //       y = kZ * 6;
-        //       //rho = 3 + .25f * Mathf.Sin(kZ*2*Mathf.PI*4) ;
-        //       rho = m_Profile.Evaluate(kZ) * 2;
+        m_Mf.mesh = CreateNormalizedGridXZ(20, 40,
+           (kX, kZ) =>
+           {
+               float rho, theta, y;
+               // coordinates mapping de (kX,kZ) -> (rho,theta,y)
+               theta = kX * 2 * Mathf.PI;
+               y = kZ * 6;
+               //rho = 3 + .25f * Mathf.Sin(kZ*2*Mathf.PI*4) ;
+               rho = m_Profile.Evaluate(kZ) * 2;
 
-        //       return new Vector3(rho * Mathf.Cos(theta), y, rho * Mathf.Sin(theta));
-        //       //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
-        //   }
-        //   );
+               return new Vector3(rho * Mathf.Cos(theta), y, rho * Mathf.Sin(theta));
+               //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
+           }
+           );
 
 
         //##############        Sphere             ######################
@@ -208,13 +208,15 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //##############        TD1 Objet        ##############
         //m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
-        m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
+        m_Mf.mesh = CreateCage(new Vector3(m_x, m_y, m_z));
+        m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
         //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
         //##############        WingedEdge        ##############
 
         m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
+        GUIUtility.systemCopyBuffer = m_WingedEdgeMesh.ConvertToCSVFormat();
         //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh(); 
 
         //##############        HalfEdge        ##############
@@ -225,9 +227,9 @@ public class MeshGeneratorQuads : MonoBehaviour
         //################          TD 2 CatmullClark        #######################
 
 
-        m_WingedEdgeMesh.SubdivideCatmullClark();
-        m_WingedEdgeMesh.SubdivideCatmullClark();
-        m_WingedEdgeMesh.SubdivideCatmullClark();
+        //m_WingedEdgeMesh.SubdivideCatmullClark();
+        //m_WingedEdgeMesh.SubdivideCatmullClark();
+        //m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
 
         m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
@@ -239,7 +241,6 @@ public class MeshGeneratorQuads : MonoBehaviour
         //HalfEdgeMesh
         //GUIUtility.systemCopyBuffer = m_HalfEdgeMesh.ConvertToCSVFormat();
         //WingedEdgeMesh
-        GUIUtility.systemCopyBuffer = m_WingedEdgeMesh.ConvertToCSVFormat();
     }
     string ConvertToCSV(string separator = "\t")
     {
@@ -387,8 +388,6 @@ public class MeshGeneratorQuads : MonoBehaviour
         int index = 0;
         for (int i = 0; i < nSegments.y + 1; i++)
         {
-            float kZ = (float)i / nSegments.y;
-
             for (int j = 0; j < nSegments.x + 1; j++)
             {
                 float3 k =  float3(j,i,0) / nSegments;
@@ -576,6 +575,74 @@ public class MeshGeneratorQuads : MonoBehaviour
         quads[9] = 7;
         quads[10] = 8;
         quads[11] = 4;
+
+        for (int i = 0; i < quads.Length; i++)
+        {
+            quads[i]--;
+        }
+        mesh.vertices = vertices;
+        mesh.SetIndices(quads, MeshTopology.Quads, 0);
+
+        return mesh;
+    }
+
+    Mesh CreateCage(Vector3 halfSize)
+    {
+        Mesh mesh = new Mesh();
+        mesh.name = "cage";
+
+        Vector3[] vertices = new Vector3[8];
+        int[] quads = new int[8 * 4];
+
+        //vertices
+        vertices[0] = new Vector3(-halfSize.x, halfSize.y, halfSize.z);
+        vertices[1] = new Vector3(halfSize.x, halfSize.y, halfSize.z);
+        vertices[2] = new Vector3(halfSize.x, halfSize.y, -halfSize.z);
+        vertices[3] = new Vector3(-halfSize.x, halfSize.y, -halfSize.z);
+
+        vertices[4] = new Vector3(-halfSize.x, -halfSize.y, halfSize.z);
+        vertices[5] = new Vector3(halfSize.x, -halfSize.y, halfSize.z);
+        vertices[6] = new Vector3(halfSize.x, -halfSize.y, -halfSize.z);
+        vertices[7] = new Vector3(-halfSize.x, -halfSize.y, -halfSize.z);
+
+        //quads
+
+        quads[0] = 1;
+        quads[1] = 2;
+        quads[2] = 3;
+        quads[3] = 4;
+        quads[16] = 4;
+        quads[17] = 3;
+        quads[18] = 2;
+        quads[19] = 1;
+
+        quads[4] = 1;
+        quads[5] = 5;
+        quads[6] = 6;
+        quads[7] = 2;
+        quads[20] = 2;
+        quads[21] = 6;
+        quads[22] = 5;
+        quads[23] = 1;
+
+        quads[8] = 3;
+        quads[9] = 7;
+        quads[10] = 8;
+        quads[11] = 4;
+        quads[24] = 4;
+        quads[25] = 8;
+        quads[26] = 7;
+        quads[27] = 3;
+
+        quads[12] = 4;
+        quads[13] = 8;
+        quads[14] = 5;
+        quads[15] = 1;
+        quads[28] = 1;
+        quads[29] = 5;
+        quads[30] = 8;
+        quads[31] = 4;
+
 
         for (int i = 0; i < quads.Length; i++)
         {

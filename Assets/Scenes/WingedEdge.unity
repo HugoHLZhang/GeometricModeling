@@ -633,12 +633,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: db4151bc9a0874d4b9c720dfcde75286, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_x: 5
-  m_y: 5
-  m_z: 5
+  m_x: 3
+  m_y: 4
+  m_z: 10
   m_nSectors: 10
-  m_nSegmentsX: 0
-  m_nSegmentsY: 0
+  m_nSegmentsX: 10
+  m_nSegmentsY: 10
   m_DisplayMeshWires: 1
   m_DisplayMeshInfos: 0
   m_DisplayMeshEdges: 0

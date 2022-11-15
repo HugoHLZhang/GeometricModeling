@@ -33,24 +33,22 @@ namespace WingedEdge
         public WingedEdge FindBorderEndCW()
         {
             //Find Last endCCW with no leftFace
-            if (this.leftFace != null) return null;
-            WingedEdge endCCW = this.endCCWEdge;
+            WingedEdge endCW = this.endCCWEdge;
             
-            while(endCCW.leftFace != null)
-                endCCW = endCCW.endVertex == this.endVertex ? endCCW.endCCWEdge : endCCW.startCCWEdge;
+            while(endCW.leftFace != null)
+                endCW = endCW.endVertex == this.endVertex ? endCW.endCCWEdge : endCW.startCCWEdge;
             
-            return endCCW;
+            return endCW;
         }
         public WingedEdge FindBorderStartCCW()
         {
             //Find Last startCW with no leftFace
-            if (this.leftFace != null) return null;
-            WingedEdge startCW = this.startCWEdge;
+            WingedEdge startCCW = this.startCWEdge;
 
-            while(startCW.leftFace != null)
-                startCW = startCW.startVertex == this.startVertex ? startCW.startCCWEdge : startCW.endCWEdge;
+            while(startCCW.leftFace != null)
+                startCCW = startCCW.startVertex == this.startVertex ? startCCW.startCCWEdge : startCCW.endCWEdge;
             
-            return startCW;
+            return startCCW;
         }
     }
     public class Vertex
