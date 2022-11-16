@@ -209,7 +209,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         //##############        TD1 Objet        ##############
         //m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
         m_Mf.mesh = CreateCage(new Vector3(m_x, m_y, m_z));
-        m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
         //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
@@ -592,7 +592,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         mesh.name = "cage";
 
         Vector3[] vertices = new Vector3[8];
-        int[] quads = new int[8 * 4];
+        int[] quads = new int[4 * 4];
 
         //vertices
         vertices[0] = new Vector3(-halfSize.x, halfSize.y, halfSize.z);
@@ -611,37 +611,22 @@ public class MeshGeneratorQuads : MonoBehaviour
         quads[1] = 2;
         quads[2] = 3;
         quads[3] = 4;
-        quads[16] = 4;
-        quads[17] = 3;
-        quads[18] = 2;
-        quads[19] = 1;
+       
 
         quads[4] = 1;
         quads[5] = 5;
         quads[6] = 6;
         quads[7] = 2;
-        quads[20] = 2;
-        quads[21] = 6;
-        quads[22] = 5;
-        quads[23] = 1;
 
         quads[8] = 3;
         quads[9] = 7;
         quads[10] = 8;
         quads[11] = 4;
-        quads[24] = 4;
-        quads[25] = 8;
-        quads[26] = 7;
-        quads[27] = 3;
 
         quads[12] = 4;
         quads[13] = 8;
         quads[14] = 5;
         quads[15] = 1;
-        quads[28] = 1;
-        quads[29] = 5;
-        quads[30] = 8;
-        quads[31] = 4;
 
 
         for (int i = 0; i < quads.Length; i++)

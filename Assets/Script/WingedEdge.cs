@@ -65,11 +65,13 @@ namespace WingedEdge
         {
             List<WingedEdge> adjacentEdges = new List<WingedEdge>();
             WingedEdge wingedEdge = edge;
-            while (!adjacentEdges.Contains(wingedEdge))
+
+            do
             {
                 adjacentEdges.Add(wingedEdge);
                 wingedEdge = (this == wingedEdge.startVertex) ? wingedEdge.startCWEdge : wingedEdge.endCWEdge;
-            }
+            } while (wingedEdge != edge);
+            
             return adjacentEdges;
         }
         public List<Face> GetAdjacentFaces()
@@ -116,11 +118,12 @@ namespace WingedEdge
             WingedEdge wingedEdge = edge;
 
             //Edge CW
-            while (!faceEdges.Contains(wingedEdge))
+            do
             {
                 faceEdges.Add(wingedEdge);
                 wingedEdge = (this == wingedEdge.rightFace) ? wingedEdge.endCCWEdge : wingedEdge.startCCWEdge;
-            }
+            } while (wingedEdge != edge);
+
             return faceEdges;
         }
         public List<Vertex> GetFaceVertex()
