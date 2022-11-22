@@ -34,11 +34,18 @@ namespace HalfEdge
         {
             List<HalfEdge> adjacentEdges = new List<HalfEdge>();
             HalfEdge halfEdge = outgoingEdge;
+            //tant que qu'on atteint pas une bordure.
+            adjacentEdges.Add(halfEdge);
+            if (halfEdge.twinEdge != null) adjacentEdges.Add(halfEdge.twinEdge);
+
             do
             {
+                halfEdge = halfEdge.prevEdge.twinEdge != null ? halfEdge.prevEdge.twinEdge : halfEdge.prevEdge ;
+                if (halfEdge == outgoingEdge) break;
                 adjacentEdges.Add(halfEdge);
-                halfEdge = halfEdge.prevEdge.twinEdge;
-            } while (halfEdge != outgoingEdge);
+                if (halfEdge.twinEdge != null) adjacentEdges.Add(halfEdge.twinEdge);
+
+            } while (halfEdge.twinEdge != null);
 
 
             return adjacentEdges;
