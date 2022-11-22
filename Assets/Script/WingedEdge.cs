@@ -355,22 +355,22 @@ namespace WingedEdge
             edges.Add(newEdge);
 
             //update cw and ccw edge
-            if (edge.endCWEdge.startCCWEdge == edge)    edge.endCWEdge.startCCWEdge = newEdge;
-            if (edge.endCCWEdge.startCWEdge == edge)    edge.endCCWEdge.startCWEdge = newEdge;
-            if (edge.endCWEdge.endCCWEdge == edge)      edge.endCWEdge.endCCWEdge   = newEdge;
-            if (edge.endCCWEdge.endCWEdge == edge)      edge.endCCWEdge.endCWEdge   = newEdge;
+            if (edge.endCWEdge.startCCWEdge == edge) edge.endCWEdge.startCCWEdge = newEdge;
+            if (edge.endCCWEdge.startCWEdge == edge) edge.endCCWEdge.startCWEdge = newEdge;
+            if (edge.endCWEdge.endCCWEdge == edge) edge.endCWEdge.endCCWEdge = newEdge;
+            if (edge.endCCWEdge.endCWEdge == edge) edge.endCCWEdge.endCWEdge = newEdge;
 
             //update edge endVertex
-            edge.endVertex      = newVertex;
+            edge.endVertex = newVertex;
             edge.endVertex.edge = newEdge;
             
             //update edge endCCW and CW
-            edge.endCCWEdge     = newEdge;
-            edge.endCWEdge      = newEdge;
+            edge.endCCWEdge = newEdge;
+            edge.endCWEdge = newEdge;
 
             //update newVertex and newEdge
-            newVertex.edge          = newEdge;
-            newEdge.endVertex.edge  = newEdge;
+            newVertex.edge = newEdge;
+            newEdge.endVertex.edge = newEdge;
         }
         public void SplitFace(Face face, Vector3 splittingPoint)
         {
@@ -384,8 +384,17 @@ namespace WingedEdge
             List<WingedEdge> faceEdges= face.GetFaceEdges();
             List<Vertex> faceVertex = face.GetFaceVertex();
 
-            //Reorder Lists
-            //Last to first : easier to split face once reordered to update recycleFace and create newFace  
+            /* Reorder Lists
+             * Exemple :
+             * faceVertex = { 0, 8, 1, 9, 2, 10, 3, 11} (8 vertices)
+             * faceEdge = { 0, 12, 1, 13, 2, 14, 3, 15} (8 edges)
+             * vertice 0 is a old vertice and vertice 8 and 11 will be used to create newEdges and recycle/create face.
+             * So I reorder everything to have this :
+             * faceVertex = { 11, 0, 8, 1, 9, 2, 10, 3} (8 vertices)
+             * faceEdge = { 15, 0, 12, 1, 13, 2, 14, 3} (8 edges)
+             * Now I can connect the newVertex = 24 to V11 to create the newEdge. And create the face.
+            */
+
             if (face.edge.rightFace == face)
             {
                 faceVertex.Insert(0, faceVertex[faceVertex.Count-1]);
