@@ -35,16 +35,8 @@ namespace HalfEdge
             List<HalfEdge> adjacentEdges = new List<HalfEdge>();
             HalfEdge halfEdge = outgoingEdge;
             adjacentEdges.Add(halfEdge);
-            //adjacentEdges.Add(halfEdge);
-            //while (halfEdge.twinEdge != null || halfEdge != outgoingEdge){
-            //    halfEdge = halfEdge.nextEdge.twinEdge != null ? halfEdge.nextEdge.twinEdge : halfEdge.nextEdge;
-            //    adjacentEdges.Add(halfEdge);
-
-            //}
-
-
-
-            //tant que 
+            adjacentEdges.Add(halfEdge.prevEdge);
+            adjacentEdges.Add(halfEdge.twinEdge.nextEdge);
 
             return adjacentEdges;
         }
@@ -87,6 +79,7 @@ namespace HalfEdge
         public List<Vertex> vertices;
         public List<HalfEdge> edges;
         public List<Face> faces;
+
         public HalfEdgeMesh(Mesh mesh) // Constructeur prenant un mesh Vertex-Face en paramètre //magic happens
         {
             int nEdges = 4;
@@ -197,6 +190,104 @@ namespace HalfEdge
             faceVertexMesh.SetIndices(m_quads, MeshTopology.Quads, 0);
 
             return faceVertexMesh;
+        }
+
+        public void SubdivideCatmullClark()
+        {
+            Debug.Log("#################                    WindgedEdgeMesh SubdivideCatmullClark                   #################");
+            List<Vector3> facePoints;
+            List<Vector3> edgePoints;
+            List<Vector3> vertexPoints;
+
+            CatmullClarkCreateNewPoints(out facePoints, out edgePoints, out vertexPoints);
+
+            string p = "";
+            for (int i = 0; i < edgePoints.Count; i++)
+            {
+                p += "e" + i + " = " + edgePoints[i]+"\n";
+            }
+            Debug.Log(p);
+            //for (int i = 0; i < edgePoints.Count; i++)
+            //    SplitEdge(edges[i], edgePoints[i]);
+
+            //for (int i = 0; i < facePoints.Count; i++)
+            //    SplitFace(faces[i], facePoints[i]);
+
+            //for (int i = 0; i < vertexPoints.Count; i++)
+            //    vertices[i].position = vertexPoints[i];
+        }
+
+        public void CatmullClarkCreateNewPoints(out List<Vector3> facePoints, out List<Vector3> edgePoints, out List<Vector3> vertexPoints)
+        {
+            facePoints = new List<Vector3>();
+            edgePoints = new List<Vector3>();
+            vertexPoints = new List<Vector3>();
+            List<Vector3> midPoints = new List<Vector3>();
+
+            //facePoints
+            for (int i = 0; i < faces.Count; i++)
+            {
+                List<Vertex> faceVertex = faces[i].GetFaceVertex();
+                Vector3 C = new Vector3();
+
+                for (int j = 0; j < faceVertex.Count; j++)
+                    C += faceVertex[j].position;
+
+                facePoints.Add(C / 4f);
+
+                List<HalfEdge> faceEdges = faces[i].GetFaceEdges();
+
+                for (int j = 0; j < faceEdges.Count; j++)
+                {
+                    midPoints.Add((edges[i].sourceVertex.position + edges[i].nextEdge.sourceVertex.position) / 2f);
+
+                }
+
+            }
+
+            //Mid Points and Edge Points
+            for (int i = 0; i < edges.Count; i++)
+                edgePoints.Add(edges[i].twinEdge != null ? (edges[i].sourceVertex.position + edges[i].twinEdge.sourceVertex.position + facePoints[edges[i].face.index] + facePoints[edges[i].twinEdge.face.index]) / 4f : midPoints[i]);
+
+
+            //Vertex Points
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                Vector3 Q = new Vector3();
+                Vector3 R = new Vector3();
+
+                List<HalfEdge> adjacentEdges = vertices[i].GetAdjacentEdges();
+                //List<Face> adjacentFaces = vertices[i].GetAdjacentFaces();
+
+
+
+
+                //toutes les vertices possédant autant d’edges incidentes que de faces adjacentes.
+                //if (adjacentEdges.Count == adjacentFaces.Count)
+                //{
+                //    float n = adjacentFaces.Count;
+                //    for (int j = 0; j < adjacentEdges.Count; j++)
+                //    {
+                //        Q += (vertices[i] == adjacentEdges[j].startVertex) ? facePoints[adjacentEdges[j].rightFace.index] : facePoints[adjacentEdges[j].leftFace.index];
+                //        R += midPoints[adjacentEdges[j].index];
+                //    }
+                //    Q = Q / n;
+                //    R = R / n;
+
+                //    vertexPoints.Add((Q / n) + (2f * R / n) + ((n - 3f) * vertices[i].position / n));
+                //}
+                ////pour les vertices en bordure
+                //else
+                //{
+                //    List<WingedEdge> borderEdges = vertices[i].GetBorderEdges();
+                //    Vector3 tot_m = new Vector3();
+
+                //    for (int j = 0; j < borderEdges.Count; j++)
+                //        tot_m += midPoints[borderEdges[j].index];
+
+                //    vertexPoints.Add((tot_m + vertices[i].position) / 3f);
+                //}
+            }
         }
 
         public string ConvertToCSVFormat(string separator = "\t") // Conversion vers format CSV
