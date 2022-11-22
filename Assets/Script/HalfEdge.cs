@@ -119,12 +119,12 @@ namespace HalfEdge
                     }
                     else //Update the edge found in dico
                     {
-                        
+
                         newEdge = new HalfEdge(edges.Count, vertices[start], face);
                         edges.Add(newEdge);
 
                         dicoEdges.Add(key, newEdge);
-                        
+
                     }
                     if (face.edge == null) face.edge = newEdge;
                     if (vertices[start].outgoingEdge == null) vertices[start].outgoingEdge = newEdge;
@@ -138,7 +138,7 @@ namespace HalfEdge
                         newEdge.nextEdge = edges[edges.Count - 4];
                         edges[edges.Count - 4].prevEdge = newEdge;
                     }
-                    
+
                     prevEdge = newEdge;
 
                 }
@@ -171,7 +171,7 @@ namespace HalfEdge
             // Attributs 
 
             Mesh faceVertexMesh = new Mesh();
-            
+
             List<Vertex> vertices = this.vertices;
             List<HalfEdge> edges = this.edges;
             List<Face> faces = this.faces;
@@ -240,7 +240,7 @@ namespace HalfEdge
                     + edges[i].face.index + separator
                     + edges[i].prevEdge.index + separator
                     + edges[i].nextEdge.index + separator
-                    + $"{( edges[i].twinEdge != null ? $"{edges[i].twinEdge.index}" : "NULL" )}" + separator + separator;
+                    + $"{(edges[i].twinEdge != null ? $"{edges[i].twinEdge.index}" : "NULL")}" + separator + separator;
             }
 
             // Récupération des faces dans le fichier CSV
@@ -293,7 +293,7 @@ namespace HalfEdge
 
             // Affichage des vertices
 
-            
+
             style.normal.textColor = Color.red;
             for (int i = 0; i < vertices.Count; i++)
             {
@@ -303,11 +303,11 @@ namespace HalfEdge
                     Handles.Label(worldPos, "V" + vertices[i].index, style);
                 }
             }
-            
+
 
             // Affichage des faces
 
-            
+
             for (int i = 0; i < faces.Count; i++)
             {
                 //int index1 = m_quads[4 * i];
@@ -339,13 +339,13 @@ namespace HalfEdge
 
                     Handles.Label(transform.TransformPoint(pos), "e" + faceEdges[j].index, style);
                 }
-                
+
             }
-            
+
 
             // Affichage des edges
 
-            
+
             //style.normal.textColor = Color.blue;
             //foreach (var edge in edges)
             //{
