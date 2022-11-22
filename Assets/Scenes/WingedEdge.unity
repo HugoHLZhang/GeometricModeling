@@ -738,7 +738,7 @@ MonoBehaviour:
   m_DisplayMeshWires: 1
   m_DisplayMeshInfos: 0
   m_DisplayMeshEdges: 0
-  m_DisplayMeshVertices: 0
+  m_DisplayMeshVertices: 1
   m_DisplayMeshFaces: 0
   m_Profile:
     serializedVersion: 2

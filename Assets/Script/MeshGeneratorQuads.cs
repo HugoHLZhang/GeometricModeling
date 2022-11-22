@@ -211,7 +211,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         //m_Mf.mesh = CreateCage(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
-        m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
+        //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
         //##############        WingedEdge        ##############
 
