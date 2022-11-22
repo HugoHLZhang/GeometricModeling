@@ -29,6 +29,25 @@ namespace HalfEdge
             this.index = index;
             this.position = position;
         }
+
+        public List<HalfEdge> GetAdjacentEdges()
+        {
+            List<HalfEdge> adjacentEdges = new List<HalfEdge>();
+            HalfEdge halfEdge = outgoingEdge;
+            adjacentEdges.Add(halfEdge);
+            //adjacentEdges.Add(halfEdge);
+            //while (halfEdge.twinEdge != null || halfEdge != outgoingEdge){
+            //    halfEdge = halfEdge.nextEdge.twinEdge != null ? halfEdge.nextEdge.twinEdge : halfEdge.nextEdge;
+            //    adjacentEdges.Add(halfEdge);
+
+            //}
+
+
+
+            //tant que 
+
+            return adjacentEdges;
+        }
     }
     public class Face
     {
@@ -45,11 +64,11 @@ namespace HalfEdge
             HalfEdge halfEdge = edge;
 
             //Edge CW
-            while (!faceEdges.Contains(halfEdge))
+            do
             {
                 faceEdges.Add(halfEdge);
                 halfEdge = halfEdge.nextEdge;
-            }
+            } while (halfEdge != edge);
             return faceEdges;
         }
         public List<Vertex> GetFaceVertex()
@@ -119,12 +138,12 @@ namespace HalfEdge
                     }
                     else //Update the edge found in dico
                     {
-                        
+
                         newEdge = new HalfEdge(edges.Count, vertices[start], face);
                         edges.Add(newEdge);
 
                         dicoEdges.Add(key, newEdge);
-                        
+
                     }
                     if (face.edge == null) face.edge = newEdge;
                     if (vertices[start].outgoingEdge == null) vertices[start].outgoingEdge = newEdge;
@@ -138,32 +157,12 @@ namespace HalfEdge
                         newEdge.nextEdge = edges[edges.Count - 4];
                         edges[edges.Count - 4].prevEdge = newEdge;
                     }
-                    
+
                     prevEdge = newEdge;
 
                 }
             }
 
-
-            //string p = "";
-            //foreach (var x in vertices)
-            //{
-            //    p += $"V{x.index} : e{x.outgoingEdge.index} \n";
-            //}
-            //Debug.Log(p);
-
-            //p = "";
-            //foreach (var x in faces)
-            //{
-            //    p += $"F{x.index} : e{x.edge.index}\n";
-            //}
-            //Debug.Log(p);
-            //p = "";
-            //foreach (var x in edges)
-            //{
-            //    p += $"e{x.index} : V{x.sourceVertex.index} | F{x.face.index} " + $"| Prev e{(x.prevEdge!=null?$"{x.prevEdge.index}":"NULL")} | Next e{(x.nextEdge!=null?$"{x.nextEdge.index}":"NULL")} | Twin e{(x.twinEdge!=null? $"{x.twinEdge.index}": "NULL")} \n";
-            //}
-            //Debug.Log(p);
         }
 
         public Mesh ConvertToFaceVertexMesh() // Conversion vers un mesh FaceVertex
@@ -171,10 +170,7 @@ namespace HalfEdge
             // Attributs 
 
             Mesh faceVertexMesh = new Mesh();
-            
-            List<Vertex> vertices = this.vertices;
-            List<HalfEdge> edges = this.edges;
-            List<Face> faces = this.faces;
+
 
             Vector3[] m_vertices = new Vector3[vertices.Count];
             int[] m_quads = new int[faces.Count * 4];
@@ -192,10 +188,9 @@ namespace HalfEdge
 
             for (int i = 0; i < faces.Count; i++)
             {
-                m_quads[index] = edges[index++].sourceVertex.index;
-                m_quads[index] = edges[index++].sourceVertex.index;
-                m_quads[index] = edges[index++].sourceVertex.index;
-                m_quads[index] = edges[index++].sourceVertex.index;
+                List<Vertex> faceVertex = faces[i].GetFaceVertex();
+                for (int j = 0; j < faceVertex.Count; j++)
+                    m_quads[index++] = faceVertex[j].index;
             }
 
             faceVertexMesh.vertices = m_vertices;
@@ -219,17 +214,21 @@ namespace HalfEdge
 
             for (int i = 0; i < vertices.Count; i++)
             {
+
+                List<HalfEdge> adjacentEdges = vertices[i].GetAdjacentEdges();
+                List<int> edgesIndex = new List<int>();
+                for (int j = 0; j < adjacentEdges.Count; j++)
+                    edgesIndex.Add(adjacentEdges[j].index);
                 Vector3 pos = vertices[i].position;
                 strings.Add(vertices[i].index + separator
-                    + pos.x.ToString("N03") + " "
-                    + pos.y.ToString("N03") + " "
-                    + pos.z.ToString("N03") + separator
-                    + vertices[i].outgoingEdge.index
-                    + separator + separator);
+                    + pos.x.ToString("N03") + " " + pos.y.ToString("N03") + " " + pos.z.ToString("N03") + separator
+                    + vertices[i].outgoingEdge.index + separator
+                    + string.Join(" ", edgesIndex) + separator
+                    + separator);
             }
 
             for (int i = vertices.Count; i < edges.Count; i++)
-                strings.Add(separator + separator + separator + separator);
+                strings.Add(separator + separator + separator + separator + separator);
 
             // Récupération des edges dans le fichier CSV
 
@@ -240,7 +239,7 @@ namespace HalfEdge
                     + edges[i].face.index + separator
                     + edges[i].prevEdge.index + separator
                     + edges[i].nextEdge.index + separator
-                    + $"{( edges[i].twinEdge != null ? $"{edges[i].twinEdge.index}" : "NULL" )}" + separator + separator;
+                    + $"{(edges[i].twinEdge != null ? $"{edges[i].twinEdge.index}" : "NULL")}" + separator + separator;
             }
 
             // Récupération des faces dans le fichier CSV
@@ -268,10 +267,10 @@ namespace HalfEdge
 
             // Mise en page du fichier CSV
 
-            str = "Vertex" + separator + separator + separator + separator + "HalfEges" + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
-                + "Index" + separator + "Position" + separator + "outgoingEdge" + separator + separator +
+            str = "Vertex" + separator + separator + separator + separator + separator + "HalfEges" + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
+                + "Index" + separator + "Position" + separator + "outgoingEdge" + separator + "adjacentEdge" + separator + separator +
                 "Index" + separator + "sourceVertex" + separator + "Face" + separator + "prevEdge" + separator + "nextEdge" + separator + "twinEdge" + separator + separator +
-                "Index" + separator + "Edge" + separator + "CW Edges" + separator + "CW Vertices\n"
+                "Index" + separator + "Edge" + separator + "CW Face Edges" + separator + "CW Face Vertices\n"
                 + string.Join("\n", strings);
             Debug.Log(str);
             return str;
@@ -281,12 +280,6 @@ namespace HalfEdge
         {
 
             // Attributs
-
-            List<Vertex> vertices = this.vertices;
-            List<HalfEdge> edges = this.edges;
-            List<Face> faces = this.faces;
-
-            List<Vector3> facePoints = new List<Vector3>();
 
             Mesh mesh = this.ConvertToFaceVertexMesh();
 
@@ -299,52 +292,71 @@ namespace HalfEdge
 
             // Affichage des vertices
 
-            if (drawVertices)
+
+            style.normal.textColor = Color.red;
+            for (int i = 0; i < vertices.Count; i++)
             {
-                style.normal.textColor = Color.red;
-                for (int i = 0; i < vertices.Count; i++)
+                Vector3 worldPos = transform.TransformPoint(vertices[i].position);
+                if (drawVertices)
                 {
-                    Vector3 worldPos = transform.TransformPoint(vertices[i].position);
                     Handles.Label(worldPos, "V" + vertices[i].index, style);
                 }
             }
 
+
             // Affichage des faces
 
-            if (drawFaces)
+
+            for (int i = 0; i < faces.Count; i++)
             {
+                //int index1 = m_quads[4 * i];
+                //int index2 = m_quads[4 * i + 1];
+                //int index3 = m_quads[4 * i + 2];
+                //int index4 = m_quads[4 * i + 3];
+
+                //Vector3 pt1 = transform.TransformPoint(vertices[index1].position);
+                //Vector3 pt2 = transform.TransformPoint(vertices[index2].position);
+                //Vector3 pt3 = transform.TransformPoint(vertices[index3].position);
+                //Vector3 pt4 = transform.TransformPoint(vertices[index4].position);
                 style.normal.textColor = Color.magenta;
-                for (int i = 0; i < faces.Count; i++)
+                List<Vertex> faceVertex = faces[i].GetFaceVertex();
+                Vector3 C = new Vector3();
+                for (int j = 0; j < faceVertex.Count; j++)
                 {
-                    int index1 = m_quads[4 * i];
-                    int index2 = m_quads[4 * i + 1];
-                    int index3 = m_quads[4 * i + 2];
-                    int index4 = m_quads[4 * i + 3];
-
-                    Vector3 pt1 = transform.TransformPoint(vertices[index1].position);
-                    Vector3 pt2 = transform.TransformPoint(vertices[index2].position);
-                    Vector3 pt3 = transform.TransformPoint(vertices[index3].position);
-                    Vector3 pt4 = transform.TransformPoint(vertices[index4].position);
-
-                    Handles.Label((pt1 + pt2 + pt3 + pt4) / 4.0f, "F" + faces[i].index, style);
-                    facePoints.Add((pt1 + pt2 + pt3 + pt4) / 4.0f);
+                    Gizmos.DrawLine(transform.TransformPoint(faceVertex[j].position), transform.TransformPoint(faceVertex[(j + 1) % faceVertex.Count].position));
+                    C += faceVertex[j].position;
                 }
+                Handles.Label(transform.TransformPoint(C / 4f), "F" + faces[i].index, style);
+                List<HalfEdge> faceEdges = faces[i].GetFaceEdges();
+
+                for (int j = 0; j < faceEdges.Count; j++)
+                {
+                    style.normal.textColor = Color.blue;
+                    Vector3 start = faceEdges[j].sourceVertex.position;
+                    Vector3 end = faceEdges[j].nextEdge.sourceVertex.position;
+                    Vector3 pos = Vector3.Lerp(Vector3.Lerp(start, end, 0.5f), C / 4f, 0.1f);
+
+                    Handles.Label(transform.TransformPoint(pos), "e" + faceEdges[j].index, style);
+                }
+
             }
+
 
             // Affichage des edges
 
-            if (drawEdges)
-            {
-                style.normal.textColor = Color.blue;
-                foreach (var edge in edges)
-                {
-                    Vector3 center = facePoints[edge.face.index];
-                    Vector3 start = edge.sourceVertex.position;
-                    Vector3 end = edge.nextEdge.sourceVertex.position;
-                    Vector3 pos = Vector3.Lerp(Vector3.Lerp(start, end, 0.5f), center, 0.2f);
-                    Handles.Label(transform.TransformPoint(pos), "e" + edge.index, style);
-                }
-            }
+
+            //style.normal.textColor = Color.blue;
+            //foreach (var edge in edges)
+            //{
+            //    Vector3 center = facePoints[edge.face.index];
+            //    Vector3 start = edge.sourceVertex.position;
+            //    Vector3 end = edge.nextEdge.sourceVertex.position;
+            //    Vector3 pos = Vector3.Lerp(Vector3.Lerp(start, end, 0.5f), center, 0.2f);
+            //    if (drawEdges)
+            //    {
+            //        Handles.Label(transform.TransformPoint(pos), "e" + edge.index, style);
+            //    }
+            //}
         }
     }
 }
