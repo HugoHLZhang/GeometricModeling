@@ -207,22 +207,23 @@ public class MeshGeneratorQuads : MonoBehaviour
         */
 
         //##############        TD1 Objet        ##############
-        //m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
-        m_Mf.mesh = CreateCage(new Vector3(m_x, m_y, m_z));
+        m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateCage(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
         //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
         //##############        WingedEdge        ##############
 
-        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
-        GUIUtility.systemCopyBuffer = m_WingedEdgeMesh.ConvertToCSVFormat();
-        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh(); 
+        //m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
+        //GUIUtility.systemCopyBuffer = m_WingedEdgeMesh.ConvertToCSVFormat();
+        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
 
         //##############        HalfEdge        ##############
 
-        //m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);
-        //m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
+        m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);
+        GUIUtility.systemCopyBuffer = m_HalfEdgeMesh.ConvertToCSVFormat();
+        m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
 
         //################          TD 2 CatmullClark        #######################
 
@@ -232,14 +233,13 @@ public class MeshGeneratorQuads : MonoBehaviour
         //m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
 
-        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
+        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
 
         //################          ConvertToCSVFormat        #######################
 
         //FaceVertexMEsh
         //GUIUtility.systemCopyBuffer = ConvertToCSV();
         //HalfEdgeMesh
-        //GUIUtility.systemCopyBuffer = m_HalfEdgeMesh.ConvertToCSVFormat();
         //WingedEdgeMesh
     }
     string ConvertToCSV(string separator = "\t")
@@ -478,7 +478,6 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         return mesh;
     }
-
     Mesh CreateBox_SIMD(float3 halfSize)
     {
         Mesh mesh = new Mesh();

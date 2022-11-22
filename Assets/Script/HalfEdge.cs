@@ -45,11 +45,11 @@ namespace HalfEdge
             HalfEdge halfEdge = edge;
 
             //Edge CW
-            while (!faceEdges.Contains(halfEdge))
+            do
             {
                 faceEdges.Add(halfEdge);
                 halfEdge = halfEdge.nextEdge;
-            }
+            } while (halfEdge != edge);
             return faceEdges;
         }
         public List<Vertex> GetFaceVertex()
@@ -282,12 +282,6 @@ namespace HalfEdge
 
             // Attributs
 
-            List<Vertex> vertices = this.vertices;
-            List<HalfEdge> edges = this.edges;
-            List<Face> faces = this.faces;
-
-            List<Vector3> facePoints = new List<Vector3>();
-
             Mesh mesh = this.ConvertToFaceVertexMesh();
 
             Vector3[] m_vertices = mesh.vertices;
@@ -299,52 +293,71 @@ namespace HalfEdge
 
             // Affichage des vertices
 
-            if (drawVertices)
+            
+            style.normal.textColor = Color.red;
+            for (int i = 0; i < vertices.Count; i++)
             {
-                style.normal.textColor = Color.red;
-                for (int i = 0; i < vertices.Count; i++)
+                Vector3 worldPos = transform.TransformPoint(vertices[i].position);
+                if (drawVertices)
                 {
-                    Vector3 worldPos = transform.TransformPoint(vertices[i].position);
                     Handles.Label(worldPos, "V" + vertices[i].index, style);
                 }
             }
+            
 
             // Affichage des faces
 
-            if (drawFaces)
+            
+            for (int i = 0; i < faces.Count; i++)
             {
+                //int index1 = m_quads[4 * i];
+                //int index2 = m_quads[4 * i + 1];
+                //int index3 = m_quads[4 * i + 2];
+                //int index4 = m_quads[4 * i + 3];
+
+                //Vector3 pt1 = transform.TransformPoint(vertices[index1].position);
+                //Vector3 pt2 = transform.TransformPoint(vertices[index2].position);
+                //Vector3 pt3 = transform.TransformPoint(vertices[index3].position);
+                //Vector3 pt4 = transform.TransformPoint(vertices[index4].position);
                 style.normal.textColor = Color.magenta;
-                for (int i = 0; i < faces.Count; i++)
+                List<Vertex> faceVertex = faces[i].GetFaceVertex();
+                Vector3 C = new Vector3();
+                for (int j = 0; j < faceVertex.Count; j++)
                 {
-                    int index1 = m_quads[4 * i];
-                    int index2 = m_quads[4 * i + 1];
-                    int index3 = m_quads[4 * i + 2];
-                    int index4 = m_quads[4 * i + 3];
-
-                    Vector3 pt1 = transform.TransformPoint(vertices[index1].position);
-                    Vector3 pt2 = transform.TransformPoint(vertices[index2].position);
-                    Vector3 pt3 = transform.TransformPoint(vertices[index3].position);
-                    Vector3 pt4 = transform.TransformPoint(vertices[index4].position);
-
-                    Handles.Label((pt1 + pt2 + pt3 + pt4) / 4.0f, "F" + faces[i].index, style);
-                    facePoints.Add((pt1 + pt2 + pt3 + pt4) / 4.0f);
+                    Gizmos.DrawLine(transform.TransformPoint(faceVertex[j].position), transform.TransformPoint(faceVertex[(j + 1) % faceVertex.Count].position));
+                    C += faceVertex[j].position;
                 }
+                Handles.Label(transform.TransformPoint(C / 4f), "F" + faces[i].index, style);
+                List<HalfEdge> faceEdges = faces[i].GetFaceEdges();
+
+                for (int j = 0; j < faceEdges.Count; j++)
+                {
+                    style.normal.textColor = Color.blue;
+                    Vector3 start = faceEdges[j].sourceVertex.position;
+                    Vector3 end = faceEdges[j].nextEdge.sourceVertex.position;
+                    Vector3 pos = Vector3.Lerp(Vector3.Lerp(start, end, 0.5f), C / 4f, 0.1f);
+
+                    Handles.Label(transform.TransformPoint(pos), "e" + faceEdges[j].index, style);
+                }
+                
             }
+            
 
             // Affichage des edges
 
-            if (drawEdges)
-            {
-                style.normal.textColor = Color.blue;
-                foreach (var edge in edges)
-                {
-                    Vector3 center = facePoints[edge.face.index];
-                    Vector3 start = edge.sourceVertex.position;
-                    Vector3 end = edge.nextEdge.sourceVertex.position;
-                    Vector3 pos = Vector3.Lerp(Vector3.Lerp(start, end, 0.5f), center, 0.2f);
-                    Handles.Label(transform.TransformPoint(pos), "e" + edge.index, style);
-                }
-            }
+            
+            //style.normal.textColor = Color.blue;
+            //foreach (var edge in edges)
+            //{
+            //    Vector3 center = facePoints[edge.face.index];
+            //    Vector3 start = edge.sourceVertex.position;
+            //    Vector3 end = edge.nextEdge.sourceVertex.position;
+            //    Vector3 pos = Vector3.Lerp(Vector3.Lerp(start, end, 0.5f), center, 0.2f);
+            //    if (drawEdges)
+            //    {
+            //        Handles.Label(transform.TransformPoint(pos), "e" + edge.index, style);
+            //    }
+            //}
         }
     }
 }
