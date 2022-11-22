@@ -80,7 +80,7 @@ namespace HalfEdge
         public List<HalfEdge> edges;
         public List<Face> faces;
 
-        public HalfEdgeMesh(Mesh mesh) // Constructeur prenant un mesh Vertex-Face en paramètre //magic happens
+        public HalfEdgeMesh(Mesh mesh) // Constructeur prenant un mesh Vertex-Face en paramï¿½tre //magic happens
         {
             int nEdges = 4;
 
@@ -163,7 +163,6 @@ namespace HalfEdge
             // Attributs 
 
             Mesh faceVertexMesh = new Mesh();
-
 
             Vector3[] m_vertices = new Vector3[vertices.Count];
             int[] m_quads = new int[faces.Count * 4];
@@ -262,7 +261,7 @@ namespace HalfEdge
 
 
 
-                //toutes les vertices possédant autant d’edges incidentes que de faces adjacentes.
+                //toutes les vertices possï¿½dant autant dï¿½edges incidentes que de faces adjacentes.
                 //if (adjacentEdges.Count == adjacentFaces.Count)
                 //{
                 //    float n = adjacentFaces.Count;
@@ -301,7 +300,7 @@ namespace HalfEdge
 
             List<string> strings = new List<string>();
 
-            // Récupération des vertices dans le fichier CSV
+            // Rï¿½cupï¿½ration des vertices dans le fichier CSV
 
             for (int i = 0; i < vertices.Count; i++)
             {
@@ -321,7 +320,7 @@ namespace HalfEdge
             for (int i = vertices.Count; i < edges.Count; i++)
                 strings.Add(separator + separator + separator + separator + separator);
 
-            // Récupération des edges dans le fichier CSV
+            // Rï¿½cupï¿½ration des edges dans le fichier CSV
 
             for (int i = 0; i < edges.Count; i++)
             {
@@ -333,7 +332,7 @@ namespace HalfEdge
                     + $"{(edges[i].twinEdge != null ? $"{edges[i].twinEdge.index}" : "NULL")}" + separator + separator;
             }
 
-            // Récupération des faces dans le fichier CSV
+            // Rï¿½cupï¿½ration des faces dans le fichier CSV
 
             for (int i = 0; i < faces.Count; i++)
             {
