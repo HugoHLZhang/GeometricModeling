@@ -37,19 +37,36 @@ namespace HalfEdge
             //tant que qu'on atteint pas une bordure.
             adjacentEdges.Add(halfEdge);
             if (halfEdge.twinEdge != null) adjacentEdges.Add(halfEdge.twinEdge);
-
+            //CW
             do
             {
                 halfEdge = halfEdge.prevEdge.twinEdge != null ? halfEdge.prevEdge.twinEdge : halfEdge.prevEdge ;
-                if (halfEdge == outgoingEdge) break;
+                if (halfEdge == outgoingEdge) return adjacentEdges;
                 adjacentEdges.Add(halfEdge);
                 if (halfEdge.twinEdge != null) adjacentEdges.Add(halfEdge.twinEdge);
 
             } while (halfEdge.twinEdge != null);
 
+            //CCW
+            if(outgoingEdge.twinEdge != null)
+            {
+                halfEdge = outgoingEdge.twinEdge.nextEdge;
+                adjacentEdges.Add(halfEdge);
+                if (halfEdge.twinEdge != null) adjacentEdges.Add(halfEdge.twinEdge);
+
+                do
+                {
+                    halfEdge = halfEdge.twinEdge.nextEdge;
+                    adjacentEdges.Add(halfEdge);
+                    if (halfEdge.twinEdge != null) adjacentEdges.Add(halfEdge.twinEdge);
+                } while (halfEdge.twinEdge != null);
+            }
+
+           
 
             return adjacentEdges;
         }
+
     }
     public class Face
     {
