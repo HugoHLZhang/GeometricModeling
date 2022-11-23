@@ -275,6 +275,28 @@ namespace WingedEdge
 
             CatmullClarkCreateNewPoints(out facePoints, out edgePoints, out vertexPoints);
 
+            string p = "";
+            for (int i = 0; i < edgePoints.Count; i++)
+            {
+                p += "e" + i + " = " + edgePoints[i] + "\n";
+            }
+            Debug.Log(p);
+
+            string f = "";
+            for (int i = 0; i < facePoints.Count; i++)
+            {
+                f += "F" + i + " = " + facePoints[i] + "\n";
+            }
+            Debug.Log(f);
+
+            string v = "";
+            for (int i = 0; i < vertexPoints.Count; i++)
+            {
+                v += "V" + i + " = " + vertexPoints[i] + "\n";
+            }
+            Debug.Log(v);
+
+
             for (int i = 0; i < edgePoints.Count; i++)
                 SplitEdge(edges[i], edgePoints[i]);
            

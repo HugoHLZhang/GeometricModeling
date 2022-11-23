@@ -261,6 +261,20 @@ namespace HalfEdge
                 p += "e" + i + " = " + edgePoints[i]+"\n";
             }
             Debug.Log(p);
+
+            string f = "";
+            for (int i = 0; i < facePoints.Count; i++)
+            {
+                f += "F" + i + " = " + facePoints[i] + "\n";
+            }
+            Debug.Log(f);
+
+            string v = "";
+            for (int i = 0; i < vertexPoints.Count; i++)
+            {
+                v += "V" + i + " = " + vertexPoints[i] + "\n";
+            }
+            Debug.Log(v);
             //for (int i = 0; i < edgePoints.Count; i++)
             //    SplitEdge(edges[i], edgePoints[i]);
 
@@ -289,19 +303,15 @@ namespace HalfEdge
 
                 facePoints.Add(C / 4f);
 
-                List<HalfEdge> faceEdges = faces[i].GetFaceEdges();
-
-                for (int j = 0; j < faceEdges.Count; j++)
-                {
-                    midPoints.Add((edges[i].sourceVertex.position + edges[i].nextEdge.sourceVertex.position) / 2f);
-
-                }
 
             }
 
             //Mid Points and Edge Points
             for (int i = 0; i < edges.Count; i++)
+            {
+                midPoints.Add((edges[i].sourceVertex.position + edges[i].nextEdge.sourceVertex.position) / 2f);
                 edgePoints.Add(edges[i].twinEdge != null ? (edges[i].sourceVertex.position + edges[i].twinEdge.sourceVertex.position + facePoints[edges[i].face.index] + facePoints[edges[i].twinEdge.face.index]) / 4f : midPoints[i]);
+            }
 
             string p = "";
             string f = "";
@@ -314,6 +324,31 @@ namespace HalfEdge
 
                 List<HalfEdge> adjacentEdges = vertices[i].GetAdjacentEdges();
                 List<Face> adjacentFaces = vertices[i].GetAdjacentFaces();
+
+                if (adjacentEdges.Count == adjacentFaces.Count)
+                {
+                    float n = adjacentFaces.Count;
+                    for (int j = 0; j < adjacentEdges.Count; j++)
+                    {
+                        Q += facePoints[adjacentFaces[j].index];
+                        R += midPoints[adjacentEdges[j].index];
+                    }
+                    Q = Q / n;
+                    R = R / n;
+
+                    vertexPoints.Add((Q / n) + (2f * R / n) + ((n - 3f) * vertices[i].position / n));
+                }
+                else
+                {
+                    List<HalfEdge> borderEdges = vertices[i].GetBorderEdges();
+                    Vector3 tot_m = new Vector3();
+
+                    for (int j = 0; j < borderEdges.Count; j++)
+                        tot_m += midPoints[borderEdges[j].index];
+
+                    vertexPoints.Add((tot_m + vertices[i].position) / 3f);
+                }
+
                 p += "V" + i + " :";
                 f += "V" + i + " :";
                 b += "V" + i + " :";
