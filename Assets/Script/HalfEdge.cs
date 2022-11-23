@@ -80,6 +80,18 @@ namespace HalfEdge
             return adjacentFaces;
         }
 
+        public List<HalfEdge> GetBorderEdges()
+        {
+            List<HalfEdge> borderEdges = new List<HalfEdge>();
+            List<HalfEdge> adjacentEdges = GetAdjacentEdges();
+
+            for (int i = 0; i < adjacentEdges.Count; i++)
+                if (adjacentEdges[i].twinEdge == null) borderEdges.Add(adjacentEdges[i]);
+
+            return borderEdges;
+        }
+
+
     }
     public class Face
     {
@@ -113,6 +125,9 @@ namespace HalfEdge
 
             return faceVertices;
         }
+
+        
+
     }
     public class HalfEdgeMesh
     {
@@ -290,6 +305,7 @@ namespace HalfEdge
 
             string p = "";
             string f = "";
+            string b = "";
             //Vertex Points
             for (int i = 0; i < vertices.Count; i++)
             {
@@ -300,6 +316,8 @@ namespace HalfEdge
                 List<Face> adjacentFaces = vertices[i].GetAdjacentFaces();
                 p += "V" + i + " :";
                 f += "V" + i + " :";
+                b += "V" + i + " :";
+
                 for (int j = 0; j < adjacentEdges.Count; j++)
                 {
                     p += " e"+adjacentEdges[j].index ;
@@ -309,6 +327,17 @@ namespace HalfEdge
                 for (int j = 0; j < adjacentFaces.Count; j++)
                 {
                     f += " F"+adjacentFaces[j].index ;
+
+                }
+                if (adjacentEdges.Count != adjacentFaces.Count)
+                {
+                    List<HalfEdge> borderEdges = vertices[i].GetBorderEdges();
+                    for (int j = 0; j < borderEdges.Count; j++)
+                    {
+                        b += " e"+ borderEdges[j].index ;
+
+                    }
+                    b += "\n";
 
                 }
                 f += "\n";
@@ -348,6 +377,7 @@ namespace HalfEdge
 
             Debug.Log(p);
             Debug.Log(f);
+            Debug.Log(b);
         }
 
         public string ConvertToCSVFormat(string separator = "\t") // Conversion vers format CSV
