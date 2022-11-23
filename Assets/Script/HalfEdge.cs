@@ -36,14 +36,12 @@ namespace HalfEdge
             HalfEdge halfEdge = outgoingEdge;
             //tant que qu'on atteint pas une bordure.
             adjacentEdges.Add(halfEdge);
-            if (halfEdge.twinEdge != null) adjacentEdges.Add(halfEdge.twinEdge);
             //CW
             do
             {
                 halfEdge = halfEdge.prevEdge.twinEdge != null ? halfEdge.prevEdge.twinEdge : halfEdge.prevEdge ;
                 if (halfEdge == outgoingEdge) return adjacentEdges;
                 adjacentEdges.Add(halfEdge);
-                if (halfEdge.twinEdge != null) adjacentEdges.Add(halfEdge.twinEdge);
 
             } while (halfEdge.twinEdge != null);
 
@@ -52,19 +50,34 @@ namespace HalfEdge
             {
                 halfEdge = outgoingEdge.twinEdge.nextEdge;
                 adjacentEdges.Add(halfEdge);
-                if (halfEdge.twinEdge != null) adjacentEdges.Add(halfEdge.twinEdge);
 
                 do
                 {
                     halfEdge = halfEdge.twinEdge.nextEdge;
                     adjacentEdges.Add(halfEdge);
-                    if (halfEdge.twinEdge != null) adjacentEdges.Add(halfEdge.twinEdge);
                 } while (halfEdge.twinEdge != null);
             }
 
            
 
             return adjacentEdges;
+        }
+
+        public List<Face> GetAdjacentFaces()
+        {
+            List<HalfEdge> adjacentEdges = GetAdjacentEdges();
+            List<Face> adjacentFaces = new List<Face>();
+
+            for (int i = 0; i < adjacentEdges.Count; i++)
+            {
+                if (!adjacentFaces.Contains(adjacentEdges[i].face)) adjacentFaces.Add(adjacentEdges[i].face);
+                if(adjacentEdges[i].twinEdge != null)
+                {
+                    if (!adjacentFaces.Contains(adjacentEdges[i].twinEdge.face)) adjacentFaces.Add(adjacentEdges[i].twinEdge.face);
+                }
+            }
+            
+            return adjacentFaces;
         }
 
     }
@@ -276,6 +289,7 @@ namespace HalfEdge
                 edgePoints.Add(edges[i].twinEdge != null ? (edges[i].sourceVertex.position + edges[i].twinEdge.sourceVertex.position + facePoints[edges[i].face.index] + facePoints[edges[i].twinEdge.face.index]) / 4f : midPoints[i]);
 
             string p = "";
+            string f = "";
             //Vertex Points
             for (int i = 0; i < vertices.Count; i++)
             {
@@ -283,12 +297,21 @@ namespace HalfEdge
                 Vector3 R = new Vector3();
 
                 List<HalfEdge> adjacentEdges = vertices[i].GetAdjacentEdges();
+                List<Face> adjacentFaces = vertices[i].GetAdjacentFaces();
                 p += "V" + i + " :";
+                f += "V" + i + " :";
                 for (int j = 0; j < adjacentEdges.Count; j++)
                 {
                     p += " e"+adjacentEdges[j].index ;
 
                 }
+
+                for (int j = 0; j < adjacentFaces.Count; j++)
+                {
+                    f += " F"+adjacentFaces[j].index ;
+
+                }
+                f += "\n";
                 p += "\n";
 
                 //List<Face> adjacentFaces = vertices[i].GetAdjacentFaces();
@@ -324,6 +347,7 @@ namespace HalfEdge
             }
 
             Debug.Log(p);
+            Debug.Log(f);
         }
 
         public string ConvertToCSVFormat(string separator = "\t") // Conversion vers format CSV
