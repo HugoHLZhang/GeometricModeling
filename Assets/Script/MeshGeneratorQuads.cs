@@ -208,16 +208,16 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //##############        TD1 Objet        ##############
         m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateCage(new Vector3(m_x, m_y, m_z));
+        m_Mf.mesh = CreateCage(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
         //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
         //##############        WingedEdge        ##############
 
-        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
-        GUIUtility.systemCopyBuffer = m_WingedEdgeMesh.ConvertToCSVFormat();
-        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
+        //m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
+        //GUIUtility.systemCopyBuffer = m_WingedEdgeMesh.ConvertToCSVFormat();
+        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
 
         //##############        HalfEdge        ##############
 
@@ -231,7 +231,7 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         m_HalfEdgeMesh.SubdivideCatmullClark();
 
-        m_WingedEdgeMesh.SubdivideCatmullClark();
+        //m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();

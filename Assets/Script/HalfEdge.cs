@@ -51,11 +51,10 @@ namespace HalfEdge
                 halfEdge = outgoingEdge.twinEdge.nextEdge;
                 adjacentEdges.Add(halfEdge);
 
-                do
-                {
+                while (halfEdge.twinEdge != null){
                     halfEdge = halfEdge.twinEdge.nextEdge;
                     adjacentEdges.Add(halfEdge);
-                } while (halfEdge.twinEdge != null);
+                }
             }
 
            
@@ -432,19 +431,35 @@ namespace HalfEdge
             {
 
                 List<HalfEdge> adjacentEdges = vertices[i].GetAdjacentEdges();
+                List<Face> adjacentFaces = vertices[i].GetAdjacentFaces();
+                List<HalfEdge> borderEdges = vertices[i].GetBorderEdges();
+
+
                 List<int> edgesIndex = new List<int>();
+                List<int> facesIndex = new List<int>();
+                List<int> borderEdgesIndex = new List<int>();
+
                 for (int j = 0; j < adjacentEdges.Count; j++)
                     edgesIndex.Add(adjacentEdges[j].index);
+
+                for (int j = 0; j < adjacentFaces.Count; j++)
+                    facesIndex.Add(adjacentFaces[j].index);
+
+                for (int j = 0; j < borderEdges.Count; j++)
+                    borderEdgesIndex.Add(borderEdges[j].index);
+
                 Vector3 pos = vertices[i].position;
                 strings.Add(vertices[i].index + separator
                     + pos.x.ToString("N03") + " " + pos.y.ToString("N03") + " " + pos.z.ToString("N03") + separator
                     + vertices[i].outgoingEdge.index + separator
-                    + string.Join(" ", edgesIndex) + separator
+                    +string.Join(" ", edgesIndex) + separator
+                    + string.Join(" ", facesIndex) + separator
+                    + string.Join(" ", borderEdgesIndex) + separator
                     + separator);
             }
 
             for (int i = vertices.Count; i < edges.Count; i++)
-                strings.Add(separator + separator + separator + separator + separator);
+                strings.Add(separator + separator + separator + separator + separator + separator + separator);
 
             // R�cup�ration des edges dans le fichier CSV
 
@@ -483,8 +498,8 @@ namespace HalfEdge
 
             // Mise en page du fichier CSV
 
-            str = "Vertex" + separator + separator + separator + separator + separator + "HalfEges" + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
-                + "Index" + separator + "Position" + separator + "outgoingEdge" + separator + "adjacentEdge" + separator + separator +
+            str = "Vertex" + separator + separator + separator + separator + separator + separator + separator + "HalfEges" + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
+                + "Index" + separator + "Position" + separator + "outgoingEdge" + separator + "adjacentEdge" + separator + "Face Adj" + separator + "Border Edges" + separator + separator +
                 "Index" + separator + "sourceVertex" + separator + "Face" + separator + "prevEdge" + separator + "nextEdge" + separator + "twinEdge" + separator + separator +
                 "Index" + separator + "Edge" + separator + "CW Face Edges" + separator + "CW Face Vertices\n"
                 + string.Join("\n", strings);
