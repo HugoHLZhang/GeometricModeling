@@ -220,29 +220,29 @@ namespace HalfEdge
 
             Mesh faceVertexMesh = new Mesh();
 
-            Vector3[] m_vertices = new Vector3[vertices.Count];
-            int[] m_quads = new int[faces.Count * 4];
+            //Vector3[] m_vertices = new Vector3[vertices.Count];
+            //int[] m_quads = new int[faces.Count * 4];
 
-            //Conversion des vertices
+            ////Conversion des vertices
 
-            for (int i = 0; i < vertices.Count; i++)
-            {
-                m_vertices[i] = vertices[i].position;
-            }
+            //for (int i = 0; i < vertices.Count; i++)
+            //{
+            //    m_vertices[i] = vertices[i].position;
+            //}
 
-            int index = 0;
+            //int index = 0;
 
-            // Conversion des quads
+            //// Conversion des quads
 
-            for (int i = 0; i < faces.Count; i++)
-            {
-                List<Vertex> faceVertex = faces[i].GetFaceVertex();
-                for (int j = 0; j < faceVertex.Count; j++)
-                    m_quads[index++] = faceVertex[j].index;
-            }
+            //for (int i = 0; i < faces.Count; i++)
+            //{
+            //    List<Vertex> faceVertex = faces[i].GetFaceVertex();
+            //    for (int j = 0; j < faceVertex.Count; j++)
+            //        m_quads[index++] = faceVertex[j].index;
+            //}
 
-            faceVertexMesh.vertices = m_vertices;
-            faceVertexMesh.SetIndices(m_quads, MeshTopology.Quads, 0);
+            //faceVertexMesh.vertices = m_vertices;
+            //faceVertexMesh.SetIndices(m_quads, MeshTopology.Quads, 0);
 
             return faceVertexMesh;
         }
@@ -276,14 +276,15 @@ namespace HalfEdge
                 v += "V" + i + " = " + vertexPoints[i] + "\n";
             }
             Debug.Log(v);
-            //for (int i = 0; i < edgePoints.Count; i++)
-            //    SplitEdge(edges[i], edgePoints[i]);
+
+            for (int i = 0; i < edgePoints.Count; i++)
+                SplitEdge(edges[i], edgePoints[i]);
 
             //for (int i = 0; i < facePoints.Count; i++)
             //    SplitFace(faces[i], facePoints[i]);
 
-            //for (int i = 0; i < vertexPoints.Count; i++)
-            //    vertices[i].position = vertexPoints[i];
+            for (int i = 0; i < vertexPoints.Count; i++)
+                vertices[i].position = vertexPoints[i];
         }
 
         public void CatmullClarkCreateNewPoints(out List<Vector3> facePoints, out List<Vector3> edgePoints, out List<Vector3> vertexPoints)
@@ -421,7 +422,8 @@ namespace HalfEdge
 
 
             Vertex newVertex;
-            if(edge.twinEdge.nextEdge.sourceVertex.position == splittingPoint)
+            
+            if(edge.twinEdge != null && edge.twinEdge.nextEdge.sourceVertex.position == splittingPoint)
             {
                 newVertex = edge.twinEdge.nextEdge.sourceVertex;
             }
@@ -442,7 +444,7 @@ namespace HalfEdge
             //update newVertex outgoingEdge
             newVertex.outgoingEdge = newEdge;
 
-            if(edge.twinEdge.nextEdge.twinEdge == edge)
+            if(edge.twinEdge != null && edge.twinEdge.nextEdge.twinEdge == edge)
             {
                 newEdge.twinEdge.twinEdge = newEdge;
                 edge.twinEdge = newEdge.twinEdge.nextEdge;
