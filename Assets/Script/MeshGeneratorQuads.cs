@@ -223,14 +223,14 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);
         GUIUtility.systemCopyBuffer = m_HalfEdgeMesh.ConvertToCSVFormat();
-        m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
+        //m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
 
 
 
         //################          TD 2 CatmullClark        #######################
 
         m_HalfEdgeMesh.SubdivideCatmullClark();
-
+        GUIUtility.systemCopyBuffer = m_HalfEdgeMesh.ConvertToCSVFormat();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
