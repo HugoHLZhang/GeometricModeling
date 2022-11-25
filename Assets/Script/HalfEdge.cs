@@ -11,11 +11,13 @@ namespace HalfEdge
         public HalfEdge prevEdge;
         public HalfEdge nextEdge;
         public HalfEdge twinEdge;
-        public HalfEdge(int index, Vertex sourceVertex, Face face, HalfEdge twinEdge = null)
+        public HalfEdge(int index, Vertex sourceVertex, Face face, HalfEdge prevEdge = null, HalfEdge nextEdge = null, HalfEdge twinEdge = null)
         {
             this.index = index;
             this.sourceVertex = sourceVertex;
             this.face = face;
+            this.prevEdge = prevEdge;
+            this.nextEdge = nextEdge;
             this.twinEdge = twinEdge;
         }
     }
@@ -51,11 +53,10 @@ namespace HalfEdge
                 halfEdge = outgoingEdge.twinEdge.nextEdge;
                 adjacentEdges.Add(halfEdge);
 
-                do
-                {
+                while (halfEdge.twinEdge != null){
                     halfEdge = halfEdge.twinEdge.nextEdge;
                     adjacentEdges.Add(halfEdge);
-                } while (halfEdge.twinEdge != null);
+                }
             }
 
            
@@ -178,7 +179,7 @@ namespace HalfEdge
                     //Create newEdge if not in dico
                     if (dicoEdges.TryGetValue(key, out halfEdge))
                     {
-                        newEdge = new HalfEdge(edges.Count, vertices[start], face, halfEdge);
+                        newEdge = new HalfEdge(edges.Count, vertices[start], face, null, null, halfEdge);
                         edges.Add(newEdge);
                         halfEdge.twinEdge = newEdge;
 
@@ -261,6 +262,20 @@ namespace HalfEdge
                 p += "e" + i + " = " + edgePoints[i]+"\n";
             }
             Debug.Log(p);
+
+            string f = "";
+            for (int i = 0; i < facePoints.Count; i++)
+            {
+                f += "F" + i + " = " + facePoints[i] + "\n";
+            }
+            Debug.Log(f);
+
+            string v = "";
+            for (int i = 0; i < vertexPoints.Count; i++)
+            {
+                v += "V" + i + " = " + vertexPoints[i] + "\n";
+            }
+            Debug.Log(v);
             //for (int i = 0; i < edgePoints.Count; i++)
             //    SplitEdge(edges[i], edgePoints[i]);
 
@@ -289,19 +304,15 @@ namespace HalfEdge
 
                 facePoints.Add(C / 4f);
 
-                List<HalfEdge> faceEdges = faces[i].GetFaceEdges();
-
-                for (int j = 0; j < faceEdges.Count; j++)
-                {
-                    midPoints.Add((edges[i].sourceVertex.position + edges[i].nextEdge.sourceVertex.position) / 2f);
-
-                }
 
             }
 
             //Mid Points and Edge Points
             for (int i = 0; i < edges.Count; i++)
+            {
+                midPoints.Add((edges[i].sourceVertex.position + edges[i].nextEdge.sourceVertex.position) / 2f);
                 edgePoints.Add(edges[i].twinEdge != null ? (edges[i].sourceVertex.position + edges[i].twinEdge.sourceVertex.position + facePoints[edges[i].face.index] + facePoints[edges[i].twinEdge.face.index]) / 4f : midPoints[i]);
+            }
 
             string p = "";
             string f = "";
@@ -314,6 +325,31 @@ namespace HalfEdge
 
                 List<HalfEdge> adjacentEdges = vertices[i].GetAdjacentEdges();
                 List<Face> adjacentFaces = vertices[i].GetAdjacentFaces();
+
+                if (adjacentEdges.Count == adjacentFaces.Count)
+                {
+                    float n = adjacentFaces.Count;
+                    for (int j = 0; j < adjacentEdges.Count; j++)
+                    {
+                        Q += facePoints[adjacentFaces[j].index];
+                        R += midPoints[adjacentEdges[j].index];
+                    }
+                    Q = Q / n;
+                    R = R / n;
+
+                    vertexPoints.Add((Q / n) + (2f * R / n) + ((n - 3f) * vertices[i].position / n));
+                }
+                else
+                {
+                    List<HalfEdge> borderEdges = vertices[i].GetBorderEdges();
+                    Vector3 tot_m = new Vector3();
+
+                    for (int j = 0; j < borderEdges.Count; j++)
+                        tot_m += midPoints[borderEdges[j].index];
+
+                    vertexPoints.Add((tot_m + vertices[i].position) / 3f);
+                }
+
                 p += "V" + i + " :";
                 f += "V" + i + " :";
                 b += "V" + i + " :";
@@ -380,7 +416,43 @@ namespace HalfEdge
             Debug.Log(b);
         }
 
-        public string ConvertToCSVFormat(string separator = "\t") // Conversion vers format CSV
+        public void SplitEdge(HalfEdge edge, Vector3 splittingPoint)
+        {
+
+
+            Vertex newVertex;
+            if(edge.twinEdge.nextEdge.sourceVertex.position == splittingPoint)
+            {
+                newVertex = edge.twinEdge.nextEdge.sourceVertex;
+            }
+            else
+            {
+                newVertex = new Vertex(vertices.Count, splittingPoint);
+                vertices.Add(newVertex);
+            }
+
+            HalfEdge newEdge = new HalfEdge(edges.Count, newVertex, edge.face, edge, edge.nextEdge, edge.twinEdge);
+            edges.Add(newEdge);
+
+            //update current Edge nextEdge
+            edge.nextEdge = newEdge;
+
+            //update nextEdge's prevEdge
+            newEdge.nextEdge.prevEdge = newEdge;
+            //update newVertex outgoingEdge
+            newVertex.outgoingEdge = newEdge;
+
+            if(edge.twinEdge.nextEdge.twinEdge == edge)
+            {
+                newEdge.twinEdge.twinEdge = newEdge;
+                edge.twinEdge = newEdge.twinEdge.nextEdge;
+                newEdge.twinEdge.nextEdge.twinEdge = edge;
+            }
+
+
+        }
+
+            public string ConvertToCSVFormat(string separator = "\t") // Conversion vers format CSV
         {
             if (this == null) return "";
             Debug.Log("#################      HalfEdgeMesh ConvertTOCSVFormat     #################");
@@ -397,19 +469,35 @@ namespace HalfEdge
             {
 
                 List<HalfEdge> adjacentEdges = vertices[i].GetAdjacentEdges();
+                List<Face> adjacentFaces = vertices[i].GetAdjacentFaces();
+                List<HalfEdge> borderEdges = vertices[i].GetBorderEdges();
+
+
                 List<int> edgesIndex = new List<int>();
+                List<int> facesIndex = new List<int>();
+                List<int> borderEdgesIndex = new List<int>();
+
                 for (int j = 0; j < adjacentEdges.Count; j++)
                     edgesIndex.Add(adjacentEdges[j].index);
+
+                for (int j = 0; j < adjacentFaces.Count; j++)
+                    facesIndex.Add(adjacentFaces[j].index);
+
+                for (int j = 0; j < borderEdges.Count; j++)
+                    borderEdgesIndex.Add(borderEdges[j].index);
+
                 Vector3 pos = vertices[i].position;
                 strings.Add(vertices[i].index + separator
                     + pos.x.ToString("N03") + " " + pos.y.ToString("N03") + " " + pos.z.ToString("N03") + separator
                     + vertices[i].outgoingEdge.index + separator
-                    + string.Join(" ", edgesIndex) + separator
+                    +string.Join(" ", edgesIndex) + separator
+                    + string.Join(" ", facesIndex) + separator
+                    + string.Join(" ", borderEdgesIndex) + separator
                     + separator);
             }
 
             for (int i = vertices.Count; i < edges.Count; i++)
-                strings.Add(separator + separator + separator + separator + separator);
+                strings.Add(separator + separator + separator + separator + separator + separator + separator);
 
             // R�cup�ration des edges dans le fichier CSV
 
@@ -448,8 +536,8 @@ namespace HalfEdge
 
             // Mise en page du fichier CSV
 
-            str = "Vertex" + separator + separator + separator + separator + separator + "HalfEges" + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
-                + "Index" + separator + "Position" + separator + "outgoingEdge" + separator + "adjacentEdge" + separator + separator +
+            str = "Vertex" + separator + separator + separator + separator + separator + separator + separator + "HalfEges" + separator + separator + separator + separator + separator + separator + separator + "Faces\n"
+                + "Index" + separator + "Position" + separator + "outgoingEdge" + separator + "adjacentEdge" + separator + "Face Adj" + separator + "Border Edges" + separator + separator +
                 "Index" + separator + "sourceVertex" + separator + "Face" + separator + "prevEdge" + separator + "nextEdge" + separator + "twinEdge" + separator + separator +
                 "Index" + separator + "Edge" + separator + "CW Face Edges" + separator + "CW Face Vertices\n"
                 + string.Join("\n", strings);
