@@ -208,30 +208,36 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //##############        TD1 Objet        ##############
         m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
+        m_Mf.mesh = CreateBlueLock(new Vector3(m_x, m_y, m_z), 5);
         //m_Mf.mesh = CreateCage(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
         //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
+
+
         //##############        WingedEdge        ##############
 
-        //m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
+        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
         //GUIUtility.systemCopyBuffer = m_WingedEdgeMesh.ConvertToCSVFormat();
         //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
 
         //##############        HalfEdge        ##############
 
-        m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);
-        GUIUtility.systemCopyBuffer = m_HalfEdgeMesh.ConvertToCSVFormat();
-        m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
+        //m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);
+        //GUIUtility.systemCopyBuffer = m_HalfEdgeMesh.ConvertToCSVFormat();
+        //m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
 
 
 
         //################          TD 2 CatmullClark        #######################
 
-        m_HalfEdgeMesh.SubdivideCatmullClark();
-        GUIUtility.systemCopyBuffer = m_HalfEdgeMesh.ConvertToCSVFormat();
-        m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
+        //m_HalfEdgeMesh.SubdivideCatmullClark();
+        //GUIUtility.systemCopyBuffer = m_HalfEdgeMesh.ConvertToCSVFormat();
+        //m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
+
+
+
         //m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
@@ -641,6 +647,41 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         return mesh;
     }
+
+    Mesh CreateStade(Vector3 halfSize)
+    {
+        Mesh mesh = new Mesh();
+        mesh.name = "stade";
+
+        Vector3[] vertices = new Vector3[8];
+
+
+        int index = 0;
+        vertices[index++] = new Vector3(halfSize.x, -halfSize.y, halfSize.z); // vertice du haut
+        vertices[index++] = new Vector3(halfSize.x, -halfSize.y, -halfSize.z); // vertice du haut
+        vertices[index++] = new Vector3(-halfSize.x, -halfSize.y, -halfSize.z); // vertice du haut
+        vertices[index++] = new Vector3(-halfSize.x, -halfSize.y, halfSize.z); // vertice du haut
+
+        vertices[index++] = new Vector3(halfSize.x, halfSize.y, halfSize.z); // vertice du bas
+        vertices[index++] = new Vector3(halfSize.x, halfSize.y, -halfSize.z); // vertice du bas
+        vertices[index++] = new Vector3(-halfSize.x, halfSize.y, -halfSize.z); // vertice du bas
+        vertices[index++] = new Vector3(-halfSize.x, halfSize.y, halfSize.z); // vertice du bas
+        //int[] quads = new int[24] { 0, 3, 7, 4, 3, 2, 6, 7, 2, 1, 5, 6, 1, 0, 4, 5, 2, 3, 0, 1, 5, 4, 7, 6 };
+        int[] quads = new int[] {
+            
+            1,2,3,0,
+            4,5,1,0,
+            3,7,4,0,
+            2,6,7,3,
+            5,6,2,1
+        };
+
+        mesh.vertices = vertices;
+        mesh.SetIndices(quads, MeshTopology.Quads, 0);
+
+        return mesh;
+    }
+
     Mesh CreateRegularPolygon(Vector3 halfSize, int nSectors)
     {
         Mesh mesh = new Mesh();
@@ -677,10 +718,89 @@ public class MeshGeneratorQuads : MonoBehaviour
             quads[index++] = (nSectors * 2 + i - 1) % (nSectors * 2);
         }
 
+
         mesh.vertices = vertices;
         mesh.SetIndices(quads, MeshTopology.Quads, 0);
         return mesh;
     }
+
+    Mesh CreateBlueLock(Vector3 halfSize, int nSectors)
+    {
+        Mesh mesh = new Mesh();
+        mesh.name = "BlueLock";
+        Vector3[] vertices = new Vector3[nSectors * 6 + 1];
+        int[] quads = new int[nSectors * 5 * 4];
+
+        //Vertices
+        int index = 0;
+
+        float step = (2 * Mathf.PI) / nSectors;
+
+        for (int i = 0; i < nSectors; i++)
+        {
+            float rad = step * i;
+            float rad2 = step * (i + 1);
+            float x = Mathf.Cos(rad) * halfSize.x;
+            float z = Mathf.Sin(rad) * halfSize.z;
+            float x2 = Mathf.Cos(rad2) * halfSize.x;
+            float z2 = Mathf.Sin(rad2) * halfSize.z;
+            vertices[index++] = new Vector3(x, 0, z);
+            vertices[index++] = Vector3.Lerp(new Vector3(x, 0, z), new Vector3(x2, 0, z2), 0.5f);
+            vertices[index++] = Vector3.Lerp(new Vector3(x, halfSize.y, z), new Vector3(x2, halfSize.y, z2), 0.5f);
+            vertices[index++] = new Vector3(x, halfSize.y, z);
+            vertices[index++] = Vector3.Lerp(new Vector3(0, halfSize.y, 0), new Vector3(x, halfSize.y, z), 0.4f);
+            vertices[index++] = Vector3.Lerp(new Vector3(0, halfSize.y, 0), Vector3.Lerp(new Vector3(x, halfSize.y, z), new Vector3(x2, halfSize.y, z2), 0.5f), 0.4f);
+        }
+        vertices[nSectors * 6] = Vector3.zero;
+
+        index = 0;
+        //Quads
+        for (int i = 0; i < nSectors * 6; i += 6)
+        {
+            //30-1-0-25
+            //sol
+            quads[index++] = nSectors * 6; 
+            quads[index++] = (i + 1) % (nSectors * 6);
+            quads[index++] = i % (nSectors * 6);
+            quads[index++] = (nSectors * 6 + i - 5) % (nSectors * 6);
+
+            //25-0-3-26
+            //mur droit
+            quads[index++] = (nSectors * 6 + i - 5) % (nSectors * 6);
+            quads[index++] = i % (nSectors * 6);
+            quads[index++] = (i + 3) % (nSectors * 6);
+            quads[index++] = (nSectors * 6 + i - 4) % (nSectors * 6);
+
+            //0-1-2-3
+            //mur gauche
+            quads[index++] = i % (nSectors * 6);
+            quads[index++] = (i + 1) % (nSectors * 6);
+            quads[index++] = (i + 2) % (nSectors * 6);
+            quads[index++] = (i + 3) % (nSectors * 6);
+
+            //
+            //toit droit
+
+            quads[index++] = (i + 3) % (nSectors * 6);
+            quads[index++] = (i + 4) % (nSectors * 6);
+            quads[index++] = (nSectors * 6 + i - 1) % (nSectors * 6);
+            quads[index++] = (nSectors * 6 + i - 4) % (nSectors * 6);
+
+            ////toit gauche
+
+            quads[index++] = (i + 5) % (nSectors * 6);
+            quads[index++] = (i + 4) % (nSectors * 6);
+            quads[index++] = (i + 3) % (nSectors * 6);
+            quads[index++] = (i + 2) % (nSectors * 6);
+        }
+
+
+        mesh.vertices = vertices;
+        mesh.SetIndices(quads, MeshTopology.Quads, 0);
+        return mesh;
+        
+    }
+
     Mesh CreatePacman(Vector3 halfSize, int nSectors, float startAngle = Mathf.PI / 3, float endAngle = 5 * Mathf.PI / 3)
     {
         Mesh mesh = new Mesh();
