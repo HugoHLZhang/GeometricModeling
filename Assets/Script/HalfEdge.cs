@@ -220,29 +220,29 @@ namespace HalfEdge
 
             Mesh faceVertexMesh = new Mesh();
 
-            //Vector3[] m_vertices = new Vector3[vertices.Count];
-            //int[] m_quads = new int[faces.Count * 4];
+            Vector3[] m_vertices = new Vector3[vertices.Count];
+            int[] m_quads = new int[faces.Count * 4];
 
-            ////Conversion des vertices
+            //Conversion des vertices
 
-            //for (int i = 0; i < vertices.Count; i++)
-            //{
-            //    m_vertices[i] = vertices[i].position;
-            //}
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                m_vertices[i] = vertices[i].position;
+            }
 
-            //int index = 0;
+            int index = 0;
 
-            //// Conversion des quads
+            // Conversion des quads
 
-            //for (int i = 0; i < faces.Count; i++)
-            //{
-            //    List<Vertex> faceVertex = faces[i].GetFaceVertex();
-            //    for (int j = 0; j < faceVertex.Count; j++)
-            //        m_quads[index++] = faceVertex[j].index;
-            //}
+            for (int i = 0; i < faces.Count; i++)
+            {
+                List<Vertex> faceVertex = faces[i].GetFaceVertex();
+                for (int j = 0; j < faceVertex.Count; j++)
+                    m_quads[index++] = faceVertex[j].index;
+            }
 
-            //faceVertexMesh.vertices = m_vertices;
-            //faceVertexMesh.SetIndices(m_quads, MeshTopology.Quads, 0);
+            faceVertexMesh.vertices = m_vertices;
+            faceVertexMesh.SetIndices(m_quads, MeshTopology.Quads, 0);
 
             return faceVertexMesh;
         }
@@ -280,8 +280,8 @@ namespace HalfEdge
             for (int i = 0; i < edgePoints.Count; i++)
                 SplitEdge(edges[i], edgePoints[i]);
 
-            //for (int i = 0; i < facePoints.Count; i++)
-            //    SplitFace(faces[i], facePoints[i]);
+            for (int i = 0; i < facePoints.Count; i++)
+                SplitFace(faces[i], facePoints[i]);
 
             for (int i = 0; i < vertexPoints.Count; i++)
                 vertices[i].position = vertexPoints[i];
@@ -454,7 +454,65 @@ namespace HalfEdge
 
         }
 
-            public string ConvertToCSVFormat(string separator = "\t") // Conversion vers format CSV
+        public void SplitFace(Face face, Vector3 splittingPoint)
+        {
+            bool isRecycled = false;
+
+            Face currentFace = face;
+
+            Vertex newVertex = new Vertex(vertices.Count, splittingPoint);
+            vertices.Add(newVertex);
+
+            List<HalfEdge> faceEdges = face.GetFaceEdges();
+            List<Vertex> faceVertex = face.GetFaceVertex();
+
+            string p = "F" + face.index + " :";
+            for (int i = 0; i < faceEdges.Count; i += 2)
+            {
+                p += " e" + faceEdges[i].index;
+
+                //Add newFace if old isRecycled
+                if (isRecycled)
+                {
+                    currentFace = new Face(faces.Count);
+                    faces.Add(currentFace);
+                }
+
+                HalfEdge rightEdge = faceEdges[(i - 1 + faceEdges.Count) % faceEdges.Count];
+                HalfEdge bottomEdge = faceEdges[i];
+
+                HalfEdge leftEdge = new HalfEdge(edges.Count, bottomEdge.nextEdge.sourceVertex, currentFace, bottomEdge);
+                edges.Add(leftEdge);
+                HalfEdge topEdge = new HalfEdge(edges.Count, newVertex, currentFace, leftEdge, rightEdge);
+
+                edges.Add(topEdge);
+
+                leftEdge.nextEdge = topEdge;
+                if (newVertex.outgoingEdge == null) newVertex.outgoingEdge = topEdge;
+                if (currentFace.edge == null) currentFace.edge = topEdge;
+                //twinEdge 
+
+                if (isRecycled)
+                {
+                    topEdge.twinEdge = rightEdge.prevEdge.nextEdge;
+                    rightEdge.prevEdge.nextEdge.twinEdge = topEdge;
+                    if (i == 6)
+                    {
+                        leftEdge.twinEdge = bottomEdge.nextEdge.prevEdge;
+                        bottomEdge.nextEdge.prevEdge.twinEdge = leftEdge;
+                    }
+                }
+
+                rightEdge.prevEdge = topEdge;
+                bottomEdge.nextEdge = leftEdge;
+
+                isRecycled = true;
+            }
+
+            Debug.Log(p);
+        }
+
+        public string ConvertToCSVFormat(string separator = "\t") // Conversion vers format CSV
         {
             if (this == null) return "";
             Debug.Log("#################      HalfEdgeMesh ConvertTOCSVFormat     #################");
@@ -492,7 +550,7 @@ namespace HalfEdge
                 strings.Add(vertices[i].index + separator
                     + pos.x.ToString("N03") + " " + pos.y.ToString("N03") + " " + pos.z.ToString("N03") + separator
                     + vertices[i].outgoingEdge.index + separator
-                    +string.Join(" ", edgesIndex) + separator
+                    + string.Join(" ", edgesIndex) + separator
                     + string.Join(" ", facesIndex) + separator
                     + string.Join(" ", borderEdgesIndex) + separator
                     + separator);
@@ -533,7 +591,8 @@ namespace HalfEdge
                 strings[i] += faces[i].index + separator
                     + faces[i].edge.index + separator
                     + string.Join(" ", edgesIndex) + separator
-                    + string.Join(" ", vertexIndex) + separator + separator;
+                    + string.Join(" ", vertexIndex) + separator
+                    + separator;
             }
 
             // Mise en page du fichier CSV

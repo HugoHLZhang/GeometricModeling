@@ -427,11 +427,12 @@ namespace WingedEdge
                     faces.Add(currentFace);
                 }
 
-                //newEdge's useful edges
+                //newEdge's usefull information
                 WingedEdge endCWEdge = faceEdges[(i - 1 + faceEdges.Count) % faceEdges.Count];
                 WingedEdge endCCWEdge = faceEdges[i];
                 WingedEdge parallelEdge = faceEdges[(i + 1) % faceEdges.Count];
 
+                //Create newEdge
                 WingedEdge newEdge = new WingedEdge(edges.Count, newVertex, faceVertex[i], currentFace, null, null, null, endCWEdge, endCCWEdge);
                 edges.Add(newEdge);
 
