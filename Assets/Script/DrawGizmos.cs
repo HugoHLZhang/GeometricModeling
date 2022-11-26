@@ -18,7 +18,16 @@ public class DrawGizmos : MonoBehaviour
         Vector3[] vertices = mesh.vertices;
         int[] quads = mesh.GetIndices(0);
 
-        Gizmos.color = Color.black;
+        switch (mesh.name)
+        {
+            case "Terrain_Gfx Instance":
+            case "Cage_Gfx Instance":
+                Gizmos.color = Color.white;
+                break;
+            default:
+                Gizmos.color = Color.black;
+                break;
+        }
 
         for (int i = 0; i < quads.Length / 4; i++)
         {

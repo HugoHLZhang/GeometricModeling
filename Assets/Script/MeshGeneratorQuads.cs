@@ -41,7 +41,7 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         //##############        Cylindre             ######################
 
-        m_Mf.mesh = CreateNormalizedGridXZ(20, 40,
+        m_Mf.mesh = CreateNormalizedGridXZ(4, 5,
            (kX, kZ) =>
            {
                float rho, theta, y;
@@ -49,7 +49,7 @@ public class MeshGeneratorQuads : MonoBehaviour
                theta = kX * 2 * Mathf.PI;
                y = kZ * 6;
                //rho = 3 + .25f * Mathf.Sin(kZ*2*Mathf.PI*4) ;
-               rho = m_Profile.Evaluate(kZ) * 2;
+               rho = m_Profile.Evaluate(kZ);
 
                return new Vector3(rho * Mathf.Cos(theta), y, rho * Mathf.Sin(theta));
                //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
@@ -68,21 +68,21 @@ public class MeshGeneratorQuads : MonoBehaviour
         //        phi = kZ * Mathf.PI;
         //        rho = 2 + .55f * Mathf.Cos(kX * 2 * Mathf.PI * 8) * Mathf.Sin(kZ * 2 * Mathf.PI * 6);
         //        //rho = 3 + .25f * Mathf.Sin(kZ*2*Mathf.PI*4) ;
-        //        //rho = m_Profile.Evaluate(kZ) * 2;
+        //        rho = m_Profile.Evaluate(kZ) * 2;
 
-        //        return new Vector3(rho * Mathf.Cos(theta)*Mathf.Sin(phi),rho*Mathf.Cos(phi),rho * Mathf.Sin(theta)*Mathf.Sin(phi));
+        //        return new Vector3(rho * Mathf.Cos(theta) * Mathf.Sin(phi), rho * Mathf.Cos(phi), rho * Mathf.Sin(theta) * Mathf.Sin(phi));
         //        //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
         //    }
         //    );
 
         //##############        Torus (donut)             ######################
 
-        //m_Mf.mesh = CreateNormalizedGridXZ(20 , 10,
+        //m_Mf.mesh = CreateNormalizedGridXZ(20, 5,
         //    (kX, kZ) =>
         //    {
         //        float R = 3;
         //        float r = 1;
-        //        float theta =  2 * Mathf.PI * kX;
+        //        float theta = 2 * Mathf.PI * kX;
         //        Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
 
         //        float alpha = Mathf.PI * 2 * kZ;
@@ -158,63 +158,64 @@ public class MeshGeneratorQuads : MonoBehaviour
 
 
         ////##############        Unity.Mathematics            ######################
-        /*
-        bool bothSides = true;
 
-        m_Mf.mesh = CreateNormalizedGridXZ_SIMD(
-            (bothSides ? 2 : 1) * int3(100, 100, 1),
-            (k) =>
-            {
-                if (bothSides) k = abs((k - .5f) * 2);
-                //return lerp(float3(-5f, 0, -5f), float3(5f, 0, 5f), k.xzy);
-                //return lerp(float3(-5, 1, -5), float3(5, 0, 5), float3(k.x, step(.2f, k.x), k.y)) ;
-                //return lerp(float3(-5, 1, -5), float3(5, 0, 5), float3(k.x, smoothstep(.2f - 0.05f, .2f + 0.05f, k.x), k.y)) ;
-                //return lerp(float3(-5, 1, -5), float3(5, 0, 5), float3(k.x, smoothstep(0.2f - .05f, .2f + .05f, k.x * k.y), k.y));
-                return lerp(float3(-5, 1, -5), float3(5, 0, 5), 
-                            float3(k.x,0.5f * (sin(k.x * 2 * PI * 4) * cos(k.y * 2 * PI * 3) + 1),
-                            //smoothstep(0.2f - .05f, .2f + .05f, 0.5f*(sin(k.x*2*PI*4) * cos(k.y*2*PI*3)+1))
-                            k.y));
-            }
-            );
+        //bool bothSides = false;
+
+        //m_Mf.mesh = CreateNormalizedGridXZ_SIMD(
+        //    (bothSides ? 2 : 1) * int3(5, 5, 1),
+        //    (k) =>
+        //    {
+        //        if (bothSides) k = abs((k - .5f) * 2);
+        //    //return lerp(float3(-5f, 0, -5f), float3(5f, 0, 5f), k.xzy);
+        //    //return lerp(float3(-2, 1, -2), float3(2, 0, 2), float3(k.x, step(.5f, k.x), k.y));
+        //    //return lerp(float3(-5, 1, -5), float3(5, 0, 5), float3(k.x, smoothstep(.2f - 0.05f, .2f + 0.05f, k.x), k.y));
+        //    return lerp(float3(-5, 1, -2), float3(5, 0, 2), float3(k.x, smoothstep(0.2f, .2f, k.x * k.y), k.y));
+        //    //return lerp(float3(-5, 1, -5), float3(5, 0, 5),
+        //    //            float3(k.x, 0.5f * (sin(k.x * 2 * PI * 4) * cos(k.y * 2 * PI * 3) + 1),
+        //    //smoothstep(0.2f - .05f, .2f + .05f, 0.5f * (sin(k.x * 2 * PI * 4) * cos(k.y * 2 * PI * 3) + 1)));
+        //    //k.y));
+        //    }
+        //    );
         // repeated pattern
 
-        int3 nCells = int3(3, 3, 1);
-        int3 nSegmentsPerCell = int3(100, 100, 1);
-        float3 kStep = float3(1) / (nCells * nSegmentsPerCell);
+        //int3 nCells = int3(3, 3, 1);
+        //int3 nSegmentsPerCell = int3(20, 20, 1);
+        //float3 kStep = float3(1) / (nCells * nSegmentsPerCell);
 
-        float3 cellSize = float3(1, .5f, 1);
+        //float3 cellSize = float3(1, .5f, 1);
 
-        m_Mf.mesh = CreateNormalizedGridXZ_SIMD(
-            nCells * nSegmentsPerCell,
-            (k) =>
-            {
-                // calculs sur la grille normalisée
-                int3 index = (int3)floor(k / kStep);
-                int3 localIndex = index % nSegmentsPerCell;
-                int3 indexCell = index / nSegmentsPerCell;
-                float3 relIndexCell = (float3)indexCell / nCells;
+        //m_Mf.mesh = CreateNormalizedGridXZ_SIMD(
+        //    nCells * nSegmentsPerCell,
+        //    (k) =>
+        //    {
+        //        // calculs sur la grille normalisée
+        //        int3 index = (int3)floor(k / kStep);
+        //        int3 localIndex = index % nSegmentsPerCell;
+        //        int3 indexCell = index / nSegmentsPerCell;
+        //        float3 relIndexCell = (float3)indexCell / nCells;
 
-                // calculs sur les positions dans l'espace
-                //float3 cellOriginPos = lerp(-cellSize * nCells.xzy * .5f,cellSize * nCells.xzy * .5f,relIndexCell.xzy);
+        //        // calculs sur les positions dans l'espace
+        //        float3 cellOriginPos = lerp(-cellSize * nCells.xzy * .5f, cellSize * nCells.xzy * .5f, relIndexCell.xzy);
 
-                float3 cellOriginPos = floor(k * nCells).xzy; // Theo's style ... ne prend pas en compte cellSize
-                k = frac(k * nCells);
+        //        //float3 cellOriginPos = floor(k * nCells).xzy; // Theo's style ... ne prend pas en compte cellSize
+        //        //k = frac(k * nCells);
 
-                return cellOriginPos + cellSize * float3(k.x, smoothstep(0.2f - .05f, .2f + .05f, k.x * k.y), k.y);
-            }
+        //        return cellOriginPos + cellSize * float3(k.x, smoothstep(0.2f - .05f, .2f + .05f, k.x * k.y), k.y);
+        //    }
 
-            );
-        */
+        //    );
+
 
         //##############        TD1 Objet        ##############
-        m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
-        m_Mf.mesh = CreateBlueLock(new Vector3(m_x, m_y, m_z), 5);
-        //m_Mf.mesh = CreateCage(new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateBlueLock(new Vector3(m_x, m_y, m_z), 5);
         //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
         //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
 
 
+        //m_Mf.mesh = CreateStrip(m_nSegmentsX, new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateCage(new Vector3(m_x, m_y, m_z));
 
         //##############        WingedEdge        ##############
 
@@ -243,7 +244,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         //m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
 
-        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
+        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
 
         //################          ConvertToCSVFormat        #######################
 
@@ -601,7 +602,6 @@ public class MeshGeneratorQuads : MonoBehaviour
         mesh.name = "cage";
 
         Vector3[] vertices = new Vector3[8];
-        int[] quads = new int[4 * 4];
 
         //vertices
         vertices[0] = new Vector3(-halfSize.x, halfSize.y, halfSize.z);
@@ -615,27 +615,13 @@ public class MeshGeneratorQuads : MonoBehaviour
         vertices[7] = new Vector3(-halfSize.x, -halfSize.y, -halfSize.z);
 
         //quads
+        int[] quads = new int[] {
+            4,3,2,1,
+            2,6,5,1,
+            4,8,7,3,
+            1,5,8,4
+        };
 
-        quads[0] = 1;
-        quads[1] = 2;
-        quads[2] = 3;
-        quads[3] = 4;
-       
-
-        quads[4] = 1;
-        quads[5] = 5;
-        quads[6] = 6;
-        quads[7] = 2;
-
-        quads[8] = 3;
-        quads[9] = 7;
-        quads[10] = 8;
-        quads[11] = 4;
-
-        quads[12] = 4;
-        quads[13] = 8;
-        quads[14] = 5;
-        quads[15] = 1;
 
 
         for (int i = 0; i < quads.Length; i++)
