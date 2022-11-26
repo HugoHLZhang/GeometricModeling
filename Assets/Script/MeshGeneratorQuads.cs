@@ -34,27 +34,27 @@ public class MeshGeneratorQuads : MonoBehaviour
     {
         m_Mf = GetComponent<MeshFilter>();
 
-        m_Mf.mesh = CreateStrip(m_nSegmentsX, new Vector3(m_x, m_y, m_z));
+        //m_Mf.mesh = CreateStrip(m_nSegmentsX, new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateGridXZ(m_nSegmentsX, m_nSegmentsY, new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateNormalizedGridXZ(m_nSegmentsX, m_nSegmentsY);
 
 
         //##############        Cylindre             ######################
 
-        m_Mf.mesh = CreateNormalizedGridXZ(4, 5,
-           (kX, kZ) =>
-           {
-               float rho, theta, y;
-               // coordinates mapping de (kX,kZ) -> (rho,theta,y)
-               theta = kX * 2 * Mathf.PI;
-               y = kZ * 6;
-               //rho = 3 + .25f * Mathf.Sin(kZ*2*Mathf.PI*4) ;
-               rho = m_Profile.Evaluate(kZ);
+        //m_Mf.mesh = CreateNormalizedGridXZ(4, 5,
+        //   (kX, kZ) =>
+        //   {
+        //       float rho, theta, y;
+        //       // coordinates mapping de (kX,kZ) -> (rho,theta,y)
+        //       theta = kX * 2 * Mathf.PI;
+        //       y = kZ * 6;
+        //       //rho = 3 + .25f * Mathf.Sin(kZ*2*Mathf.PI*4) ;
+        //       rho = m_Profile.Evaluate(kZ) * 2;
 
-               return new Vector3(rho * Mathf.Cos(theta), y, rho * Mathf.Sin(theta));
-               //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
-           }
-           );
+        //       return new Vector3(rho * Mathf.Cos(theta), y, rho * Mathf.Sin(theta));
+        //       //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
+        //   }
+        //   );
 
 
         //##############        Sphere             ######################
@@ -207,7 +207,7 @@ public class MeshGeneratorQuads : MonoBehaviour
 
 
         //##############        TD1 Objet        ##############
-        //m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
+        m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateBlueLock(new Vector3(m_x, m_y, m_z), 5);
         //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
         //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
@@ -239,12 +239,12 @@ public class MeshGeneratorQuads : MonoBehaviour
 
 
 
-        //m_WingedEdgeMesh.SubdivideCatmullClark();
+        m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
         //m_WingedEdgeMesh.SubdivideCatmullClark();
 
-        m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
+        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
 
         //################          ConvertToCSVFormat        #######################
 
