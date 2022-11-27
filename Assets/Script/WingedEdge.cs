@@ -102,7 +102,6 @@ namespace WingedEdge
             
             return borderEdges;
         }
-
     }
     public class Face
     {
@@ -135,21 +134,12 @@ namespace WingedEdge
                 faceVertices.Add((faceEdges[i].rightFace == this) ? faceEdges[i].startVertex : faceEdges[i].endVertex);
             return faceVertices;
         }
-        public List<WingedEdge> GetBorderEdges()
-        {
-            List<WingedEdge> borderEdges = new List<WingedEdge>();
-            List<WingedEdge> adjacentEdges = GetFaceEdges();
-            for (int i = 0; i < adjacentEdges.Count; i++)
-                if (adjacentEdges[i].leftFace == null) borderEdges.Add(adjacentEdges[i]);
-            return borderEdges;
-        }
     }
     public class WingedEdgeMesh
     {
         public List<Vertex> vertices;
         public List<WingedEdge> edges;
         public List<Face> faces;
-
         public WingedEdgeMesh(Mesh mesh)
         {
 

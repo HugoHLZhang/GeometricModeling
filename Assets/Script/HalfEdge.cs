@@ -31,7 +31,6 @@ namespace HalfEdge
             this.index = index;
             this.position = position;
         }
-
         public List<HalfEdge> GetAdjacentEdges()
         {
             List<HalfEdge> adjacentEdges = new List<HalfEdge>();
@@ -63,7 +62,6 @@ namespace HalfEdge
 
             return adjacentEdges;
         }
-
         public List<Face> GetAdjacentFaces()
         {
             List<HalfEdge> adjacentEdges = GetAdjacentEdges();
@@ -80,7 +78,6 @@ namespace HalfEdge
             
             return adjacentFaces;
         }
-
         public List<HalfEdge> GetBorderEdges()
         {
             List<HalfEdge> borderEdges = new List<HalfEdge>();
@@ -91,8 +88,6 @@ namespace HalfEdge
 
             return borderEdges;
         }
-
-
     }
     public class Face
     {
@@ -102,7 +97,6 @@ namespace HalfEdge
         {
             this.index = index;
         }
-
         public List<HalfEdge> GetFaceEdges()
         {
             List<HalfEdge> faceEdges = new List<HalfEdge>();
@@ -126,9 +120,6 @@ namespace HalfEdge
 
             return faceVertices;
         }
-
-        
-
     }
     public class HalfEdgeMesh
     {
