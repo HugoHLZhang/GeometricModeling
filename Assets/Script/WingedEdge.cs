@@ -30,9 +30,9 @@ namespace WingedEdge
             this.endCWEdge = endCWEdge;
             this.endCCWEdge = endCCWEdge;
         }
+        //Cherche EndCW Edge en parcourant les edges dans le sens anti-horaire CCW.
         public WingedEdge FindBorderEndCW()
         {
-            //Find Last endCCW with no leftFace
             WingedEdge endCW = this.endCCWEdge;
             
             while(endCW.leftFace != null)
@@ -40,9 +40,9 @@ namespace WingedEdge
             
             return endCW;
         }
+        //Cherche StartCCW Edge en parcourant les edges dans le sens horaire CW.
         public WingedEdge FindBorderStartCCW()
         {
-            //Find Last startCW with no leftFace
             WingedEdge startCCW = this.startCWEdge;
 
             while(startCCW.leftFace != null)
@@ -61,11 +61,12 @@ namespace WingedEdge
             this.index = index;
             this.position = position;
         }
+
+        //Cherche dans le sens horaire CW
         public List<WingedEdge> GetAdjacentEdges()
         {
             List<WingedEdge> adjacentEdges = new List<WingedEdge>();
             WingedEdge wingedEdge = edge;
-
             do
             {
                 adjacentEdges.Add(wingedEdge);
@@ -74,25 +75,18 @@ namespace WingedEdge
             
             return adjacentEdges;
         }
+
+        //Parcours les adjacentEdges de la vertice en ignorant l'edge qui pointe vers la vertice et qui n'a pas de leftFace sinon un doublon s'ajoute dans la liste des adjacentFaces...
         public List<Face> GetAdjacentFaces()
         {
             List<WingedEdge> adjacentEdges = GetAdjacentEdges();
-            List<WingedEdge> borderEdges = GetBorderEdges();
             List<Face> adjacentFaces = new List<Face>();
-            //vertex not in border => nb adjacent Edges == nb adjacent Faces
-            if(borderEdges.Count == 0)
-            {
-                for (int i = 0; i < adjacentEdges.Count; i++)
-                    adjacentFaces.Add(this == adjacentEdges[i].startVertex ? adjacentEdges[i].rightFace : adjacentEdges[i].leftFace);
-            }
-            //vertex in border
-            else
-            {
-                for (int i = 0; i < adjacentEdges.Count; i++)
-                    if(!adjacentFaces.Contains(adjacentEdges[i].rightFace)) adjacentFaces.Add(adjacentEdges[i].rightFace);
-            }
+            for (int i = 0; i < adjacentEdges.Count; i++)
+                if( !(this == adjacentEdges[i].endVertex && adjacentEdges[i].leftFace == null)) adjacentFaces.Add(this == adjacentEdges[i].startVertex ? adjacentEdges[i].rightFace : adjacentEdges[i].leftFace);
             return adjacentFaces;
         }
+
+        //Les edges sans leftFace sont des edges en bordures.
         public List<WingedEdge> GetBorderEdges()
         {
             List<WingedEdge> borderEdges = new List<WingedEdge>();
@@ -111,12 +105,12 @@ namespace WingedEdge
         {
             this.index = index;
         }
+
+        //Edges d'une face dans le sens horaires
         public List<WingedEdge> GetFaceEdges()
         {
             List<WingedEdge> faceEdges = new List<WingedEdge>();
             WingedEdge wingedEdge = edge;
-
-            //Edge CW
             do
             {
                 faceEdges.Add(wingedEdge);
@@ -125,11 +119,12 @@ namespace WingedEdge
 
             return faceEdges;
         }
+        //Vertex d'une face dans le sens horaires
         public List<Vertex> GetFaceVertex()
         {
             List<WingedEdge> faceEdges = GetFaceEdges();
             List<Vertex> faceVertices = new List<Vertex>();
-            //Vertice CW
+
             for (int i = 0; i < faceEdges.Count; i++)
                 faceVertices.Add((faceEdges[i].rightFace == this) ? faceEdges[i].startVertex : faceEdges[i].endVertex);
             return faceVertices;
@@ -189,19 +184,21 @@ namespace WingedEdge
                         dicoEdges.Add(key, wingedEdge);
                     }
                     //otherwise complete the edge info
-                    else 
+                    else
+                    {
                         wingedEdge.leftFace = face;
+                    }
 
-                    //update vertex edge
+                    //add vertex edge
                     if (vertices[start].edge == null)   vertices[start].edge = wingedEdge;
                     if (vertices[end].edge == null)     vertices[end].edge = wingedEdge;
-                    //update face edge
+                    //add face edge
                     if (face.edge == null)              face.edge = wingedEdge;
 
                     faceEdges.Add(wingedEdge);
                     
                 }
-                //Update CCW and CW Edge
+                //Complete CCW and CW Edge
                 for (int j = 0; j < faceEdges.Count; j++)
                 {
                     if (faceEdges[j].rightFace == face)
@@ -217,7 +214,7 @@ namespace WingedEdge
                 }
 
             }
-            //Update CCW and CW Edge for borderEdges
+            //Complete borderEdges's CCW and CW Edge 
             for (int i = 0; i < edges.Count; i++)
             {
                 if(edges[i].leftFace == null)
@@ -265,28 +262,6 @@ namespace WingedEdge
 
             CatmullClarkCreateNewPoints(out facePoints, out edgePoints, out vertexPoints);
 
-            string p = "";
-            for (int i = 0; i < edgePoints.Count; i++)
-            {
-                p += "e" + i + " = " + edgePoints[i] + "\n";
-            }
-            Debug.Log(p);
-
-            string f = "";
-            for (int i = 0; i < facePoints.Count; i++)
-            {
-                f += "F" + i + " = " + facePoints[i] + "\n";
-            }
-            Debug.Log(f);
-
-            string v = "";
-            for (int i = 0; i < vertexPoints.Count; i++)
-            {
-                v += "V" + i + " = " + vertexPoints[i] + "\n";
-            }
-            Debug.Log(v);
-
-
             for (int i = 0; i < edgePoints.Count; i++)
                 SplitEdge(edges[i], edgePoints[i]);
            
@@ -331,7 +306,7 @@ namespace WingedEdge
                 List<WingedEdge> adjacentEdges = vertices[i].GetAdjacentEdges();
                 List<Face> adjacentFaces = vertices[i].GetAdjacentFaces();
 
-                //toutes les vertices possédant autant d’edges incidentes que de faces adjacentes.
+                //pour toutes les vertices possédant autant d’edges incidentes que de faces adjacentes.
                 if (adjacentEdges.Count == adjacentFaces.Count)
                 {
                     float n = adjacentFaces.Count;
@@ -387,17 +362,22 @@ namespace WingedEdge
         public void SplitFace(Face face, Vector3 splittingPoint)
         {
             bool isRecycled = false;
-
             Face currentFace = face;
-
             Vertex newVertex = new Vertex(vertices.Count, splittingPoint);
             vertices.Add(newVertex);
 
             List<WingedEdge> faceEdges= face.GetFaceEdges();
             List<Vertex> faceVertex = face.GetFaceVertex();
 
-            //Reorder Lists
-            //Last to first : easier to split face once reordered to update recycleFace and create newFace  
+            /* Raison du Reorder, on prend comme exemple la face à recycler:
+             * - Cas 1 (face.edge.leftFace = face) :
+             * La première edge de la liste faceEdges correspondra à la rightEdge et la seconde à la bottomEdge de la face à recycler.
+             * Ici il n'y a pas de problème, l'ordre de la liste dans ce cas 1 nous facilite le travail pour recycler et créer les nouvellles faces.
+             * - Cas 2 (face.edge.rightFace = face) :
+             * Le dernier élément de la liste faceEdges correspondra à la rightEdge et le premier élément à la bottomEdge.
+             * Ici l'ordre n'est pas idéal...
+             * Pour simplifier l'utilisation des liste de faceEdges et faceVertex, on décale le dernier élément à la premiere position de la liste pour obtenir une liste dans le même ordre que le cas 1.
+             */
             if (face.edge.rightFace == face)
             {
                 faceVertex.Insert(0, faceVertex[faceVertex.Count-1]);
@@ -406,192 +386,68 @@ namespace WingedEdge
                 faceEdges.Insert(0, faceEdges[faceEdges.Count - 1]);
                 faceEdges.RemoveAt(faceEdges.Count - 1);
             }
-
-            string v = "";
-            for (int i = 0; i < faceVertex.Count; i++)
+            for (int i = 0; i < faceEdges.Count; i += 2)
             {
-                v += "V" + faceVertex[i].index;
-            }
-            v += "\n";
-            for (int i = 0; i < faceEdges.Count; i++)
-            {
-                v += "e" + faceEdges[i].index;
-            }
-            Debug.Log(v);
-            
-
-            for (int i = 0; i < faceEdges.Count; i+=2)
-            {
-                
                 //Add newFace if old isRecycled
                 if (isRecycled)
                 {
                     currentFace = new Face(faces.Count);
                     faces.Add(currentFace);
                 }
-
-
                 WingedEdge rightEdge = faceEdges[i];
                 WingedEdge rightEdgePrevEdge = faceEdges[(i - 1 + faceEdges.Count) % faceEdges.Count];
+
                 WingedEdge bottomEdge = faceEdges[(i + 1) % faceEdges.Count];
                 WingedEdge bottomEdgeNextEdge = faceEdges[(i + 2) % faceEdges.Count];
 
                 WingedEdge topEdge;
                 WingedEdge leftEdge;
-                switch (i)
+
+                if (!isRecycled)
                 {
-                    case 0:
-                        topEdge = new WingedEdge(edges.Count, newVertex, faceVertex[i], currentFace, null, null, null, rightEdgePrevEdge, rightEdge);
-                        edges.Add(topEdge);
-                        leftEdge = new WingedEdge(edges.Count, newVertex, faceVertex[i + 2], null, currentFace, null, null, bottomEdge, bottomEdgeNextEdge);
-                        edges.Add(leftEdge);
-
-                        topEdge.startCWEdge = leftEdge;
-                        topEdge.endCWEdge = rightEdgePrevEdge;
-                        topEdge.endCCWEdge = rightEdge;
-
-
-
-                        leftEdge.startCCWEdge = topEdge;
-                        leftEdge.endCWEdge = bottomEdge;
-                        leftEdge.endCCWEdge = bottomEdgeNextEdge;
-
-                        if (rightEdgePrevEdge.startVertex == topEdge.endVertex) rightEdgePrevEdge.startCCWEdge = topEdge;
-                        if (rightEdgePrevEdge.endVertex == topEdge.endVertex) rightEdgePrevEdge.endCCWEdge = topEdge;
-
-                        if (rightEdge.startVertex == topEdge.endVertex) rightEdge.startCWEdge = topEdge;
-                        if (rightEdge.endVertex == topEdge.endVertex) rightEdge.endCWEdge = topEdge;
-
-                        if (bottomEdge.startVertex == leftEdge.endVertex) bottomEdge.startCCWEdge = leftEdge;
-                        if (bottomEdge.endVertex == leftEdge.endVertex) bottomEdge.endCCWEdge = leftEdge;
-
-                        if (bottomEdgeNextEdge.startVertex == leftEdge.endVertex) bottomEdgeNextEdge.startCWEdge = leftEdge;
-                        if (bottomEdgeNextEdge.endVertex == leftEdge.endVertex) bottomEdgeNextEdge.endCWEdge = leftEdge;
-
-                        newVertex.edge = topEdge;
-                        isRecycled = true;
-                        break;
-
-                    case 6:
-
+                    topEdge = new WingedEdge(edges.Count, newVertex, faceVertex[i], currentFace, null, null, null, rightEdgePrevEdge, rightEdge);
+                    edges.Add(topEdge);
+                    leftEdge = new WingedEdge(edges.Count, newVertex, faceVertex[i + 2], null, currentFace, null, null, bottomEdge, bottomEdgeNextEdge);
+                    edges.Add(leftEdge);
+                }
+                else
+                {
+                    if (i == 6)
+                    {
                         topEdge = edges[edges.Count - 1];
                         leftEdge = edges[edges.Count - 4];
 
                         topEdge.rightFace = currentFace;
                         leftEdge.leftFace = currentFace;
-
-                        topEdge.startCWEdge = leftEdge;
-                        leftEdge.startCCWEdge = topEdge;
-
-                        if (rightEdge.startVertex == topEdge.endVertex) rightEdge.rightFace = currentFace;
-                        if (rightEdge.endVertex == topEdge.endVertex) rightEdge.leftFace = currentFace;
-
-                        if (bottomEdge.startVertex == leftEdge.endVertex) bottomEdge.leftFace = currentFace;
-                        if (bottomEdge.endVertex == leftEdge.endVertex) bottomEdge.rightFace = currentFace;
-
-                        currentFace.edge = topEdge;
-
-                        break;
-                    default:
-
+                    }
+                    else
+                    {
                         topEdge = edges[edges.Count - 1];
                         topEdge.rightFace = currentFace;
 
                         leftEdge = new WingedEdge(edges.Count, newVertex, faceVertex[i + 2], null, currentFace, null, null, bottomEdge, bottomEdgeNextEdge);
                         edges.Add(leftEdge);
-
-                        topEdge.startCWEdge = leftEdge;
-
-                        leftEdge.startCCWEdge = topEdge;
-                        leftEdge.endCWEdge = bottomEdge;
-                        leftEdge.endCCWEdge = bottomEdgeNextEdge;
-
-                        if (rightEdge.startVertex == topEdge.endVertex) rightEdge.rightFace = currentFace;
-                        if (rightEdge.endVertex == topEdge.endVertex) rightEdge.leftFace = currentFace;
-
-                        if (bottomEdge.startVertex == leftEdge.endVertex)
-                        {
-                            bottomEdge.startCCWEdge = leftEdge;
-                            bottomEdge.leftFace = currentFace;
-                        }
-                        if (bottomEdge.endVertex == leftEdge.endVertex)
-                        {
-                            bottomEdge.endCCWEdge = leftEdge;
-                            bottomEdge.rightFace = currentFace;
-                        }
-
-                        if (bottomEdgeNextEdge.startVertex == leftEdge.endVertex) bottomEdgeNextEdge.startCWEdge = leftEdge;
-                        if (bottomEdgeNextEdge.endVertex == leftEdge.endVertex) bottomEdgeNextEdge.endCWEdge = leftEdge;
-
-                        currentFace.edge = topEdge;
-                        break;
-
+                    }
                 }
 
+                //connect topEdge and leftEdge
+                topEdge.startCWEdge = leftEdge;
+                leftEdge.startCCWEdge = topEdge;
+
+                //update rightEdge
+                if (rightEdge.startVertex == topEdge.endVertex) { rightEdge.startCWEdge = topEdge; } else { rightEdge.endCWEdge = topEdge; }
+                if (rightEdge.startVertex == topEdge.endVertex) { rightEdge.rightFace = currentFace; } else { rightEdge.leftFace = currentFace; }
+
+                //update bottomEdge
+                if (bottomEdge.startVertex == leftEdge.endVertex) { bottomEdge.startCCWEdge = leftEdge; } else { bottomEdge.endCCWEdge = leftEdge; }
+                if (bottomEdge.startVertex == leftEdge.endVertex) { bottomEdge.leftFace = currentFace; } else { bottomEdge.rightFace = currentFace; }
+
+                //complete currentFace.edge and newVertex.edge
+                if(currentFace.edge == null) currentFace.edge = topEdge;
+                newVertex.edge = topEdge;
 
 
-                Debug.Log(i);
-                ////newEdge's usefull information
-                //WingedEdge endCWEdge = faceEdges[(i - 1 + faceEdges.Count) % faceEdges.Count];
-                //WingedEdge endCCWEdge = faceEdges[i];
-                //WingedEdge parallelEdge = faceEdges[(i + 1) % faceEdges.Count];
-
-                ////Create newEdge
-                //WingedEdge newEdge = new WingedEdge(edges.Count, newVertex, faceVertex[i], currentFace, null, null, null, endCWEdge, endCCWEdge);
-                //edges.Add(newEdge);
-
-
-                ////Update for every split Face
-
-                ////Update Vertex's and Face's edge
-                //newVertex.edge = newEdge;
-                //if (currentFace.edge == null) currentFace.edge = newEdge;
-
-
-                ////Update des edges adjacentes à la endVertex de la nouvelle Edge
-                //if (endCWEdge.endVertex == newEdge.endVertex) endCWEdge.endCCWEdge = newEdge;
-                //if (endCWEdge.startVertex == newEdge.endVertex) endCWEdge.startCCWEdge = newEdge;
-
-
-                //if (endCCWEdge.startVertex == newEdge.endVertex) endCCWEdge.startCWEdge = newEdge;
-                //if (endCCWEdge.endVertex == newEdge.endVertex) endCCWEdge.endCWEdge = newEdge;
-
-
-                ////Update for the newFace
-                //if (isRecycled)
-                //{
-                //    //Update rightFace's & leftFace's edge
-                //    if (endCCWEdge.startVertex == newEdge.endVertex)
-                //    {
-                //        endCCWEdge.rightFace = currentFace;
-                //        if (parallelEdge.startVertex == endCCWEdge.endVertex) parallelEdge.rightFace = currentFace;
-                //        if (parallelEdge.endVertex == endCCWEdge.endVertex) parallelEdge.leftFace = currentFace;
-                //    }
-                //    if (endCCWEdge.endVertex == newEdge.endVertex)
-                //    {
-                //        endCCWEdge.leftFace = currentFace;
-                //        if (parallelEdge.startVertex == endCCWEdge.startVertex) parallelEdge.rightFace = currentFace;
-                //        if (parallelEdge.endVertex == endCCWEdge.startVertex) parallelEdge.leftFace = currentFace;
-                //    }
-
-                //    //Update newEdge startCCW/startCWEdge and leftFace
-                //    newEdge.startCCWEdge = edges[edges.Count - 2];
-                //    edges[edges.Count - 2].startCWEdge = newEdge;
-                //    newEdge.leftFace = edges[edges.Count - 2].rightFace;
-
-                //    //Update the last split of the Face - complete missing information of the first newEdge created
-                //    //startCCW/startCWEdge and leftFace 
-                //    if (i == 6)
-                //    {
-                //        newEdge.startCWEdge = edges[edges.Count - 4];
-                //        edges[edges.Count - 4].startCCWEdge = newEdge;
-                //        edges[edges.Count - 4].leftFace = currentFace;
-                //    }
-
-
-                //}
-
-                //isRecycled = true;
+                isRecycled = true;
             }
         }
         public string ConvertToCSVFormat(string separator = "\t")

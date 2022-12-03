@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEngine;
 using WingedEdge;
 using HalfEdge;
-
+using Random = UnityEngine.Random;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
@@ -15,245 +15,243 @@ public class MeshGeneratorQuads : MonoBehaviour
     MeshFilter m_Mf;
     WingedEdgeMesh m_WingedEdgeMesh;
     HalfEdgeMesh m_HalfEdgeMesh;
-    [SerializeField] private float m_x;
-    [SerializeField] private float m_y;
-    [SerializeField] private float m_z;
-    [SerializeField] private int m_nSectors;
-    [SerializeField] private int m_nSegmentsX;
-    [SerializeField] private int m_nSegmentsY;
+    enum Objets { Strip, GridXZ, NormalizedGridXZ, NormalizedGridXZ_SIMD1, NormalizedGridXZ_SIMD2, Cyclindre, Sphere, Torus, Helix, Box, Chips, Cage, RegularPolygon, PacMan, BlueLock };
+    enum MeshType { VertexFaceMesh, WingedEdgeMesh, HalfEdgeMesh};
 
+    [Header("Mesh")]
+    [SerializeField] private Objets Create;
+    [SerializeField] private MeshType mesh_type;
+    [SerializeField] private bool reverseMesh = false;
+    [Range(0, 4)]
+    [SerializeField] private int nb_subdivide = 0;
+    [SerializeField] AnimationCurve m_Profile;
+
+
+    [Header("Size")]
+    [SerializeField] private float m_x = 5;
+    [SerializeField] private float m_y = 5;
+    [SerializeField] private float m_z = 5;
+    [SerializeField] private int m_nSectors = 5;
+    [SerializeField] private int m_nSegmentsX = 5;
+    [SerializeField] private int m_nSegmentsZ = 5;
+
+
+    [Header("Gizmos")]
     [SerializeField] bool m_DisplayMeshWires = true;
     [SerializeField] bool m_DisplayMeshInfos = true;
     [SerializeField] bool m_DisplayMeshEdges = true;
     [SerializeField] bool m_DisplayMeshVertices = true;
     [SerializeField] bool m_DisplayMeshFaces = true;
 
-    [SerializeField] AnimationCurve m_Profile;
 
     void Start()
     {
         m_Mf = GetComponent<MeshFilter>();
 
-        //m_Mf.mesh = CreateStrip(m_nSegmentsX, new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateGridXZ(m_nSegmentsX, m_nSegmentsY, new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateNormalizedGridXZ(m_nSegmentsX, m_nSegmentsY);
+        //Create Mesh
+        switch (Create)
+        {
+            case Objets.Strip:
+                m_Mf.mesh = CreateStrip(m_nSegmentsX, new Vector3(m_x, m_y, m_z));
+                break;
+            case Objets.GridXZ:
+                m_Mf.mesh = CreateGridXZ(m_nSegmentsX, m_nSegmentsZ, new Vector3(m_x, m_y, m_z));
+                break;
+            case Objets.NormalizedGridXZ:
+                m_Mf.mesh = CreateNormalizedGridXZ(m_nSegmentsX, m_nSegmentsZ);
+                break;
+            case Objets.Cyclindre:
+                m_Mf.mesh = CreateNormalizedGridXZ(m_nSegmentsX, m_nSegmentsZ,
+                   (kX, kZ) =>
+                   {
+                       float rho, theta, y;
+                       // coordinates mapping de (kX,kZ) -> (rho,theta,y)
+                       theta = kX * 2 * Mathf.PI;
+                       y = kZ * 6;
+                       //rho = 3 + .25f * Mathf.Sin(kZ*2*Mathf.PI*4) ;
+                       rho = m_Profile.Evaluate(kZ) * 2;
 
+                       return new Vector3(rho * Mathf.Cos(theta), y, rho * Mathf.Sin(theta));
+                       //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
+                   }
+                   );
+                break;
+            case Objets.Sphere:
+                m_Mf.mesh = CreateNormalizedGridXZ(m_nSegmentsX, m_nSegmentsZ,
+                    (kX, kZ) =>
+                    {
+                        float rho, theta, phi;
+                        // coordinates mapping de (kX,kZ) -> (rho,theta,phi)
+                        theta = kX * 2 * Mathf.PI;
+                        phi = kZ * Mathf.PI;
+                        rho = 2 + .55f * Mathf.Cos(kX * 2 * Mathf.PI * 8) * Mathf.Sin(kZ * 2 * Mathf.PI * 6);
+                        //rho = 3 + .25f * Mathf.Sin(kZ*2*Mathf.PI*4) ;
+                        rho = m_Profile.Evaluate(kZ) * 2;
 
-        //##############        Cylindre             ######################
+                        return new Vector3(rho * Mathf.Cos(theta) * Mathf.Sin(phi), rho * Mathf.Cos(phi), rho * Mathf.Sin(theta) * Mathf.Sin(phi));
+                        //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
+                    }
+                    );
+                break;
+            case Objets.Torus:
+                m_Mf.mesh = CreateNormalizedGridXZ(40, 4,
+                    (kX, kZ) =>
+                    {
+                        float R = 3;
+                        float r = 1;
+                        float theta = 2 * Mathf.PI * kX;
+                        Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
 
-        //m_Mf.mesh = CreateNormalizedGridXZ(4, 5,
-        //   (kX, kZ) =>
-        //   {
-        //       float rho, theta, y;
-        //       // coordinates mapping de (kX,kZ) -> (rho,theta,y)
-        //       theta = kX * 2 * Mathf.PI;
-        //       y = kZ * 6;
-        //       //rho = 3 + .25f * Mathf.Sin(kZ*2*Mathf.PI*4) ;
-        //       rho = m_Profile.Evaluate(kZ) * 2;
+                        float alpha = Mathf.PI * 2 * kZ;
+                        Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up;
 
-        //       return new Vector3(rho * Mathf.Cos(theta), y, rho * Mathf.Sin(theta));
-        //       //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
-        //   }
-        //   );
+                        return OOmega + OmegaP;
+                    }
+                );
+                break;
+            case Objets.Helix:
+                m_Mf.mesh = CreateNormalizedGridXZ(40, 4,
+                  (kX, kZ) =>
+                  {
+                      float theta = 4 * 2 * Mathf.PI * kX;
+                      float r = 1;
+                      float R = 2;
+                      Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
+                      float alpha = Mathf.PI * 2 * kZ + 2;
+                      Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up + Vector3.up * kX * 2 * r * 4;
+                      return OOmega + OmegaP;
+                  }
+                );
 
+                break;
+    
+            // Unity.Mathematics
+            case Objets.NormalizedGridXZ_SIMD1:
+                m_Mf.mesh = CreateNormalizedGridXZ_SIMD(int3(100, 100, 1),
+                    (k) =>
+                    {
+                        //return lerp(float3(-5f, 0, -5f), float3(5f, 0, 5f), k.xzy);
+                        //return lerp(float3(-5, 1, -5), float3(5, 0, 5), float3(k.x, step(.2f, k.x), k.y)) ;
+                        //return lerp(float3(-5, 1, -5), float3(5, 0, 5), float3(k.x, smoothstep(.2f - 0.05f, .2f + 0.05f, k.x), k.y)) ;
+                        //return lerp(float3(-5, 1, -5), float3(5, 0, 5), float3(k.x, smoothstep(0.2f - .05f, .2f + .05f, k.x * k.y), k.y));
+                        return lerp(float3(-5, 1, -5), float3(5, 0, 5), float3(
+                            k.x,
+                            0.5f * (sin(k.x * 2 * PI * 4) * cos(k.y * 2 * PI * 3) + 1),
+                             //smoothstep(0.2f - .05f, .2f + .05f, 0.5f*(sin(k.x*2*PI*4) * cos(k.y*2*PI*3)+1))
+                             k.y));
+                    }
+                    );
+                break;
+            case Objets.NormalizedGridXZ_SIMD2:
+                // repeated pattern
+                int3 nCells = int3(3, 3, 1);
+                int3 nSegmentsPerCell = int3(100, 100, 1);
+                float3 kStep = float3(1) / (nCells * nSegmentsPerCell);
 
-        //##############        Sphere             ######################
+                float3 cellSize = float3(1, .5f, 1);
 
-        //m_Mf.mesh = CreateNormalizedGridXZ(10, 5,
-        //    (kX, kZ) =>
-        //    {
-        //        float rho, theta, phi;
-        //        // coordinates mapping de (kX,kZ) -> (rho,theta,phi)
-        //        theta = kX * 2 * Mathf.PI;
-        //        phi = kZ * Mathf.PI;
-        //        rho = 2 + .55f * Mathf.Cos(kX * 2 * Mathf.PI * 8) * Mathf.Sin(kZ * 2 * Mathf.PI * 6);
-        //        //rho = 3 + .25f * Mathf.Sin(kZ*2*Mathf.PI*4) ;
-        //        rho = m_Profile.Evaluate(kZ) * 2;
+                m_Mf.mesh = CreateNormalizedGridXZ_SIMD(
+                    nCells * nSegmentsPerCell,
+                    (k) =>
+                    {
+                        // calculs sur la grille normalisée
+                        int3 index = (int3)floor(k / kStep);
+                        int3 localIndex = index % nSegmentsPerCell;
+                        int3 indexCell = index / nSegmentsPerCell;
+                        float3 relIndexCell = (float3)indexCell / nCells;
 
-        //        return new Vector3(rho * Mathf.Cos(theta) * Mathf.Sin(phi), rho * Mathf.Cos(phi), rho * Mathf.Sin(theta) * Mathf.Sin(phi));
-        //        //return new Vector3(Mathf.Lerp(-1.5f, 5.5f, kX), 1, Mathf.Lerp(-2, 4, kZ));
-        //    }
-        //    );
+                        // calculs sur les positions dans l'espace
 
-        //##############        Torus (donut)             ######################
+                        float3 cellOriginPos = lerp(
+                            -cellSize * nCells.xzy * .5f,
+                            cellSize * nCells.xzy * .5f,
+                            relIndexCell.xzy);
 
-        //m_Mf.mesh = CreateNormalizedGridXZ(20, 5,
-        //    (kX, kZ) =>
-        //    {
-        //        float R = 3;
-        //        float r = 1;
-        //        float theta = 2 * Mathf.PI * kX;
-        //        Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
+                        //float3 cellOriginPos = floor(k * nCells).xzy; // Theo's style ... ne prend pas en compte cellSize
+                        k = frac(k * nCells);
 
-        //        float alpha = Mathf.PI * 2 * kZ;
-        //        Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up;
+                        return cellOriginPos + cellSize * float3(k.x, smoothstep(0.2f - .05f, .2f + .05f, k.x * k.y), k.y);
+                    }
+                    );
+                break;
 
-        //        return OOmega + OmegaP;
-        //    }
-        //);
+            //##############        TD1 Objet        ##############
+            case Objets.Box:
+                m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
+                break;
+            case Objets.Chips:
+                m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
+                break;
+            case Objets.RegularPolygon:
+                m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
+                break;
+            case Objets.PacMan:
+                m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
+                break;
+            case Objets.Cage:
+                m_Mf.mesh = CreateCage(new Vector3(m_x, m_y, m_z));
+                break;
+            case Objets.BlueLock:
+                m_Mf.mesh = CreateBlueLock(new Vector3(m_x, m_y, m_z), 5);
+                break;
 
+        }
 
+        //Reverse Mesh
+        if (reverseMesh) Reverse(m_Mf.mesh);
 
-        //##############        Helix             ######################
-        //Helix
-        //m_Mf.mesh = CreateNormalizedGridXZ(20*6, 10,
-        //    (kX, kZ) =>
-        //    {
-        //        float R = 3;
-        //        float r = 1;
-        //        float theta = 6*2 * Mathf.PI * kX;
-        //        Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
+        //Mesh Structure
+        switch (mesh_type)
+        {
+            //##############        WingedEdge  &&  TD 2 CatmullClark        ##############
+            case MeshType.WingedEdgeMesh:
 
-        //        float alpha = Mathf.PI * 2 * kZ;
-        //        Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up +Vector3.up*kX*2*r*6;
-        //        return OOmega+OmegaP;
-        //    }
-        //);
+                m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
+                m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
+                int i = 0;
+                while(i < nb_subdivide)
+                {
+                    if (m_Mf.mesh.GetIndices(0).Length > 10000)
+                    {
+                        Debug.Log("Only subdivided the mesh " + i + " times to avoid memory surcharge"); break;
+                    }
+                    m_WingedEdgeMesh.SubdivideCatmullClark();
+                    m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
+                    i++;
 
+                }
+                nb_subdivide = i;
+                GUIUtility.systemCopyBuffer = m_WingedEdgeMesh.ConvertToCSVFormat();
+                ConvertToCSV();
 
+                break;
 
-        //##############        Helix Inner             ######################
+            //##############        HalfEdge  &&  TD 2 CatmullClark         ##############
+            case MeshType.HalfEdgeMesh:
+                m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);
+                m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
+                i = 0;
+                while (i < nb_subdivide)
+                {
+                    if (m_Mf.mesh.GetIndices(0).Length > 10000)
+                    {
+                        Debug.Log("Only subdivided the mesh " + i + " times to avoid memory surcharge"); break;
+                    }
+                    m_HalfEdgeMesh.SubdivideCatmullClark();
+                    m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
+                    i++;
 
-        //m_Mf.mesh = CreateNormalizedGridXZ(40, 4,
-        //  (kx, kz) =>
-        //  {
-        //      float theta = 4 * 2 * Mathf.PI * kx;
-        //      float r = 1;
-        //      float R = 2;
-        //      Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
-        //      float alpha = Mathf.PI * 2 * (1 - kz) + 2;
-        //      Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up + Vector3.up * kx * 2 * r * 4;
-        //      return OOmega + OmegaP;
-        //  }
-        //);
+                }
+                nb_subdivide = i;
 
-        //##############        Helix Outer             ######################
-        //m_Mf.mesh = CreateNormalizedGridXZ(40, 4,
-        //  (kX, kZ) =>
-        //  {
-        //      float theta = 4 * 2 * Mathf.PI * kX;
-        //      float r = 1;
-        //      float R = 2;
-        //      Vector3 OOmega = new Vector3(R * Mathf.Cos(theta), 0, R * Mathf.Sin(theta));
-        //      float alpha = Mathf.PI * 2 * kZ + 2;
-        //      Vector3 OmegaP = r * Mathf.Cos(alpha) * OOmega.normalized + r * Mathf.Sin(alpha) * Vector3.up + Vector3.up * kX * 2 * r * 4;
-        //      return OOmega + OmegaP;
-        //  }
-        //);
-        //bool bothSides = true;
-        ////##############        Torus Outer             ######################
-        //m_Mf.mesh = CreateNormalizedGridXZ_SIMD((bothSides ? 2 : 1) * int3(50,20,1), 
-        //    (k) =>  
-        //        {
-        //            if (bothSides) k = abs((k - .5f) * 2);
-        //            //return lerp(float3(-5f, 0, -5f), float3(5f, 0, 5f), k.xzy);
-        //            //return lerp(float3(-5, 1, -5), float3(5,0, 5), float3(k.x, step(.2f, k.x), k.y));
-        //            //return lerp(float3(-5, 1, -5), float3(5, 0, 5), float3(k.x, smoothstep(.2f-0.05f, 0.2f + 0.05f, k.x), k.y));
-        //            //return lerp(float3(-5, 1, -5), float3(5, 0, 5), float3(k.x, smoothstep(.2f-0.05f, 0.2f + 0.05f, k.x * k.y), k.y));
-        //            return lerp(float3(-5, 1, -5), float3(5, 0, 5), float3(k.x, 0.5f*( sin(k.x*2*PI*4) * cos(k.y*2*PI*3) + 1), k.y));
+                GUIUtility.systemCopyBuffer = m_HalfEdgeMesh.ConvertToCSVFormat();
+                ConvertToCSV();
+                break;
+            default:
+                ConvertToCSV();
+                break;
 
-        //        }
-        //    );
-
-
-
-        ////##############        Unity.Mathematics            ######################
-
-        //bool bothSides = false;
-
-        //m_Mf.mesh = CreateNormalizedGridXZ_SIMD(
-        //    (bothSides ? 2 : 1) * int3(5, 5, 1),
-        //    (k) =>
-        //    {
-        //        if (bothSides) k = abs((k - .5f) * 2);
-        //    //return lerp(float3(-5f, 0, -5f), float3(5f, 0, 5f), k.xzy);
-        //    //return lerp(float3(-2, 1, -2), float3(2, 0, 2), float3(k.x, step(.5f, k.x), k.y));
-        //    //return lerp(float3(-5, 1, -5), float3(5, 0, 5), float3(k.x, smoothstep(.2f - 0.05f, .2f + 0.05f, k.x), k.y));
-        //    return lerp(float3(-5, 1, -2), float3(5, 0, 2), float3(k.x, smoothstep(0.2f, .2f, k.x * k.y), k.y));
-        //    //return lerp(float3(-5, 1, -5), float3(5, 0, 5),
-        //    //            float3(k.x, 0.5f * (sin(k.x * 2 * PI * 4) * cos(k.y * 2 * PI * 3) + 1),
-        //    //smoothstep(0.2f - .05f, .2f + .05f, 0.5f * (sin(k.x * 2 * PI * 4) * cos(k.y * 2 * PI * 3) + 1)));
-        //    //k.y));
-        //    }
-        //    );
-        // repeated pattern
-
-        //int3 nCells = int3(3, 3, 1);
-        //int3 nSegmentsPerCell = int3(20, 20, 1);
-        //float3 kStep = float3(1) / (nCells * nSegmentsPerCell);
-
-        //float3 cellSize = float3(1, .5f, 1);
-
-        //m_Mf.mesh = CreateNormalizedGridXZ_SIMD(
-        //    nCells * nSegmentsPerCell,
-        //    (k) =>
-        //    {
-        //        // calculs sur la grille normalisée
-        //        int3 index = (int3)floor(k / kStep);
-        //        int3 localIndex = index % nSegmentsPerCell;
-        //        int3 indexCell = index / nSegmentsPerCell;
-        //        float3 relIndexCell = (float3)indexCell / nCells;
-
-        //        // calculs sur les positions dans l'espace
-        //        float3 cellOriginPos = lerp(-cellSize * nCells.xzy * .5f, cellSize * nCells.xzy * .5f, relIndexCell.xzy);
-
-        //        //float3 cellOriginPos = floor(k * nCells).xzy; // Theo's style ... ne prend pas en compte cellSize
-        //        //k = frac(k * nCells);
-
-        //        return cellOriginPos + cellSize * float3(k.x, smoothstep(0.2f - .05f, .2f + .05f, k.x * k.y), k.y);
-        //    }
-
-        //    );
-
-
-        //##############        TD1 Objet        ##############
-        //m_Mf.mesh = CreateBox(new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateBlueLock(new Vector3(m_x, m_y, m_z), 5);
-        //m_Mf.mesh = CreateChips(new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateChipsInner(new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateRegularPolygon(new Vector3(m_x, m_y, m_z), m_nSectors);
-        //m_Mf.mesh = CreatePacman(new Vector3(m_x, m_y, m_z), m_nSectors);
-
-
-        //m_Mf.mesh = CreateStrip(m_nSegmentsX, new Vector3(m_x, m_y, m_z));
-        //m_Mf.mesh = CreateCage(new Vector3(m_x, m_y, m_z));
-        m_Mf.mesh = CreateCageOuter(new Vector3(m_x, m_y, m_z));
-
-        //##############        WingedEdge        ##############
-
-        m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
-        //GUIUtility.systemCopyBuffer = m_WingedEdgeMesh.ConvertToCSVFormat();
-        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
-
-        //##############        HalfEdge        ##############
-
-        //m_HalfEdgeMesh = new HalfEdgeMesh(m_Mf.mesh);
-        //GUIUtility.systemCopyBuffer = m_HalfEdgeMesh.ConvertToCSVFormat();
-        //m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
-
-
-
-        //################          TD 2 CatmullClark        #######################
-
-        //m_HalfEdgeMesh.SubdivideCatmullClark();
-        //GUIUtility.systemCopyBuffer = m_HalfEdgeMesh.ConvertToCSVFormat();
-        //m_Mf.mesh = m_HalfEdgeMesh.ConvertToFaceVertexMesh();
-
-
-
-        //m_WingedEdgeMesh.SubdivideCatmullClark();
-        //m_WingedEdgeMesh.SubdivideCatmullClark();
-        //m_WingedEdgeMesh.SubdivideCatmullClark();
-        //m_WingedEdgeMesh.SubdivideCatmullClark();
-
-        //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
-
-        //################          ConvertToCSVFormat        #######################
-
-        //FaceVertexMEsh
-        //GUIUtility.systemCopyBuffer = ConvertToCSV();
-        //HalfEdgeMesh
-        //WingedEdgeMesh
+        }
     }
     string ConvertToCSV(string separator = "\t")
     {
@@ -491,67 +489,6 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         return mesh;
     }
-    Mesh CreateBox_SIMD(float3 halfSize)
-    {
-        Mesh mesh = new Mesh();
-        mesh.name = "box";
-
-
-        Vector3[] vertices = new Vector3[8];
-        int[] quads = new int[6 * 4];
-
-        //vertices
-        vertices[0] = new Vector3(-halfSize.x, halfSize.y, halfSize.z);
-        vertices[1] = new Vector3(halfSize.x, halfSize.y, halfSize.z);
-        vertices[2] = new Vector3(halfSize.x, halfSize.y, -halfSize.z);
-        vertices[3] = new Vector3(-halfSize.x, halfSize.y, -halfSize.z);
-
-        vertices[4] = new Vector3(-halfSize.x, -halfSize.y, halfSize.z);
-        vertices[5] = new Vector3(halfSize.x, -halfSize.y, halfSize.z);
-        vertices[6] = new Vector3(halfSize.x, -halfSize.y, -halfSize.z);
-        vertices[7] = new Vector3(-halfSize.x, -halfSize.y, -halfSize.z);
-
-        //quads
-
-        quads[0] = 1;
-        quads[1] = 2;
-        quads[2] = 3;
-        quads[3] = 4;
-
-        quads[4] = 1;
-        quads[5] = 5;
-        quads[6] = 6;
-        quads[7] = 2;
-
-        quads[8] = 2;
-        quads[9] = 6;
-        quads[10] = 7;
-        quads[11] = 3;
-
-        quads[12] = 3;
-        quads[13] = 7;
-        quads[14] = 8;
-        quads[15] = 4;
-
-        quads[16] = 4;
-        quads[17] = 8;
-        quads[18] = 5;
-        quads[19] = 1;
-
-        quads[20] = 5;
-        quads[21] = 8;
-        quads[22] = 7;
-        quads[23] = 6;
-
-        for (int i = 0; i < quads.Length; i++)
-        {
-            quads[i]--;
-        }
-        mesh.vertices = vertices;
-        mesh.SetIndices(quads, MeshTopology.Quads, 0);
-
-        return mesh;
-    }
     Mesh CreateChips(Vector3 halfSize)
     {
         Mesh mesh = new Mesh();
@@ -597,51 +534,7 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         return mesh;
     }
-    Mesh CreateChipsInner(Vector3 halfSize)
-    {
-        Mesh mesh = new Mesh();
-        mesh.name = "chips";
-
-        Vector3[] vertices = new Vector3[8];
-        int[] quads = new int[3 * 4];
-
-        //vertices
-        vertices[0] = new Vector3(-halfSize.x, halfSize.y, halfSize.z);
-        vertices[1] = new Vector3(halfSize.x, halfSize.y, halfSize.z);
-        vertices[2] = new Vector3(halfSize.x, halfSize.y, -halfSize.z);
-        vertices[3] = new Vector3(-halfSize.x, halfSize.y, -halfSize.z);
-
-        vertices[4] = new Vector3(-halfSize.x, -halfSize.y, halfSize.z);
-        vertices[5] = new Vector3(halfSize.x, -halfSize.y, halfSize.z);
-        vertices[6] = new Vector3(halfSize.x, -halfSize.y, -halfSize.z);
-        vertices[7] = new Vector3(-halfSize.x, -halfSize.y, -halfSize.z);
-
-        //quads
-
-        quads[0] = /*1*/4;
-        quads[1] = /*2*/3;
-        quads[2] = /*3*/2;
-        quads[3] = /*4*/1;
-
-        quads[4] = /*1*/2;
-        quads[5] = /*5*/6;
-        quads[6] = /*6*/5;
-        quads[7] = /*2*/1;
-
-        quads[8] = /*3 */4;
-        quads[9] = /*7 */8;
-        quads[10] =/* 8*/7;
-        quads[11] =/* 4*/3;
-
-        for (int i = 0; i < quads.Length; i++)
-        {
-            quads[i]--;
-        }
-        mesh.vertices = vertices;
-        mesh.SetIndices(quads, MeshTopology.Quads, 0);
-
-        return mesh;
-    }
+    //Dérivé de Box et Chips
     Mesh CreateCage(Vector3 halfSize)
     {
         Mesh mesh = new Mesh();
@@ -674,76 +567,6 @@ public class MeshGeneratorQuads : MonoBehaviour
         {
             quads[i]--;
         }
-        mesh.vertices = vertices;
-        mesh.SetIndices(quads, MeshTopology.Quads, 0);
-
-        return mesh;
-    }
-    Mesh CreateCageOuter(Vector3 halfSize)
-    {
-        Mesh mesh = new Mesh();
-        mesh.name = "cage";
-
-        Vector3[] vertices = new Vector3[8];
-
-        //vertices
-        vertices[0] = new Vector3(-halfSize.x, halfSize.y, halfSize.z);
-        vertices[1] = new Vector3(halfSize.x, halfSize.y, halfSize.z);
-        vertices[2] = new Vector3(halfSize.x, halfSize.y, -halfSize.z);
-        vertices[3] = new Vector3(-halfSize.x, halfSize.y, -halfSize.z);
-
-        vertices[4] = new Vector3(-halfSize.x, -halfSize.y, halfSize.z);
-        vertices[5] = new Vector3(halfSize.x, -halfSize.y, halfSize.z);
-        vertices[6] = new Vector3(halfSize.x, -halfSize.y, -halfSize.z);
-        vertices[7] = new Vector3(-halfSize.x, -halfSize.y, -halfSize.z);
-
-        //quads
-        int[] quads = new int[] {
-            1,2,3,4,
-            1,5,6,2,
-            3,7,8,4,
-            4,8,5,1
-        };
-
-
-
-        for (int i = 0; i < quads.Length; i++)
-        {
-            quads[i]--;
-        }
-        mesh.vertices = vertices;
-        mesh.SetIndices(quads, MeshTopology.Quads, 0);
-
-        return mesh;
-    }
-    Mesh CreateStade(Vector3 halfSize)
-    {
-        Mesh mesh = new Mesh();
-        mesh.name = "stade";
-
-        Vector3[] vertices = new Vector3[8];
-
-
-        int index = 0;
-        vertices[index++] = new Vector3(halfSize.x, -halfSize.y, halfSize.z); // vertice du haut
-        vertices[index++] = new Vector3(halfSize.x, -halfSize.y, -halfSize.z); // vertice du haut
-        vertices[index++] = new Vector3(-halfSize.x, -halfSize.y, -halfSize.z); // vertice du haut
-        vertices[index++] = new Vector3(-halfSize.x, -halfSize.y, halfSize.z); // vertice du haut
-
-        vertices[index++] = new Vector3(halfSize.x, halfSize.y, halfSize.z); // vertice du bas
-        vertices[index++] = new Vector3(halfSize.x, halfSize.y, -halfSize.z); // vertice du bas
-        vertices[index++] = new Vector3(-halfSize.x, halfSize.y, -halfSize.z); // vertice du bas
-        vertices[index++] = new Vector3(-halfSize.x, halfSize.y, halfSize.z); // vertice du bas
-        //int[] quads = new int[24] { 0, 3, 7, 4, 3, 2, 6, 7, 2, 1, 5, 6, 1, 0, 4, 5, 2, 3, 0, 1, 5, 4, 7, 6 };
-        int[] quads = new int[] {
-            
-            1,2,3,0,
-            4,5,1,0,
-            3,7,4,0,
-            2,6,7,3,
-            5,6,2,1
-        };
-
         mesh.vertices = vertices;
         mesh.SetIndices(quads, MeshTopology.Quads, 0);
 
@@ -790,6 +613,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         mesh.SetIndices(quads, MeshTopology.Quads, 0);
         return mesh;
     }
+    //Dérivé de CreateRegularPolygon 
     Mesh CreateBlueLock(Vector3 halfSize, int nSectors)
     {
         Mesh mesh = new Mesh();
@@ -904,6 +728,49 @@ public class MeshGeneratorQuads : MonoBehaviour
         mesh.vertices = vertices;
         mesh.SetIndices(quads, MeshTopology.Quads, 0);
         return mesh;
+    }
+
+    void AddHolesRandomly(Mesh mesh)
+    {
+        Mesh newMesh = new Mesh();
+        mesh.name = mesh.name +"with holes";
+
+        int[] quads = mesh.GetIndices(0);
+        int nbHoles = Random.Range(0, quads.Length);
+        int[] reverse_quads = new int[quads.Length - nbHoles];
+
+
+    }
+    void Reverse(Mesh mesh)
+    {
+        Mesh reverseMesh = new Mesh();
+        mesh.name = "reverse"+mesh.name;
+
+        Vector3[] vertices = mesh.vertices;
+
+        int[] quads = mesh.GetIndices(0);
+
+        int[] reverse_quads = new int[quads.Length];
+
+        int index = 0;
+        for (int i = 0; i < quads.Length/4; i++)
+        {
+            //quad's vertices index
+            int[] quad_index = new int[4];
+            for (int j = 0; j < 4; j++)
+                quad_index[j] = quads[4 * i + j];
+
+            reverse_quads[index++] = quad_index[0];
+            reverse_quads[index++] = quad_index[3];
+            reverse_quads[index++] = quad_index[2];
+            reverse_quads[index++] = quad_index[1];
+        }
+
+
+        reverseMesh.vertices = vertices;
+        reverseMesh.SetIndices(reverse_quads, MeshTopology.Quads, 0);
+        m_Mf.mesh = reverseMesh;
+
     }
     private void OnDrawGizmos()
     {
