@@ -15,7 +15,7 @@ public class MeshGeneratorQuads : MonoBehaviour
     MeshFilter m_Mf;
     WingedEdgeMesh m_WingedEdgeMesh;
     HalfEdgeMesh m_HalfEdgeMesh;
-    enum Objets { Strip, GridXZ, NormalizedGridXZ, NormalizedGridXZ_SIMD1, NormalizedGridXZ_SIMD2, Cyclindre, Sphere, Torus, Helix, Box, Chips, Cage, RegularPolygon, PacMan, BlueLock };
+    enum Objets { Strip, GridXZ, NormalizedGridXZ, NormalizedGridXZ_SIMD1, NormalizedGridXZ_SIMD2, Cyclindre, Sphere, Torus, Helix, Box, Chips, Cage, RegularPolygon, PacMan, PacMan3D, BlueLock };
     enum MeshType { VertexFaceMesh, WingedEdgeMesh, HalfEdgeMesh};
 
     [Header("Mesh")]
@@ -194,12 +194,15 @@ public class MeshGeneratorQuads : MonoBehaviour
             case Objets.BlueLock:
                 m_Mf.mesh = CreateBlueLock(new Vector3(m_x, m_y, m_z), 5);
                 break;
-
+            case Objets.PacMan3D:
+                m_Mf.mesh = Create3DPacman(new Vector3(m_x, m_y, m_z), 5);
+                break;
         }
 
         //Reverse Mesh
         if (reverseMesh) Reverse(m_Mf.mesh);
 
+        int i;
         //Mesh Structure
         switch (mesh_type)
         {
@@ -207,21 +210,21 @@ public class MeshGeneratorQuads : MonoBehaviour
             case MeshType.WingedEdgeMesh:
 
                 m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
-                m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
-                int i = 0;
-                while(i < nb_subdivide)
-                {
-                    if (m_Mf.mesh.GetIndices(0).Length > 10000)
-                    {
-                        Debug.Log("Only subdivided the mesh " + i + " times to avoid memory surcharge"); break;
-                    }
-                    m_WingedEdgeMesh.SubdivideCatmullClark();
-                    m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
-                    i++;
+                //m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
+                //i = 0;
+                //while (i < nb_subdivide)
+                //{
+                //    if (m_Mf.mesh.GetIndices(0).Length > 10000)
+                //    {
+                //        Debug.Log("Only subdivided the mesh " + i + " times to avoid memory surcharge"); break;
+                //    }
+                //    m_WingedEdgeMesh.SubdivideCatmullClark();
+                //    m_Mf.mesh = m_WingedEdgeMesh.ConvertToFaceVertexMesh();
+                //    i++;
 
-                }
-                nb_subdivide = i;
-                GUIUtility.systemCopyBuffer = m_WingedEdgeMesh.ConvertToCSVFormat();
+                //}
+                //nb_subdivide = i;
+                //GUIUtility.systemCopyBuffer = m_WingedEdgeMesh.ConvertToCSVFormat();
                 ConvertToCSV();
 
                 break;
@@ -435,7 +438,6 @@ public class MeshGeneratorQuads : MonoBehaviour
 
 
         Vector3[] vertices = new Vector3[8];
-        int[] quads = new int[6 * 4];
 
         //vertices
         vertices[0] = new Vector3(-halfSize.x, halfSize.y, halfSize.z);
@@ -449,36 +451,15 @@ public class MeshGeneratorQuads : MonoBehaviour
         vertices[7] = new Vector3(-halfSize.x, -halfSize.y, -halfSize.z);
 
         //quads
+        int[] quads = new int[] {
+            1,2,3,4,
+            1,5,6,2,
+            2,6,7,3,
+            3,7,8,4,
+            4,8,5,1,
+            5,8,7,6
+        };
 
-        quads[0] = 1;
-        quads[1] = 2;
-        quads[2] = 3;
-        quads[3] = 4;
-
-        quads[4] = 1;
-        quads[5] = 5;
-        quads[6] = 6;
-        quads[7] = 2;
-
-        quads[8] = 2;
-        quads[9] = 6;
-        quads[10] = 7;
-        quads[11] = 3;
-
-        quads[12] = 3;
-        quads[13] = 7;
-        quads[14] = 8;
-        quads[15] = 4;
-
-        quads[16] = 4;
-        quads[17] = 8;
-        quads[18] = 5;
-        quads[19] = 1;
-
-        quads[20] = 5;
-        quads[21] = 8;
-        quads[22] = 7;
-        quads[23] = 6;
 
         for (int i = 0; i < quads.Length; i++)
         {
@@ -534,8 +515,7 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         return mesh;
     }
-    //Dérivé de Box et Chips
-    Mesh CreateCage(Vector3 halfSize)
+    Mesh CreateCage(Vector3 halfSize) //Dérivé de Box et Chips 
     {
         Mesh mesh = new Mesh();
         mesh.name = "cage";
@@ -572,6 +552,52 @@ public class MeshGeneratorQuads : MonoBehaviour
 
         return mesh;
     }
+    Mesh Create3DPacman(Vector3 halfSize, int nSectors, float startAngle = Mathf.PI / 3, float endAngle = 5 * Mathf.PI / 3)
+    {
+        Mesh mesh = new Mesh();
+        mesh.name = "3DPacman";
+
+        Vector3[] vertices = new Vector3[12];
+
+        //vertices
+        vertices[0] = new Vector3(-halfSize.x, halfSize.y, halfSize.z);
+        vertices[1] = new Vector3(halfSize.x, halfSize.y, halfSize.z);
+        vertices[2] = new Vector3(halfSize.x, halfSize.y, -halfSize.z);
+        vertices[3] = new Vector3(-halfSize.x, halfSize.y, -halfSize.z);
+
+        vertices[4] = new Vector3(-halfSize.x, -halfSize.y, halfSize.z);
+        vertices[5] = new Vector3(halfSize.x, -halfSize.y, halfSize.z);
+        vertices[6] = new Vector3(halfSize.x, -halfSize.y, -halfSize.z);
+        vertices[7] = new Vector3(-halfSize.x, -halfSize.y, -halfSize.z);
+
+        vertices[8] = new Vector3(-halfSize.x, 0, halfSize.z);
+        vertices[9] = new Vector3(halfSize.x, 0, halfSize.z);
+        vertices[10] = new Vector3(halfSize.x, 0, 0);
+        vertices[11] = new Vector3(-halfSize.x, 0, 0);
+
+        //quads 10
+        int[] quads = new int[] {
+            0,1,2,3,
+            4,5,6,7,
+            0,8,9,1,
+            8,4,5,9,
+            1,9,10,2,
+            9,5,6,10,
+            0,3,11,8,
+            8,11,7,4,
+            2,10,11,3,
+            10,6,7,11
+
+
+        };
+
+
+        mesh.vertices = vertices;
+        mesh.SetIndices(quads, MeshTopology.Quads, 0);
+
+        return mesh;
+    }
+
     Mesh CreateRegularPolygon(Vector3 halfSize, int nSectors)
     {
         Mesh mesh = new Mesh();
@@ -613,8 +639,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         mesh.SetIndices(quads, MeshTopology.Quads, 0);
         return mesh;
     }
-    //Dérivé de CreateRegularPolygon 
-    Mesh CreateBlueLock(Vector3 halfSize, int nSectors)
+    Mesh CreateBlueLock(Vector3 halfSize, int nSectors) //Dérivé de CreateRegularPolygon 
     {
         Mesh mesh = new Mesh();
         mesh.name = "BlueLock";
@@ -729,7 +754,7 @@ public class MeshGeneratorQuads : MonoBehaviour
         mesh.SetIndices(quads, MeshTopology.Quads, 0);
         return mesh;
     }
-
+    
     void AddHolesRandomly(Mesh mesh)
     {
         Mesh newMesh = new Mesh();
