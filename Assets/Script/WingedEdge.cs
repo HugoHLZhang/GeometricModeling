@@ -192,7 +192,7 @@ namespace WingedEdge
                     if (vertices[end].edge == null)     vertices[end].edge = wingedEdge;
                     
                     //Faces
-                    face.edge = wingedEdge;
+                    if(face.edge == null) face.edge = wingedEdge;
 
                     faceEdges.Add(wingedEdge);
                     
@@ -457,14 +457,14 @@ namespace WingedEdge
             //Vertices
             for (int i = 0; i < vertices.Count; i++)
             {
-                List<WingedEdge> adjacentEdges  = vertices[i].GetAdjacentEdges();
-                List<Face>       adjacentFaces  = vertices[i].GetAdjacentFaces();
-                List<WingedEdge> borderEdges    = vertices[i].GetBorderEdges();
+                List<WingedEdge> adjacentEdges = vertices[i].GetAdjacentEdges();
+                List<Face> adjacentFaces = vertices[i].GetAdjacentFaces();
+                List<WingedEdge> borderEdges = vertices[i].GetBorderEdges();
 
-                List<int> edgesIndex        = new List<int>();
-                List<int> facesIndex        = new List<int>();
-                List<int> borderEdgesIndex  = new List<int>();
-                
+                List<int> edgesIndex = new List<int>();
+                List<int> facesIndex = new List<int>();
+                List<int> borderEdgesIndex = new List<int>();
+
                 for (int j = 0; j < adjacentEdges.Count; j++)
                     edgesIndex.Add(adjacentEdges[j].index);
 
@@ -515,7 +515,7 @@ namespace WingedEdge
                 //Edge CW
                 for (int j = 0; j < faceEdges.Count; j++)
                     edgesIndex.Add(faceEdges[j].index);
-                
+
                 //Vertice CW
                 for (int j = 0; j < faceVertex.Count; j++)
                     vertexIndex.Add(faceVertex[j].index);
@@ -523,7 +523,7 @@ namespace WingedEdge
                 strings[i] += faces[i].index + separator
                             + faces[i].edge.index + separator
                             + string.Join(" ", edgesIndex) + separator
-                            + string.Join(" ", vertexIndex) + separator 
+                            + string.Join(" ", vertexIndex) + separator
                             + separator;
             }
 
