@@ -230,7 +230,7 @@ namespace HalfEdge
         }
         public void SubdivideCatmullClark()
         {
-            Debug.Log("#################                    WindgedEdgeMesh SubdivideCatmullClark                   #################");
+            Debug.Log("------------------------WindgedEdgeMesh SubdivideCatmullClark------------------------");
             List<Vector3> facePoints;
             List<Vector3> edgePoints;
             List<Vector3> vertexPoints;
@@ -392,7 +392,7 @@ namespace HalfEdge
         public string ConvertToCSVFormat(string separator = "\t") // Conversion vers format CSV
         {
             if (this == null) return "";
-            Debug.Log("#################      HalfEdgeMesh ConvertTOCSVFormat     #################");
+            Debug.Log("------------------------HalfEdgeMesh ConvertTOCSVFormat------------------------");
 
             // Attributs
 

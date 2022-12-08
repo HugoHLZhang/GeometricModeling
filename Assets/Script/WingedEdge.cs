@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
-
+using Random = UnityEngine.Random;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
@@ -252,6 +252,96 @@ namespace WingedEdge
             faceVertexMesh.SetIndices(m_quads, MeshTopology.Quads, 0);
 
             return faceVertexMesh;
+        }
+
+        public void RemoveFace()
+        {
+            //remove face inner only
+            int face_index = Random.Range(0, faces.Count);
+            bool canRemove = false;
+            //every edge of the face has left and right face.
+            Face currFace = null;
+            List<WingedEdge> faceEdges = new List<WingedEdge>();
+            while (canRemove == false)
+            {
+                currFace = faces[face_index];
+                faceEdges = currFace.GetFaceEdges();
+                List<Vertex> faceVertex = currFace.GetFaceVertex();
+
+                for (int i = 0; i < faceVertex.Count; i++)
+                {
+                    if (faceVertex[i].GetBorderEdges().Count == 0)
+                    {
+                        canRemove = true;
+                    }
+                    else
+                    {
+                        canRemove = false;
+                        face_index = Random.Range(0, faces.Count);
+                        break;
+                    }
+                }
+
+                //faceEdges = currFace.GetFaceEdges();
+
+
+                //for (int i = 0; i < faceEdges.Count; i++)
+                //{
+                //    if (faceEdges[i].leftFace == null)
+                //    {
+                //        canRemove = false;
+                //        face_index = Random.Range(0, faces.Count);
+                //        break;
+                //    }
+                //    else
+                //    {
+                //        canRemove = true;
+                //    }
+                //}
+
+            }
+
+
+
+            for (int i = 0; i < faceEdges.Count; i++)
+            {
+                if (faceEdges[i].rightFace == currFace)
+                {
+                    faceEdges[i].rightFace = faceEdges[i].leftFace;
+                    faceEdges[i].leftFace = null;
+                    
+                    
+                    Vertex start = faceEdges[i].startVertex;
+                    Vertex end = faceEdges[i].endVertex;
+
+                    faceEdges[i].startVertex = end;
+                    faceEdges[i].endVertex = start;
+
+                    WingedEdge startCW = faceEdges[i].startCWEdge;
+                    WingedEdge startCCW = faceEdges[i].startCCWEdge;
+                    WingedEdge endCW= faceEdges[i].endCWEdge;
+                    WingedEdge endCCW = faceEdges[i].endCCWEdge;
+                    
+                    faceEdges[i].startCWEdge = endCW;
+                    faceEdges[i].startCCWEdge = endCCW;
+                    faceEdges[i].endCCWEdge = startCCW;
+                    faceEdges[i].endCWEdge = startCW;
+                }
+                if(faceEdges[i].leftFace ==currFace)
+                {
+                    faceEdges[i].leftFace = null;
+                }
+            }
+
+
+            faces.Remove(currFace);
+
+            for (int i = currFace.index; i < faces.Count; i++)
+            {
+                faces[i].index--;
+            }
+
+
         }
         public void SubdivideCatmullClark()
         {
