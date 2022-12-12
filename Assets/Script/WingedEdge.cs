@@ -137,7 +137,6 @@ namespace WingedEdge
         public List<Face> faces;
         public WingedEdgeMesh(Mesh mesh)
         {
-            Debug.Log("------------------------FaceVertexMesh convert to WingedEdgeMesh------------------------");
 
             int nEdges= 4; //quads
 
@@ -227,7 +226,6 @@ namespace WingedEdge
         }
         public Mesh ConvertToFaceVertexMesh()
         {
-            Debug.Log("------------------------WindgedEdgeMesh convert to FaceVertexMesh------------------------");
 
             Mesh faceVertexMesh = new Mesh();
             // magic happens 
@@ -253,7 +251,6 @@ namespace WingedEdge
 
             return faceVertexMesh;
         }
-
         public void RemoveFace()
         {
             //remove face inner only
@@ -345,7 +342,6 @@ namespace WingedEdge
         }
         public void SubdivideCatmullClark()
         {
-            Debug.Log("------------------------SubdivideCatmullClark------------------------");
             List<Vector3> facePoints;
             List<Vector3> edgePoints;
             List<Vector3> vertexPoints;
@@ -492,7 +488,7 @@ namespace WingedEdge
                 WingedEdge rightEdgePrevEdge = faceEdges[(i - 1 + faceEdges.Count) % faceEdges.Count];
                 WingedEdge bottomEdgeNextEdge = faceEdges[(i + 2) % faceEdges.Count];
 
-                if (!isRecycled) //recycled face
+                if (!isRecycled) //edges de face recyclé
                 {
                     topEdge = new WingedEdge(edges.Count, newVertex, faceVertex[i], currentFace, null, null, null, rightEdgePrevEdge, rightEdge);
                     edges.Add(topEdge);
@@ -501,7 +497,7 @@ namespace WingedEdge
                 }
                 else
                 {
-                    if (i == 6) //last face
+                    if (i == 6) //edges de la last face
                     {
                         topEdge = edges[edges.Count - 1];
                         leftEdge = edges[edges.Count - 4];
@@ -509,7 +505,7 @@ namespace WingedEdge
                         topEdge.rightFace = currentFace;
                         leftEdge.leftFace = currentFace;
                     }
-                    else // 2nd and 3rd face
+                    else //edges de la 2e et 3e face
                     {
                         topEdge = edges[edges.Count - 1];
                         topEdge.rightFace = currentFace;
@@ -541,7 +537,6 @@ namespace WingedEdge
         public string ConvertToCSVFormat(string separator = "\t")
         {
             if (this == null) return "";
-
             List<string> strings = new List<string>();
 
             //Vertices
@@ -577,7 +572,9 @@ namespace WingedEdge
             }
 
             for (int i = vertices.Count; i < edges.Count; i++)
+            {
                 strings.Add(separator + separator + separator + separator + separator + separator + separator);
+            }
 
             //Edges
             for (int i = 0; i < edges.Count; i++)
@@ -622,7 +619,6 @@ namespace WingedEdge
                         + "Index" + separator + "Start Vertex" + separator + "End Vertex" + separator + "Left Face" + separator + "Right Face" + separator + "Start CCW Edge" + separator + "Start CW Edge" + separator + "End CW Edge" + separator + "End CCW Edge" + separator + separator 
                         + "Index" + separator + "Edge" + separator + "CW Edges" + separator + "CW Vertices\n"
                         + string.Join("\n", strings);
-            Debug.Log(str);
             return str;
         }
         public void DrawGizmos(bool drawVertices, bool drawEdges, bool drawFaces, Transform transform)

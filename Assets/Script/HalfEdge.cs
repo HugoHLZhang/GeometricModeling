@@ -121,7 +121,6 @@ namespace HalfEdge
         public List<Vertex> vertices;
         public List<HalfEdge> edges;
         public List<Face> faces;
-
         public HalfEdgeMesh(Mesh mesh) // Constructeur prenant un mesh Vertex-Face en param�tre //magic happens
         {
             int nEdges = 4;
@@ -149,14 +148,14 @@ namespace HalfEdge
                 for (int j = 0; j < 4; j++)
                     quad_index[j] = m_quads[nEdges * i + j];
 
-                HalfEdge prevEdge = null;
+                //HalfEdge prevEdge = null;
                 for (int j = 0; j < quad_index.Length; j++)
                 {
                     int start = quad_index[j];
                     int end = quad_index[(j + 1) % nEdges];
 
                     ulong key = (ulong)Mathf.Min(start, end) + ((ulong)Mathf.Max(start, end) << 32);
-                    HalfEdge newEdge = null;
+                    HalfEdge newEdge;
                     //Create newEdge if not in dico
                     if (dicoEdges.TryGetValue(key, out halfEdge))
                     {
@@ -177,21 +176,17 @@ namespace HalfEdge
                     if (face.edge == null) face.edge = newEdge;
                     if (vertices[start].outgoingEdge == null) vertices[start].outgoingEdge = newEdge;
 
-                    //not first Edge
-                    if (prevEdge != null)
+                    if(j != 0)
                     {
-                        newEdge.prevEdge = prevEdge;
-                        prevEdge.nextEdge = newEdge;
+                        newEdge.prevEdge = edges[edges.Count - 2];
+                        edges[edges.Count - 2].nextEdge = newEdge;
                     }
-                    //last Edge
-                    if (j == 3)
+
+                    if(j == 3)
                     {
                         newEdge.nextEdge = edges[edges.Count - 4];
                         edges[edges.Count - 4].prevEdge = newEdge;
                     }
-
-                    prevEdge = newEdge;
-
                 }
             }
 
@@ -230,7 +225,6 @@ namespace HalfEdge
         }
         public void SubdivideCatmullClark()
         {
-            Debug.Log("------------------------WindgedEdgeMesh SubdivideCatmullClark------------------------");
             List<Vector3> facePoints;
             List<Vector3> edgePoints;
             List<Vector3> vertexPoints;
@@ -392,7 +386,6 @@ namespace HalfEdge
         public string ConvertToCSVFormat(string separator = "\t") // Conversion vers format CSV
         {
             if (this == null) return "";
-            Debug.Log("------------------------HalfEdgeMesh ConvertTOCSVFormat------------------------");
 
             // Attributs
 
@@ -479,7 +472,6 @@ namespace HalfEdge
                 "Index" + separator + "sourceVertex" + separator + "Face" + separator + "prevEdge" + separator + "nextEdge" + separator + "twinEdge" + separator + separator +
                 "Index" + separator + "Edge" + separator + "CW Face Edges" + separator + "CW Face Vertices\n"
                 + string.Join("\n", strings);
-            Debug.Log(str);
             return str;
         }
         public void DrawGizmos(bool drawVertices, bool drawEdges, bool drawFaces, Transform transform) // Dessins des Gizmos
@@ -516,7 +508,7 @@ namespace HalfEdge
                 Vector3 C = new Vector3();
                 for (int j = 0; j < faceVertex.Count; j++)
                 {
-                    Gizmos.DrawLine(transform.TransformPoint(faceVertex[j].position), transform.TransformPoint(faceVertex[(j + 1) % faceVertex.Count].position));
+                    if (drawFaces) Gizmos.DrawLine(transform.TransformPoint(faceVertex[j].position), transform.TransformPoint(faceVertex[(j + 1) % faceVertex.Count].position));
                     C += faceVertex[j].position;
                 }
                 if (drawFaces) Handles.Label(transform.TransformPoint(C / 4f), "F" + faces[i].index, style);
