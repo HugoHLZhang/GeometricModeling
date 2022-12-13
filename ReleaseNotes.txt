@@ -1,11 +1,11 @@
 GUIDE D'UTILISATION :
 
 	- Voir la scène "MeshCraft" pour générer des objets 3D.
-	- Voir la scène "ProjetBlueLock" pour visualiser notre projet contenant plusieurs objets 3D différents subdivisés de 0 à 4 fois maximum.
+	- Voir la scène "ProjetBlueLock" pour visualiser notre projet contenant plusieurs objets 3D différents subdivisés de 0 à 4 fois.
 
 LES FONCTIONNALITÉS DÉVELOPPÉES : 
 
-    - MeshGeneratorQuads.cs :
+    - MeshGeneratorQuads.cs et MeshGeneratorQuadsEditor.cs:
 
 	Un éditeur personnalisé pour générer facilement un objet 3D.
 
@@ -37,6 +37,12 @@ LES FONCTIONNALITÉS DÉVELOPPÉES :
 	Ayant commencé par développer WingedEdge, nous avons remarqué que nous pouvons réadapter les méthodes de ce script dans HalfEdge 
 	en restructurant les méthodes afin qu’elles soient fonctionnelles pour HalfEdge.
 
+   - DrawGizmos.cs et Gravity.cs :
+
+	Ces scripts sont utilisés la scène "ProjetBlueLock". 
+	En activant les Gizmos dans la scène et la fenêtre game, on pourra voir les gizmos des mesh. 
+	Et pour que la balle rebondisse bien on a ajouté un phisycal material sans friction et tous les objets avec le bounciness au maximum.
+
 LES SCÈNES UNITY3D CORRESPONDANTES :
 
 	La scène nommée “ProjetBlueLock” correspond à notre projet. 
@@ -55,8 +61,13 @@ LA RÉPARTITION DES T CHES ENTRE LES MEMBRES DU GROUPE :
 
 	On a travaillé ensemble sur la compréhension du sujet et la création de la scène “ProjetBlueLock”.
 
-	Sur la partie programmation, on a créé un dépôt git et une branche par personne.
+	Sur la partie programmation, on a créé un dépôt git et une branche par personne. 
 
 	Hugo :		WingedEdge
 	Oussama :	HalfEdge
 	Rayan :		HalfEdge
+
+AMÉLIORATIONS POSSIBLES :
+
+	Créer une méthode pour vérifier qu'un mesh est bien de type manifold.
+	Retravailler la méthode RemoveFace qu'il fonctionne sur tous les mesh.
