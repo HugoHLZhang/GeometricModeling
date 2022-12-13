@@ -1,0 +1,62 @@
+GUIDE D'UTILISATION :
+
+	- Voir la scène "MeshCraft" pour générer des objets 3D.
+	- Voir la scène "ProjetBlueLock" pour visualiser notre projet contenant plusieurs objets 3D différents subdivisés de 0 à 4 fois maximum.
+
+LES FONCTIONNALITÉS DÉVELOPPÉES : 
+
+    - MeshGeneratorQuads.cs :
+
+	Un éditeur personnalisé pour générer facilement un objet 3D.
+
+	Les objets 3D pouvant être générer :
+	    - avec un GridXZ : Segment, Grid, Cylindre, Sphère, Torus, Helix...
+	    - objets simples : Box, Chips, Cage, BlueLock, Polygon, Pacman, Cone, Cylindre
+
+	Outils pour débugger :
+	    - ConvertToCSV
+	    - DrawGizmos
+
+	En se basant sur des objets simples du TD1, on a créer des nouveaux objets 3D tel que BlueLock, Cone, Cylindre et Cage.
+
+    - HalfEdge.cs et WingedEdge.cs :
+
+    	- GetAdjacentEdges, GetAdjacentFaces, GetBorderEdges permettent de 
+	  récupérer dans des listes les edges adjacentes, les faces adjacentes et les edges en bordure.
+    	- GetFaceEdges permet de récupérer dans une liste les edges de chaque faces
+    	- GetFaceVertex récupère la liste des vertex de chaque faces
+    	- ConvertToFaceVertexMesh qui permet de stocker dans un mesh la conversion vers un mesh FaceVertex
+    	- SubdivideCatmullClark qui sert à subdiviser un mesh
+    	- CatmullClarkCreateNewPoints qui est une méthode intermédiaire permettant de créer les nouveaux points du mesh subdivisé
+    	- SplitEdge diviser toutes les edges
+    	- SplitFace divise toutes les faces
+    	- ConvertToCSVFormat convertit les valeurs dans un format CSV 
+	  et on a ajouté des informations en plus (Vertex Adjacent Edge/Adjacent Face/BorderEdge, etc…) 
+	  qui nous ont permis de debugger comme pour la méthode DrawGizmos
+
+	Ayant commencé par développer WingedEdge, nous avons remarqué que nous pouvons réadapter les méthodes de ce script dans HalfEdge 
+	en restructurant les méthodes afin qu’elles soient fonctionnelles pour HalfEdge.
+
+LES SCÈNES UNITY3D CORRESPONDANTES :
+
+	La scène nommée “ProjetBlueLock” correspond à notre projet. 
+
+	Une deuxième scène “MeshCraft” permet de générer des meshs avec des quads. 
+
+	Un editor vous permettra de générer des mesh avec la structure WingedEdge, HalfEdge ou FaceVertex.
+
+LES LIMITATIONS ET BUG CONNUS :
+
+	Une des limitations de ce projet est la subdivision qui est limitée à cause de la class List qui ne peut pas contenir une infinité de données 
+	et l’ordinateur qui ne peut pas supporter un trop grand nombre de données. 
+	Ne surtout pas faire créer mesh avec trop de faces.
+
+LA RÉPARTITION DES T CHES ENTRE LES MEMBRES DU GROUPE :
+
+	On a travaillé ensemble sur la compréhension du sujet et la création de la scène “ProjetBlueLock”.
+
+	Sur la partie programmation, on a créé un dépôt git et une branche par personne.
+
+	Hugo :		WingedEdge
+	Oussama :	HalfEdge
+	Rayan :		HalfEdge
