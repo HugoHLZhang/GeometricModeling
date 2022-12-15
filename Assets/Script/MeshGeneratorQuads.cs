@@ -440,7 +440,7 @@ public class MeshGeneratorQuads : MonoBehaviour
                 m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
                 if (addHoles)
                 {
-                    if (nb_holes > math.floor(m_nSegmentsX / 2.5f) * (math.floor(m_nSegmentsZ / 2.5f) - 1)) nb_holes = (int)(math.floor(m_nSegmentsX / 2.5f) * (math.floor(m_nSegmentsZ / 2.5f) - 1));
+                    if (nb_holes > math.floor(m_nSegmentsX / 2.5f) * (math.floor(m_nSegmentsZ / 2.5f) - 1)) nb_holes = (int)(math.floor(m_nSegmentsX / 2.5f) * (math.floor(m_nSegmentsZ / 2.5f) - 1)) - 1;
                     for (int j = 0; j < nb_holes; j++)
                     {
                         m_WingedEdgeMesh.RemoveFace();
