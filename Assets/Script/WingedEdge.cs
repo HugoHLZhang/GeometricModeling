@@ -432,9 +432,11 @@ namespace WingedEdge
         }
         public void SplitEdge(WingedEdge edge, Vector3 splittingPoint)
         {
+            //create/add new vertex
             Vertex newVertex = new Vertex(vertices.Count, splittingPoint);
             vertices.Add(newVertex);
 
+            //create/add newEdge
             WingedEdge newEdge = new WingedEdge(edges.Count, newVertex, edge.endVertex, edge.rightFace, edge.leftFace, edge, edge, edge.endCWEdge, edge.endCCWEdge);
             edges.Add(newEdge);
 
@@ -473,7 +475,7 @@ namespace WingedEdge
              * - Cas 2 (face.edge.rightFace = face) :
              * Le dernier élément de la liste faceEdges correspondra à la rightEdge et le premier élément à la bottomEdge.
              * Ici l'ordre n'est pas idéal...
-             * Pour simplifier l'utilisation des liste de faceEdges et faceVertex, on décale le dernier élément à la premiere position de la liste pour obtenir une liste dans le même ordre que le cas 1.
+             * Pour simplifier l'utilisation des listes de faceEdges et faceVertex, on décale le dernier élément à la premiere position de la liste pour obtenir une liste dans le même ordre que le cas 1.
              */
             if (face.edge.rightFace == face)
             {
