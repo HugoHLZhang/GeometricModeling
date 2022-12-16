@@ -339,14 +339,14 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  nb_holes: 456
+  nb_holes: 9
   addHoles: 1
   m_x: 5
   m_y: 5
   m_z: 5
   m_nSectors: 20
-  m_nSegmentsX: 20
-  m_nSegmentsZ: 19
+  m_nSegmentsX: 10
+  m_nSegmentsZ: 10
   m_DisplayMeshWires: 1
   m_DisplayMeshInfos: 0
   m_DisplayMeshEdges: 0

@@ -13,7 +13,7 @@ public class SubdivideMesh : MonoBehaviour
     [SerializeField] public MeshType mesh_type;
     [Header("Subdivide every x seconds")]
     [Range(1, 4)]
-    [SerializeField] public int seconds = 2;
+    [SerializeField] public int seconds = 1;
     WingedEdgeMesh m_WingedEdgeMesh;
     HalfEdgeMesh m_HalfEdgeMesh;
     Mesh m_Mesh;

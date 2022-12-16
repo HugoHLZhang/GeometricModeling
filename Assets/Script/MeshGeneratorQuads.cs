@@ -157,7 +157,7 @@ public class MeshGeneratorQuads : MonoBehaviour
             case Objets.NormalizedGridXZ_SIMD2:
                 // repeated pattern
                 int3 nCells = int3(3, 3, 1);
-                int3 nSegmentsPerCell = int3(100, 100, 1);
+                int3 nSegmentsPerCell = int3(5, 5, 1);
                 float3 kStep = float3(1) / (nCells * nSegmentsPerCell);
 
                 float3 cellSize = float3(1, .5f, 1);
@@ -367,7 +367,7 @@ public class MeshGeneratorQuads : MonoBehaviour
             case Objets.NormalizedGridXZ_SIMD2:
                 // repeated pattern
                 int3 nCells = int3(3, 3, 1);
-                int3 nSegmentsPerCell = int3(10, 10, 1);
+                int3 nSegmentsPerCell = int3(5 , 5, 1);
                 float3 kStep = float3(1) / (nCells * nSegmentsPerCell);
 
                 float3 cellSize = float3(1, .5f, 1);

@@ -1,13 +1,15 @@
 GUIDE D'UTILISATION :
 
-	- Voir la scène "MeshCraft" pour générer des objets 3D.
+	- Voir la scène "MeshCraft" pour générer des objets 3D avec des quads.
 	- Voir la scène "ProjetBlueLock" pour visualiser notre projet contenant plusieurs objets 3D différents subdivisés de 0 à 4 fois.
+	- Voir la scène "WingedEdgeMesh" pour visualiser les objets 3D subdivisés avec WingedEdge
+	- Voir la scène "HalfEdgeMesh" pour visualiser les objets 3D subdivisés avec HalfEdge
 
 LES FONCTIONNALITÉS DÉVELOPPÉES : 
 
-    - MeshGeneratorQuads.cs et MeshGeneratorQuadsEditor.cs:
+    - MeshGeneratorQuads.cs et MeshGeneratorQuadsEditor.cs :
 
-	Un éditeur personnalisé pour générer facilement un objet 3D.
+	Un éditeur personnalisé pour générer facilement un objet 3D avec la possibilité de subdivision par l'algorithme de Catmull-Clark.
 
 	Les objets 3D pouvant être générer :
 	    - avec un GridXZ : Segment, Grid, Cylindre, Sphère, Torus, Helix...
@@ -42,6 +44,11 @@ LES FONCTIONNALITÉS DÉVELOPPÉES :
 	Ces scripts sont utilisés la scène "ProjetBlueLock". 
 	En activant les Gizmos dans la scène et la fenêtre game, on pourra voir les gizmos des mesh. 
 	Et pour que la balle rebondisse bien on a ajouté un phisycal material sans friction et tous les objets avec le bounciness au maximum.
+
+   - SubdivideMesh et SubdivideMeshEditor :
+	
+	Ces scripts permettent à un mesh de se subdiviser 3 fois en boucle.
+	Un éditeur personnalisé permet d'obtenir des informations sur Mesh.
 
 LES SCÈNES UNITY3D CORRESPONDANTES :
 
