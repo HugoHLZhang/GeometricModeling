@@ -216,6 +216,7 @@ public class MeshGeneratorQuads : MonoBehaviour
                 m_Mf.mesh = CreateCone(new Vector3(m_x, m_y, m_z), m_nSectors);
                 break;
         }
+
         //---------------------Reverse Mesh---------------------
         if (reverseMesh) Reverse(m_Mf.mesh);
         if(Create != Objets.GridXZ &&  Create != Objets.NormalizedGridXZ && Create != Objets.NormalizedGridXZ_SIMD1 && Create != Objets.NormalizedGridXZ_SIMD2 && Create != Objets.Cyclindre && Create != Objets.Sphere && Create != Objets.Torus && Create != Objets.Helix) addHoles = false;
@@ -232,7 +233,8 @@ public class MeshGeneratorQuads : MonoBehaviour
                 //Only for GridXZ
                 if (addHoles)
                 {
-                    if (nb_holes > math.floor(m_nSegmentsX / 2.5f) * (math.floor(m_nSegmentsZ / 2.5f) - 1)) nb_holes = (int)(math.floor(m_nSegmentsX / 2.5f) * (math.floor(m_nSegmentsZ / 2.5f) - 1));
+                    //à améliorer
+                    if (nb_holes > math.floor(m_nSegmentsX / 3f) * (math.floor(m_nSegmentsZ / 3f) - 1)) nb_holes = (int)(math.floor(m_nSegmentsX / 3f) * (math.floor(m_nSegmentsZ / 3f) - 1));
                     for (int j = 0; j < nb_holes; j++)
                     {
                         m_WingedEdgeMesh.RemoveFace();
@@ -426,6 +428,7 @@ public class MeshGeneratorQuads : MonoBehaviour
                 m_Mf.mesh = CreateCone(new Vector3(m_x, m_y, m_z), m_nSectors);
                 break;
         }
+
         //---------------------Reverse Mesh---------------------
         if (reverseMesh) Reverse(m_Mf.mesh);
         if (Create != Objets.GridXZ && Create != Objets.NormalizedGridXZ && Create != Objets.NormalizedGridXZ_SIMD1 && Create != Objets.NormalizedGridXZ_SIMD2 && Create != Objets.Cyclindre && Create != Objets.Sphere && Create != Objets.Torus && Create != Objets.Helix) addHoles = false;
@@ -440,7 +443,8 @@ public class MeshGeneratorQuads : MonoBehaviour
                 m_WingedEdgeMesh = new WingedEdgeMesh(m_Mf.mesh);
                 if (addHoles)
                 {
-                    if (nb_holes > math.floor(m_nSegmentsX / 2.5f) * (math.floor(m_nSegmentsZ / 2.5f) - 1)) nb_holes = (int)(math.floor(m_nSegmentsX / 2.5f) * (math.floor(m_nSegmentsZ / 2.5f) - 1)) - 1;
+                    //à améliorer
+                    if (nb_holes > math.floor(m_nSegmentsX / 3f) * (math.floor(m_nSegmentsZ / 3f) - 1)) nb_holes = (int)(math.floor(m_nSegmentsX / 3f) * (math.floor(m_nSegmentsZ / 3f) - 1));
                     for (int j = 0; j < nb_holes; j++)
                     {
                         m_WingedEdgeMesh.RemoveFace();

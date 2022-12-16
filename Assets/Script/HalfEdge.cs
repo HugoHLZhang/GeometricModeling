@@ -191,7 +191,7 @@ namespace HalfEdge
             }
 
         }
-        public Mesh ConvertToFaceVertexMesh() // Conversion vers un mesh FaceVertex
+        public Mesh ConvertToFaceVertexMesh() // Conversion vers un FaceVertexMesh
         {
             // Attributs 
 
@@ -215,7 +215,9 @@ namespace HalfEdge
             {
                 List<Vertex> faceVertex = faces[i].GetFaceVertex();
                 for (int j = 0; j < faceVertex.Count; j++)
+                {
                     m_quads[index++] = faceVertex[j].index;
+                }
             }
 
             faceVertexMesh.vertices = m_vertices;

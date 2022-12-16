@@ -137,32 +137,41 @@ namespace WingedEdge
         public List<Face> faces;
         public WingedEdgeMesh(Mesh mesh)
         {
+            //4 edges par quads
+            int nEdges= 4;
 
-            int nEdges= 4; //quads
-
+            //init List
             vertices = new List<Vertex>();
             edges = new List<WingedEdge>();
             faces = new List<Face>();
 
+            //Get Mesh vertices and quads infos
             Vector3[] m_vertices = mesh.vertices;
             int[] m_quads = mesh.GetIndices(0);
 
+            //
             Dictionary<ulong, WingedEdge> dicoEdges = new Dictionary<ulong, WingedEdge>();
             WingedEdge wingedEdge;
 
-            //Create Vertex
-            for (int i = 0; i < mesh.vertexCount; i++) { vertices.Add(new Vertex(i, m_vertices[i])); }
+            //Create/Add Vertex to List
+            for (int i = 0; i < mesh.vertexCount; i++) 
+            { 
+                vertices.Add(new Vertex(i, m_vertices[i])); 
+            }
 
-            //Create Face and WingedEdge
+            
             for (int i = 0; i < m_quads.Length/ nEdges; i++) 
             {
+                //Create/Add Face 
                 Face face = new Face(faces.Count);
                 faces.Add(face);
                 
                 //quad's vertices index
                 int[] quad_index = new int[nEdges];
-
-                for (int j = 0; j < nEdges; j++) { quad_index[j] = m_quads[nEdges * i + j]; }
+                for (int j = 0; j < nEdges; j++) 
+                { 
+                    quad_index[j] = m_quads[nEdges * i + j]; 
+                }
 
                 List<WingedEdge> faceEdges = new List<WingedEdge>();
 
@@ -173,24 +182,26 @@ namespace WingedEdge
 
                     ulong key = (ulong)Mathf.Min(start,end) + ((ulong)Mathf.Max(start, end) << 32);
 
+                    //key not find in dico
                     if (!dicoEdges.TryGetValue(key, out wingedEdge)) 
                     {
-                        //create wingedEdge
+                        //Create/Add WingedEdge
                         wingedEdge = new WingedEdge(edges.Count, vertices[start], vertices[end], face, null);
                         edges.Add(wingedEdge);
                         dicoEdges.Add(key, wingedEdge);
                     }
+                    //key find in dico
                     else
                     {
                         //complete wingedEdge information
                         wingedEdge.leftFace = face;
                     }
 
-                    //Vertex
+                    //complete Vertex edge info
                     if (vertices[start].edge == null)   vertices[start].edge = wingedEdge;
                     if (vertices[end].edge == null)     vertices[end].edge = wingedEdge;
                     
-                    //Faces
+                    //complete Faces edge info
                     if(face.edge == null) face.edge = wingedEdge;
 
                     faceEdges.Add(wingedEdge);
